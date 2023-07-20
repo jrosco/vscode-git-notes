@@ -12,7 +12,7 @@ const input = NotesInput.getInstance();
 const logger = LoggerService.getInstance();
 
 export function activate(context: vscode.ExtensionContext) {
-  logger.info('Your extension "git-notes" has been activated.');
+  logger.info("Your extension 'git-notes' has been activated.");
 
   // Get the URIs of open files when Visual Studio Code first opens
   // Iterate through the currently open files
@@ -141,5 +141,5 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 export function deactivate() {
-  logger.info('Your extension "git-notes" has been deactivated.');
+  logger.info("Your extension 'git-notes' has been deactivated.");
 }

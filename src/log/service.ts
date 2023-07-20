@@ -10,7 +10,7 @@ export class LoggerService {
   public logLevel: LogLevel;
 	private static instance: LoggerService;
 
-  constructor(logLevel: LogLevel = LogLevel.debug) {
+  constructor(logLevel: LogLevel = LogLevel.info) {
     this.logLevel = logLevel;
   }
 

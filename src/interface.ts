@@ -52,7 +52,7 @@ export class RepositoryManager {
   }
 
   public getExistingRepositoryDetails(repositoryPath: string | undefined) {
-    this.logger.debug("getExistingRepositoryDetails("+repositoryPath+")");
+    this.logger.debug(`getExistingRepositoryDetails(${repositoryPath})`);
     const repository = this.repositoryDetailsInterface.find(
       repo => repo.repositoryPath?.trim() === repositoryPath?.trim()
     );
@@ -60,12 +60,12 @@ export class RepositoryManager {
   }
 
   public getFileChangeFile(commitDetails: CommitDetails[], commitHash: string): string | undefined {
-    this.logger.debug("getFileChangeFile("+commitHash+")");
+    this.logger.debug(`getFileChangeFile(${commitHash})`);
     const commit = commitDetails.find(commit => commit.commitHash === commitHash);
     if (commit) {
       const fileChange = commit.fileChanges[0]; // Assuming you want the first file change
       if (fileChange) {
-        this.logger.debug("getFileChangeFile("+commitHash+") = "+fileChange.file);
+        this.logger.debug(`getFileChangeFile(${commitHash}) = ${fileChange.file}`);
         return fileChange.file;
       }
     }
@@ -73,7 +73,7 @@ export class RepositoryManager {
   }
 
   public updateRepositoryDetails(repositoryPath: string | undefined, repositoryUrl: string, notes: CommitDetails[]): void {
-    this.logger.debug("updateRepositoryDetails("+repositoryPath+", "+repositoryUrl+", "+notes+")");
+    this.logger.debug(`updateRepositoryDetails(${repositoryPath}, ${repositoryUrl}, ${notes})`);
     const index = this.repositoryDetailsInterface.findIndex(
       repo => repo.repositoryPath === repositoryPath
     );
@@ -90,7 +90,7 @@ export class RepositoryManager {
   }
 
   public async clearRepositoryDetails(document?: vscode.Uri | undefined, repositoryPath?: string | undefined): Promise<void> {
-    this.logger.debug("clearRepositoryDetails("+document+", "+repositoryPath+")");
+    this.logger.debug(`clearRepositoryDetails(${document}, ${repositoryPath})`);
     repositoryPath = this.getGitRepositoryPath(document, repositoryPath);
     const index = this.repositoryDetailsInterface.findIndex(
       repo => repo.repositoryPath === repositoryPath
@@ -102,7 +102,7 @@ export class RepositoryManager {
   }
 
   public getGitRepositoryPath(fileUri?: vscode.Uri | undefined, repositoryPath?: string | undefined): string {
-    this.logger.debug("getGitRepositoryPath("+fileUri+", "+repositoryPath+")");
+    this.logger.debug(`getGitRepositoryPath(${fileUri}, ${repositoryPath})`);
     let workspaceFolder;
     if (fileUri !== undefined) {
       workspaceFolder = vscode.workspace.getWorkspaceFolder(fileUri);

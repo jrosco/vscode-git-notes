@@ -29,7 +29,7 @@ export class GitNotesStatusBar {
   }
 
   public update(): void {
-    this.logger.debug("statusBar.update("+this.notesCount+","+this.repositoryPath+")");
+    this.logger.debug(`statusBar.update(${this.notesCount}, ${this.repositoryPath})`);
     if (!this.statusBarItem) {
       this.statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left);
     }
