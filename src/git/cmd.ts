@@ -296,8 +296,11 @@ export class GitCommands {
     } catch (error) {
       this.output.log('An error occurred while fetching Git notes:'+ error);
       this.statusBar.showErrorMessage("Git Notes: An error occurred while fetching Git notes:" + error);
-      const forced = await this.input.showInputWindowMessage("Failed to fetch Git Notes", "Force fetch?", true, true);
-      if (forced) {
+      const messageItem: vscode.MessageItem[] = [{ title: "Push notes" }, {title: "Force fetch"}, {title: "Cancel"}];
+      const selected = await this.input.showInputWindowMessage("Failed to fetch Git Notes", messageItem, true, true);
+      if (selected?.title === "Push notes") {
+        await this.pushGitNotes(fileUri, repositoryPath);
+      } else if (selected?.title === "Force fetch") {
         await this.fetchGitNotes(fileUri, repositoryPath, true);
       }
     }
@@ -329,8 +332,11 @@ export class GitCommands {
     } catch (error) {
       this.logger.error(`An error occurred while pushing Git notes: ${error}`);
       this.statusBar.showErrorMessage('Git Notes: An error occurred while pushing Git notes: ' + error);
-      const forced = await this.input.showInputWindowMessage("Failed to push Git Notes", "Force push?", true, true);
-      if (forced) {
+      const messageItem: vscode.MessageItem[] = [{ title: "Fetch notes" }, {title: "Force push"}, {title: "Cancel"}];
+      const selected = await this.input.showInputWindowMessage("Failed to push Git Notes", messageItem, true, true);
+      if (selected?.title === "Fetch notes") {
+        await this.fetchGitNotes(fileUri, repositoryPath);
+      } else if (selected?.title === "Force push") {
         await this.pushGitNotes(fileUri, repositoryPath, true);
       }
     }
@@ -361,8 +367,9 @@ export class GitCommands {
     } catch (error) {
       this.logger.error(`An error occurred while pushing Git notes: ${error}`);
       this.statusBar.showErrorMessage(`Git Notes: An error occurred while pushing Git notes: ${error}`);
-      const prune = await this.input.showInputWindowMessage("Failed to remove Git note", "Prune Notes?", true, true);
-      if (prune) {
+      const messageItem: vscode.MessageItem[] = [ { title: "Prune notes" }, {title: "Cancel"} ];
+      const selected = await this.input.showInputWindowMessage("Failed to remove Git note", messageItem, true, true);
+      if (selected?.title === "Prune notes") {
         await this.removeGitNote(commitHash, fileUri, repositoryPath, true);
       }
     }
