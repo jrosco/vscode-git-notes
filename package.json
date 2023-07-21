@@ -48,7 +48,7 @@
       },
       {
         "command": "extension.addGitNoteMessage",
-        "title": "Add Git Note"
+        "title": "Add/Edit Git Note"
       }
     ]
   },
