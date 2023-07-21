@@ -139,23 +139,25 @@ export function activate(context: vscode.ExtensionContext) {
   );
 
   // Register the command opening a editor for adding git notes to commits
-  let gitAddNoteMessageDisposable = vscode.commands.registerCommand('extension.addGitNoteMessage', async () => {
-    logger.info("extension.addGitNoteMessage command called");
-    input.setup('Add/Edit a Git Note', 'Enter the Commit hash or leave blank to apply to last commit ....', false);
-    const commitHashInput = await input.showInputBox();
-    let currentNote = '';
-    let editNote = false;
-    // TODO: If not commitHashInput, then use last commit message details
-    if (commitHashInput !== undefined && commitHashInput !== "") {
+  let gitAddNoteMessageDisposable = vscode.commands.registerCommand('extension.addGitNoteMessage', 
+    async () => {
+      logger.info("extension.addGitNoteMessage command called");
+      input.setup('Add/Edit a Git Note', 'Enter the Commit hash or leave blank to apply to last commit ....', false);
+      const commitHashInput = await input.showInputBox();
+      let currentNote = '';
+      let editNote = false;
       const activeFileRepoPath = notes.repositoryPath;
-      const existingNote = manager.getGitNoteMessage(manager.getExistingRepositoryDetails(activeFileRepoPath), commitHashInput);
-      if (existingNote !== undefined) {
-        currentNote = existingNote;
-        editNote = true;
+      const commitHash = commitHashInput ? commitHashInput.replace(/\s/g, '') : (await notes.getLatestCommit(undefined, activeFileRepoPath));
+      if (commitHash !== undefined) {
+        const existingNote = manager.getGitNoteMessage(manager.getExistingRepositoryDetails(activeFileRepoPath), commitHash);
+        if (existingNote !== undefined) {
+          currentNote = existingNote;
+          editNote = true;
+        }
       }
-      const commitHash = commitHashInput.replace(/\s/g, '');
-      const tempDir = os.tmpdir();
-      const tempFilePath = path.join(tempDir, commitHash + '.vscode-git-notes-autosave_msg.txt');
+      const tempDir = os.tmpdir(); const filePrefix = commitHash ? commitHash : 'last_commit';
+      const tempFilePath = path.join(tempDir, filePrefix + '.vscode-git-notes-autosave_msg.txt');
+
       fs.writeFileSync(tempFilePath, `${currentNote}`);
       vscode.workspace.openTextDocument(tempFilePath).then((doc) => {
         vscode.window.showTextDocument(doc, { preview: true }).then((editor) => {
@@ -172,11 +174,10 @@ export function activate(context: vscode.ExtensionContext) {
             // Perform any operations you need with the buffer content here
             document.save();
           });
-
           // Dispose the event listener when the editor is closed
           const onDidChangeActiveDisposable = vscode.window.onDidChangeActiveTextEditor((editor) => {
             if (!editor) {
-              if (bufferContent !== '') {
+              if (bufferContent !== '' && commitHash !== undefined) {
                 notes.addGitNotes(bufferContent, commitHash, 'add', undefined, activeFileRepoPath, editNote);
                 onDidChangeActiveDisposable.dispose();
                 onDidChangeDisposable.dispose();
@@ -196,7 +197,7 @@ export function activate(context: vscode.ExtensionContext) {
         });
       });
     }
-  });
+  );
 
   context.subscriptions.push(gitCheckNotesDisposable,
     gitFetchNoteRefDisposable,
