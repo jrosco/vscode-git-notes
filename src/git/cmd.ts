@@ -302,6 +302,9 @@ export class GitCommands {
         await this.pushGitNotes(fileUri, repositoryPath);
       } else if (selected?.title === "Force fetch") {
         await this.fetchGitNotes(fileUri, repositoryPath, true);
+      } else {
+        this.statusBar.notesCount = this.manager.getExistingRepositoryDetails(repositoryPath)?.length || 0;
+        this.statusBar.update();
       }
     }
   }
@@ -338,6 +341,9 @@ export class GitCommands {
         await this.fetchGitNotes(fileUri, repositoryPath);
       } else if (selected?.title === "Force push") {
         await this.pushGitNotes(fileUri, repositoryPath, true);
+      } else {
+        this.statusBar.notesCount = this.manager.getExistingRepositoryDetails(repositoryPath)?.length || 0;
+        this.statusBar.update();
       }
     }
   }
@@ -371,6 +377,9 @@ export class GitCommands {
       const selected = await this.input.showInputWindowMessage("Failed to remove Git note", messageItem, true, true);
       if (selected?.title === "Prune notes") {
         await this.removeGitNote(commitHash, fileUri, repositoryPath, true);
+      } else {
+        this.statusBar.notesCount = this.manager.getExistingRepositoryDetails(repositoryPath)?.length || 0;
+        this.statusBar.update();
       }
     }
   }
