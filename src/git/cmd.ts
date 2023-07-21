@@ -236,7 +236,7 @@ export class GitCommands {
     const date: string = dateLine ? dateLine.replace("Date:", "").trim() : "";
 
     // Get file changes
-const fileChanges = await this._getCommitFileChanges(commitSHA);
+    const fileChanges = await this._getCommitFileChanges(commitSHA);
 
     const commit = {
       author: author,
@@ -248,6 +248,30 @@ const fileChanges = await this._getCommitFileChanges(commitSHA);
     commits.push(commit);
 
     return commits;
+  }
+
+  public async addGitNotes(message: string, commitHash: string, fileUri?: vscode.Uri, repositoryPath?: string): Promise<void> {
+    repositoryPath = this.manager.getGitRepositoryPath(fileUri, repositoryPath);
+    this._setRepositoryPath(repositoryPath);
+    this.statusBar.reset();
+    try {
+      if (repositoryPath !== undefined) {
+        this.statusBar.message = "Adding Message ...";
+        this.statusBar.update();
+        await this.git.raw(['notes', 'add', commitHash, '-m', message])
+        .then((message) => {
+          this.output.log(message);
+          this.manager.clearRepositoryDetails(undefined, repositoryPath);
+        });
+        this.getNotes(repositoryPath);
+      } else {
+        this.output.log("Not a git repository (or any of the parent directories): .git ");
+        this.statusBar.showInformationMessage("Git Notes: Not a git repository (or any of the parent directories): .git");
+      }
+    } catch (error) {
+      this.output.log('An error occurred while adding Git note:'+ error);
+      this.statusBar.showErrorMessage("Git Notes: An error occurred while adding Git note:" + error);
+    }
   }
 
   public async fetchGitNotes(fileUri?: vscode.Uri, repositoryPath?: string): Promise<void> {
@@ -278,6 +302,7 @@ const fileChanges = await this._getCommitFileChanges(commitSHA);
       this.statusBar.showErrorMessage("Git Notes: An error occurred while fetching Git notes:" + error);
     }
   }
+
   public async pushGitNotes(fileUri?: vscode.Uri, repositoryPath?: string): Promise<void> {
     console.log("pushGitNotes("+fileUri+","+repositoryPath+")");
     repositoryPath = this.manager.getGitRepositoryPath(fileUri, repositoryPath);

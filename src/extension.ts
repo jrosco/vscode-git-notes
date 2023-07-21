@@ -1,4 +1,8 @@
 import * as vscode from 'vscode';
+import * as fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
+
 import { GitNotesPanel } from './ui/webview';
 import { NotesInput } from './ui/input';
 
@@ -92,6 +96,7 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
+  // Register the command for removing git notes on commits
   let removeGitNotePromptDisposable = vscode.commands.registerCommand('extension.removeGitNotePrompt',
     async () => {
       const activeEditor = vscode.window.activeTextEditor;
@@ -110,6 +115,7 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
+  // Register the command for pruning git notes from stale commits
   let pruneGitNotePromptDisposable = vscode.commands.registerCommand('extension.pruneGitNotePrompt',
     async () => {
       const activeEditor = vscode.window.activeTextEditor;
@@ -123,12 +129,64 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
+  // Register the command opening a editor for adding git notes to commits
+  let gitAddNoteMessageDisposable = vscode.commands.registerCommand('extension.addGitNoteMessage', async () => {
+    input.setup('Add a Git Note', 'Enter the Commit hash add a message to....', false);
+    const commitHashInput = await input.showInputBox();
+    const activeFileRepoPath = notes.repositoryPath;
+    // TODO: If not commitHashInput, then use last commit message details
+    if (commitHashInput !== undefined && commitHashInput !== "") {
+      const tempDir = os.tmpdir();
+      const tempFilePath = path.join(tempDir, commitHashInput + '.vscode-git-notes-autosave_msg.txt');
+      fs.writeFileSync(tempFilePath, '');
+      vscode.workspace.openTextDocument(tempFilePath).then((doc) => {
+        vscode.window.showTextDocument(doc, { preview: true }).then((editor) => {
+          // Define bufferContent outside of the callback functions
+          let bufferContent = '';
+          // Listen for changes in the document to extract the commit message
+          const onDidChangeDisposable = vscode.workspace.onDidChangeTextDocument((event) => {
+            let activeEditor = vscode.window.activeTextEditor;
+            if (!activeEditor) {
+              return;
+            }
+            const document = activeEditor.document;
+            bufferContent = document.getText();
+            // Perform any operations you need with the buffer content here
+            document.save();
+          });
+
+          // Dispose the event listener when the editor is closed
+          const onDidChangeActiveDisposable = vscode.window.onDidChangeActiveTextEditor((editor) => {
+            if (!editor) {
+              if (bufferContent !== '') {
+                notes.addGitNotes(bufferContent, commitHashInput, undefined, activeFileRepoPath);
+                onDidChangeActiveDisposable.dispose();
+                onDidChangeDisposable.dispose();
+              }
+              // You can perform any cleanup or handling here
+              fs.unlink(tempFilePath, (err) => {
+                if (err) {
+                  console.error('Error removing the file:', err);
+                }
+              });
+              return;
+            }
+          });
+          // Store the disposables in the extension context
+          context.subscriptions.push(onDidChangeDisposable);
+          context.subscriptions.push(onDidChangeActiveDisposable);
+        });
+      });
+    }
+  });
+
   context.subscriptions.push(gitCheckNotesDisposable,
     gitFetchNoteRefDisposable,
     gitPushNoteRefDisposable,
     runWebviewDisposable,
     removeGitNotePromptDisposable,
-    pruneGitNotePromptDisposable
+    pruneGitNotePromptDisposable,
+    gitAddNoteMessageDisposable
   );
 }
 
