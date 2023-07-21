@@ -59,4 +59,24 @@ export class NotesInput {
 			return inputValue;
 		}
 	}
+
+public async showInputWindowMessage(message: string, messageText?: string, interactive?: boolean, errorWindow?: boolean): Promise<boolean> {
+	let window = vscode.window.showInformationMessage;
+	if (errorWindow) {
+		window = vscode.window.showErrorMessage;
+	}
+	if (interactive && messageText !== undefined) {
+		const confirm = await window(
+			message, { modal: false }, messageText, 'Cancel'
+		);
+		if (confirm === messageText) {
+			return true;
+		} else {
+			return false;
+		}
+	} else {
+		window(message);
+	}
+	return false;
+}
 }
