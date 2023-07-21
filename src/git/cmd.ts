@@ -271,7 +271,9 @@ export class GitCommands {
     return commits;
   }
 
-  public async addGitNotes(message: string, commitHash: string, fileUri?: vscode.Uri, repositoryPath?: string, force?: boolean): Promise<void> {
+  public async addGitNotes(message: string, commitHash: string, subCmd: string = 'add', fileUri?: vscode.Uri, repositoryPath?: string,
+    force?: boolean, append?: boolean): Promise<void> {
+
     this.logger.debug(`addGitNotes(${message}, ${commitHash}, ${fileUri}, ${repositoryPath})`);
     repositoryPath = this.manager.getGitRepositoryPath(fileUri, repositoryPath);
     this._setRepositoryPath(repositoryPath);
@@ -280,7 +282,7 @@ export class GitCommands {
       if (repositoryPath !== undefined) {
         this.statusBar.message = "Adding Message ...";
         this.statusBar.update();
-        const cmdList = force ? ['notes', 'add', commitHash, '-m', message, '--force'] : ['notes', 'add', commitHash, '-m', message];
+        const cmdList = force ? ['notes', subCmd, commitHash, '-m', message, '--force'] : ['notes', subCmd, commitHash, '-m', message];
         await this.git.raw(cmdList)
         .then((message) => {
           this.output.log(message);
@@ -294,10 +296,12 @@ export class GitCommands {
     } catch (error) {
       this.logger.error('An error occurred while adding Git note:'+ error);
       this.statusBar.showErrorMessage(`Git Notes: An error occurred while adding Git note: ${error}`);
-      const messageItem: vscode.MessageItem[] = [{ title: "Force overwrite" }, {title: "Cancel"}];
+      const messageItem: vscode.MessageItem[] = [{title: "Append"}, {title: "Force overwrite"}, {title: "Cancel"}];
       const selected = await this.input.showInputWindowMessage("Failed to Add Git Note", messageItem, true, true);
-      if (selected?.title === "Force overwrite") {
-        await this.addGitNotes(message, commitHash, undefined, repositoryPath, true);
+      if (selected?.title === "Append") {
+        await this.addGitNotes(message, commitHash, 'append', undefined, repositoryPath);
+      } else if (selected?.title === "Force overwrite") {
+        await this.addGitNotes(message, commitHash, 'add', undefined, repositoryPath, true);
       } else {
         this.statusBar.notesCount = this.manager.getExistingRepositoryDetails(repositoryPath)?.length || 0;
         this.statusBar.update();
