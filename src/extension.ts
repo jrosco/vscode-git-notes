@@ -148,7 +148,7 @@ export function activate(context: vscode.ExtensionContext) {
     // TODO: If not commitHashInput, then use last commit message details
     if (commitHashInput !== undefined && commitHashInput !== "") {
       const activeFileRepoPath = notes.repositoryPath;
-      const existingNote = manager.getGetNoteMessage(manager.getExistingRepositoryDetails(activeFileRepoPath), commitHashInput);
+      const existingNote = manager.getGitNoteMessage(manager.getExistingRepositoryDetails(activeFileRepoPath), commitHashInput);
       if (existingNote !== undefined) {
         currentNote = existingNote;
         editNote = true;
