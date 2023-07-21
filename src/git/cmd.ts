@@ -9,6 +9,7 @@ import * as fs from 'fs';
 import { GitNotesStatusBar } from '../ui/status';
 import { NotesOutputChannel } from '../ui/output';
 import { NotesInput } from '../ui/input';
+import { LoggerService, LogLevel } from '../log/service';
 
 import {
   RepositoryManager,
@@ -18,8 +19,8 @@ import {
 } from '../interface';
 
 export class GitCommands {
-
   public repositoryPath: string;
+  private logger: LoggerService;
   private git: SimpleGit;
   private manager: RepositoryManager;
   private statusBar: GitNotesStatusBar;
@@ -31,24 +32,31 @@ export class GitCommands {
     this.manager = RepositoryManager.getInstance();
     this.statusBar = GitNotesStatusBar.getInstance();
     this.output = new NotesOutputChannel();
+    this.logger = LoggerService.getInstance();
     this.repositoryPath = "";
     this.input = NotesInput.getInstance();
+
+    this.logger.debug(`GitCommands constructor: ${Object.getOwnPropertyNames(this)}`);
   }
 
   private _setRepositoryPath(repositoryPath: string): void {
+    this.logger.trace(`_setRepositoryPath(${repositoryPath})`);
     this.repositoryPath = repositoryPath;
     try {
       this.git = simpleGit(repositoryPath);
+      this.logger.debug(`this.git: ${Object.getOwnPropertyNames(this.git)}`);
     } catch (error) {
-      console.log(error);
+      this.logger.error(`error setting repositoryPath: ${error}`);
     }
   }
 
   public getRepositoryPath() {
+    this.logger.debug(`getRepositoryPath() return: ${this.repositoryPath}`);
     return this.repositoryPath;
   }
 
   public async getNotes(repositoryPath?: string): Promise<RepositoryDetails[]> {
+    this.logger.debug(`getNotes(${repositoryPath})`);
     repositoryPath = repositoryPath || vscode.workspace.workspaceFolders?.toString() || "";
     this._setRepositoryPath(repositoryPath);
     this.statusBar.reset();
@@ -79,13 +87,13 @@ export class GitCommands {
       this.statusBar.repositoryPath = repositoryPath;
       this.statusBar.update();
     } catch (error) {
-      console.error(error);
+      this.logger.error(`error getting notes: ${error}`);
     }
     return this.manager.repositoryDetailsInterface;
   }
 
   private _getGitNotes(): Promise<any[]> {
-    console.log("_getGitNotes()");
+    this.logger.trace("_getGitNotes()");
     return new Promise<any[]>(async(resolve, reject) => {
       this.git.raw(["notes", "--ref=refs/notes/commits", "list"], (err, result) => {
         if (err) {
@@ -99,6 +107,7 @@ export class GitCommands {
   }
 
   private _parseGitNotes(notesOutput: string): Promise<any[]> {
+    this.logger.trace(`_parseGitNotes(${notesOutput})`);
     return new Promise<any[]>(async (resolve, reject) => {
       try {
         // Parse the output and extract relevant information
@@ -124,19 +133,21 @@ export class GitCommands {
         resolve(notes);
       } catch (error) {
         // Reject the promise with the error message
-        reject(new Error("Error parsing Git notes: " + error));
+        reject(new Error(`Error parsing Git notes: ${error}`));
       }
     });
   }
 
   private _getGitNoteMessage(commitHash: string): Promise<string> {
-    console.log("_getGitNoteMessage("+commitHash+")");
+    this.logger.trace(`_getGitNoteMessage(${commitHash})`);
     return new Promise<string>(async (resolve, reject) => {
       this.git.raw(
         ["notes", "--ref=refs/notes/commits", "show", commitHash],
-        (err, result) => {
-          if (err) {
-            reject(new Error("Error retrieving note details: " + err));
+        (error, result) => {
+          if (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+            reject(new Error(`Error retrieving note details: ${errorMessage}`));
+            this.statusBar.showErrorMessage(`Git Notes: Error retrieving note: ${errorMessage}`);
           } else {
             resolve(result);
           }
@@ -146,7 +157,7 @@ export class GitCommands {
   }
 
   private _getCommitDetails(commitSHA: string): Promise<any[]> {
-    console.log(`_getCommitDetails(${commitSHA})`);
+    this.logger.trace(`_getCommitDetails(${commitSHA})`);
     return new Promise<any[]>(async (resolve, reject) => {
       this.git.show(['--stat', commitSHA])
         .then(commitDetails => {
@@ -162,9 +173,9 @@ export class GitCommands {
   }
 
   private _getCommitFileChanges(commitSHA: string): Promise<any[]> {
-    console.log(`_getCommitDetails(${commitSHA})`);
+    this.logger.trace(`_getCommitFileChanges(${commitSHA})`);
     return new Promise<any[]>(async (resolve, reject) => {
-      this.git.show(['--numstat', '--oneline', commitSHA])
+      this.git.show(["--numstat", "--oneline", commitSHA])
         .then(commitFilesDetails => {
           const parsedDetails = this._parseFileDetails(commitFilesDetails, this.repositoryPath);
           resolve(parsedDetails);
@@ -178,6 +189,7 @@ export class GitCommands {
   }
 
   private async _parseFileDetails(gitOutput: string, repositoryPath: string) {
+    this.logger.trace(`_parseFileDetails(${gitOutput}, ${repositoryPath})`);
     const lines = gitOutput.split('\n').slice(1);
     // if last line is empty, remove it
     if (lines[-1] === undefined || lines[-1] === "") {
@@ -221,6 +233,7 @@ export class GitCommands {
   }
 
   private async _parseCommitDetails(commitDetails: string, commitSHA: string) {
+    this.logger.trace(`_parseCommitDetails(${commitDetails}, ${commitSHA})`);
     const commits: any[] = [];
 
     const lines: string[] = commitDetails.split("\n");
@@ -243,7 +256,7 @@ export class GitCommands {
     const date: string = dateLine ? dateLine.replace("Date:", "").trim() : "";
 
     // Get file changes
-const fileChanges = await this._getCommitFileChanges(commitSHA);
+    const fileChanges = await this._getCommitFileChanges(commitSHA);
 
     const commit = {
       author: author,
@@ -254,10 +267,12 @@ const fileChanges = await this._getCommitFileChanges(commitSHA);
 
     commits.push(commit);
 
+    this.logger.info(`return ${commits}`);
     return commits;
   }
 
   public async fetchGitNotes(fileUri?: vscode.Uri, repositoryPath?: string, force?: boolean): Promise<void> {
+    this.logger.debug(`fetchGitNotes(${fileUri}, ${repositoryPath})`);
     repositoryPath = this.manager.getGitRepositoryPath(fileUri, repositoryPath);
     this._setRepositoryPath(repositoryPath);
     this.statusBar.reset();
@@ -269,13 +284,13 @@ const fileChanges = await this._getCommitFileChanges(commitSHA);
         const cmdList = force ? ['origin', refspec, '--force'] : ['origin', refspec];
         await this.git.fetch(cmdList)
         .then((message) => {
-          this.output.log(message.raw);
+          this.logger.debug(`message: ${message.raw}`);
           this.statusBar.showInformationMessage("Git Notes: Fetched");
           this.manager.clearRepositoryDetails(undefined, repositoryPath);
         });
         this.getNotes(repositoryPath);
       } else {
-        this.output.log("Not a git repository (or any of the parent directories): .git ");
+        this.logger.debug("Not a git repository (or any of the parent directories): .git ");
         this.statusBar.showInformationMessage("Git Notes: Not a git repository (or any of the parent directories): .git");
       }
     } catch (error) {
@@ -289,7 +304,7 @@ const fileChanges = await this._getCommitFileChanges(commitSHA);
   }
 
   public async pushGitNotes(fileUri?: vscode.Uri, repositoryPath?: string, force?: boolean): Promise<void> {
-    console.log("pushGitNotes("+fileUri+","+repositoryPath+")");
+    this.logger.debug(`pushGitNotes(${fileUri}, ${repositoryPath})`);
     repositoryPath = this.manager.getGitRepositoryPath(fileUri, repositoryPath);
     this._setRepositoryPath(this.repositoryPath);
     this.statusBar.reset();
@@ -304,14 +319,15 @@ const fileChanges = await this._getCommitFileChanges(commitSHA);
           const showMsg = message.pushed.length > 0 ? "Everything up-to-date": "Pushed " + message.update?.hash.from + " -> " + message.update?.hash.to;
           this.statusBar.showInformationMessage(`Git Notes: ${showMsg}`);
           this.manager.clearRepositoryDetails(undefined, repositoryPath);
+
         });
         this.getNotes(this.repositoryPath);
       } else {
-        this.output.log("Not a git repository (or any of the parent directories): .git");
+        this.logger.debug("Not a git repository (or any of the parent directories): .git");
         this.statusBar.showInformationMessage("Git Notes: Not a git repository (or any of the parent directories): .git");
       }
     } catch (error) {
-      this.output.log('An error occurred while pushing Git notes: ' + error);
+      this.logger.error(`An error occurred while pushing Git notes: ${error}`);
       this.statusBar.showErrorMessage('Git Notes: An error occurred while pushing Git notes: ' + error);
       const forced = await this.input.showInputWindowMessage("Failed to push Git Notes", "Force push?", true, true);
       if (forced) {
@@ -321,7 +337,7 @@ const fileChanges = await this._getCommitFileChanges(commitSHA);
   }
 
   public async removeGitNote(commitHash: string, fileUri?: vscode.Uri, repositoryPath?: string, prune?: boolean): Promise<void> {
-    this.output.log("Running removeGitNote() command for commit " + commitHash);
+    this.logger.debug(`removeGitNote(${commitHash}, ${fileUri}, ${repositoryPath}, ${prune})`);
     repositoryPath = this.manager.getGitRepositoryPath(fileUri, repositoryPath);
     this._setRepositoryPath(repositoryPath);
     this.statusBar.reset();
@@ -330,7 +346,7 @@ const fileChanges = await this._getCommitFileChanges(commitSHA);
         this.statusBar.message = "Removing ...";
         this.statusBar.update();
         const cmdList = prune ? ['notes', 'prune'] : ['notes', 'remove', commitHash];
-        console.log("cmdList: " + cmdList + "for " + repositoryPath);
+        this.logger.debug(`cmdList: ${cmdList} for ${repositoryPath}`);
         await this.git.raw(cmdList)
         .then(() => {
           const showMsg = prune ? "Pruned notes" : "Removed note for commit " + commitHash + "\nPath: " + repositoryPath;
@@ -339,12 +355,12 @@ const fileChanges = await this._getCommitFileChanges(commitSHA);
         });
         this.getNotes(repositoryPath);
       } else {
-        this.output.log("Not a git repository (or any of the parent directories): .git");
+        this.logger.debug("Not a git repository (or any of the parent directories): .git");
         this.statusBar.showInformationMessage("Git Notes: Not a git repository (or any of the parent directories): .git");
       }
     } catch (error) {
-      this.output.log('An error occurred while removing Git notes: ' + error);
-      this.statusBar.showErrorMessage('Git Notes: An error occurred while removing Git notes: ' + error);
+      this.logger.error(`An error occurred while pushing Git notes: ${error}`);
+      this.statusBar.showErrorMessage(`Git Notes: An error occurred while pushing Git notes: ${error}`);
       const prune = await this.input.showInputWindowMessage("Failed to remove Git note", "Prune Notes?", true, true);
       if (prune) {
         await this.removeGitNote(commitHash, fileUri, repositoryPath, true);
@@ -353,11 +369,12 @@ const fileChanges = await this._getCommitFileChanges(commitSHA);
   }
 
   private async _getGitUrl(): Promise<string> {
+    this.logger.trace("_getGitUrl()");
     try {
       const result = await new Promise<string>((resolve, reject) => {
         this.git.remote(['get-url', 'origin'], (err, result) => {
           if (err) {
-            reject('Error retrieving Git URL');
+            reject("Error retrieving Git URL");
           } else {
             resolve(result as string);
           }
@@ -371,9 +388,10 @@ const fileChanges = await this._getCommitFileChanges(commitSHA);
         gitUrl = gitUrl.replace(/:/, '/').replace(/.git$/, '').replace(/^git@/, 'https://');
       }
 
+      this.logger.info(`return ${gitUrl}`);
       return gitUrl;
     } catch (error) {
-      console.error('Failed to retrieve Git URL:', error);
+      this.logger.error(`Failed to retrieve Git URL:', ${error}`);
       return "";
     }
   }
