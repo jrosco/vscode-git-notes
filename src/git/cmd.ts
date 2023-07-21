@@ -267,21 +267,22 @@ export class GitCommands {
     return commits;
   }
 
-  public async getLatestCommit(fileUri?: vscode.Uri, repositoryPath?: string) {
+  public async getLatestCommit(fileUri?: vscode.Uri, repositoryPath?: string): Promise<string | undefined> {
     this.logger.debug(`getLatestCommit(${fileUri}, ${repositoryPath})`);
     repositoryPath = this.manager.getGitRepositoryPath(fileUri, repositoryPath);
     this._setRepositoryPath(repositoryPath);
     if (repositoryPath !== undefined) {
-      await this.git.log({n: 1})
-      .then((commitId) => {
+      try {
+        const commitId = await this.git.log({ n: 1 });
         this.logger.debug(`getLatestCommit found ${commitId.latest?.hash}`);
         return commitId.latest?.hash;
-      }).catch((error) => {
+      } catch (error) {
         this.logger.error(`error getting latest commit: ${error}`);
-      });
+      }
     }
-    return "";
+    return undefined;
   };
+
 
   public async addGitNotes(message: string, commitHash: string, subCmd: string = 'add', fileUri?: vscode.Uri, repositoryPath?: string,
     force?: boolean, append?: boolean): Promise<void> {
