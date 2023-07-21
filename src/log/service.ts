@@ -12,6 +12,11 @@ export class LoggerService {
 
   constructor(logLevel: LogLevel = LogLevel.info) {
     this.logLevel = logLevel;
+    // debug simple-git
+    if (this.logLevel === LogLevel.trace) {
+      const debug = require('debug');
+      debug.enable('simple-git:task:*');
+    }
   }
 
   public static getInstance(logLevel?: LogLevel): LoggerService {

@@ -2,10 +2,6 @@ import simpleGit, { SimpleGit } from 'simple-git';
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 
-// debug simple-git
-// const debug = require('debug');
-// debug.enable('simple-git:task:push:*');
-
 import { GitNotesStatusBar } from '../ui/status';
 import { NotesOutputChannel } from '../ui/output';
 import { NotesInput } from '../ui/input';
