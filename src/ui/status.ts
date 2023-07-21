@@ -1,9 +1,12 @@
 import * as vscode from 'vscode';
 
+import { LoggerService, LogLevel } from '../log/service';
+
 export class GitNotesStatusBar {
 
   private static instance: GitNotesStatusBar;
   private statusBarItem: vscode.StatusBarItem | undefined;
+  private logger: LoggerService;
 
   public notesCount: number;
   public message;
@@ -15,6 +18,7 @@ export class GitNotesStatusBar {
     this.message = message;
     this.repositoryPath = repositoryPath;
     this.command = command;
+    this.logger = LoggerService.getInstance();
   }
 
   public static getInstance(): GitNotesStatusBar {
@@ -25,12 +29,11 @@ export class GitNotesStatusBar {
   }
 
   public update(): void {
-    console.log("statusBar.update("+this.notesCount+","+this.repositoryPath+")");
+    this.logger.debug(`statusBar.update(${this.notesCount}, ${this.repositoryPath})`);
     if (!this.statusBarItem) {
       this.statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left);
     }
     if (this.notesCount > 0 && this.command === undefined) {
-      vscode.window.showInformationMessage(`Git Notes: Found in ${this.repositoryPath}.`);
       this.statusBarItem.text = `Git Notes: ${this.notesCount}`;
       this.statusBarItem.command = this.command ? this.command: "extension.runWebview";
       this.statusBarItem.show();
@@ -57,7 +60,7 @@ export class GitNotesStatusBar {
   setTimeout(async () => {
     const choice = await promise;
     if (choice) {
-      console.log(`User selected ${choice}`);
+      this.logger.debug(`User selected ${choice}`);
     }
   }, duration);
 }

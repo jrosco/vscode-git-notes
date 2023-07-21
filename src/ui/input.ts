@@ -59,4 +59,27 @@ export class NotesInput {
 			return inputValue;
 		}
 	}
+
+	public async showInputWindowMessage(message: string, messageItem?: vscode.MessageItem[], interactive?: boolean, errorWindow?: boolean) {
+		let window = vscode.window.showInformationMessage;
+		if (errorWindow) {
+			window = vscode.window.showErrorMessage;
+		}
+		if (interactive && messageItem !== undefined) {
+			const confirm = await window(
+				message, { modal: false }, messageItem[0], messageItem[1], messageItem[2]
+			);
+			if (confirm === messageItem[0]) {
+				return messageItem[0];
+			} else if (confirm === messageItem[1]) {
+				return messageItem[1];
+			} else if (confirm === messageItem[2]) {
+				return messageItem[2];
+			} else {
+				return undefined;
+			}
+		} else {
+			window(message);
+		}
+	}
 }
