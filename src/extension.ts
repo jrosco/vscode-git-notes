@@ -107,10 +107,11 @@ export function activate(context: vscode.ExtensionContext) {
         input.setup('Remove a Git Note', 'Enter the Commit hash of the note to remove....', true);
         const commitHashInput = await input.showInputBox();
         if (commitHashInput !== undefined && commitHashInput !== "") {
+          const commitHash = commitHashInput.replace(/\s/g, '');
           if (repositoryPath !== undefined) {
-            await notes.removeGitNote(commitHashInput, undefined, repositoryPath);
+            await notes.removeGitNote(commitHash, undefined, repositoryPath);
           } else if (activeEditor) {
-            await notes.removeGitNote(commitHashInput, activeEditor.document.uri);
+            await notes.removeGitNote(commitHash, activeEditor.document.uri);
           }
         }
       }

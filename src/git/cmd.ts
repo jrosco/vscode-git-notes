@@ -2,8 +2,13 @@ import simpleGit, { SimpleGit } from 'simple-git';
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 
+// debug simple-git
+// const debug = require('debug');
+// debug.enable('simple-git:task:push:*');
+
 import { GitNotesStatusBar } from '../ui/status';
 import { NotesOutputChannel } from '../ui/output';
+import { NotesInput } from '../ui/input';
 import { LoggerService, LogLevel } from '../log/service';
 
 import {
@@ -20,6 +25,7 @@ export class GitCommands {
   private manager: RepositoryManager;
   private statusBar: GitNotesStatusBar;
   private output: NotesOutputChannel;
+  private input: NotesInput;
 
   constructor() {
     this.git = simpleGit();
@@ -28,6 +34,8 @@ export class GitCommands {
     this.output = new NotesOutputChannel();
     this.logger = LoggerService.getInstance();
     this.repositoryPath = "";
+    this.input = NotesInput.getInstance();
+
     this.logger.debug(`GitCommands constructor: ${Object.getOwnPropertyNames(this)}`);
   }
 
@@ -263,7 +271,7 @@ export class GitCommands {
     return commits;
   }
 
-  public async fetchGitNotes(fileUri?: vscode.Uri, repositoryPath?: string): Promise<void> {
+  public async fetchGitNotes(fileUri?: vscode.Uri, repositoryPath?: string, force?: boolean): Promise<void> {
     this.logger.debug(`fetchGitNotes(${fileUri}, ${repositoryPath})`);
     repositoryPath = this.manager.getGitRepositoryPath(fileUri, repositoryPath);
     this._setRepositoryPath(repositoryPath);
@@ -273,14 +281,12 @@ export class GitCommands {
         this.statusBar.message = "Fetching ...";
         this.statusBar.update();
         const refspec = 'refs/notes/commits:refs/notes/commits'; // Set the refspec to fetch the Git notes. Make this a setting
-        await this.git.fetch('origin', refspec)
+        const cmdList = force ? ['origin', refspec, '--force'] : ['origin', refspec];
+        await this.git.fetch(cmdList)
         .then((message) => {
           this.logger.debug(`message: ${message.raw}`);
           this.statusBar.showInformationMessage("Git Notes: Fetched");
           this.manager.clearRepositoryDetails(undefined, repositoryPath);
-        }).catch((error) => {
-          this.logger.error(`An error occurred while fetching Git notes: ${error}`);
-          this.statusBar.showErrorMessage(`Git Notes: ${error}`);
         });
         this.getNotes(repositoryPath);
       } else {
@@ -288,11 +294,22 @@ export class GitCommands {
         this.statusBar.showInformationMessage("Git Notes: Not a git repository (or any of the parent directories): .git");
       }
     } catch (error) {
-      this.logger.error(`An error occurred while fetching Git notes: ${error}`);
-      this.statusBar.showErrorMessage(`Git Notes: An error occurred while fetching Git notes: ${error}`);
+      this.output.log('An error occurred while fetching Git notes:'+ error);
+      this.statusBar.showErrorMessage("Git Notes: An error occurred while fetching Git notes:" + error);
+      const messageItem: vscode.MessageItem[] = [{ title: "Push notes" }, {title: "Force fetch"}, {title: "Cancel"}];
+      const selected = await this.input.showInputWindowMessage("Failed to fetch Git Notes", messageItem, true, true);
+      if (selected?.title === "Push notes") {
+        await this.pushGitNotes(fileUri, repositoryPath);
+      } else if (selected?.title === "Force fetch") {
+        await this.fetchGitNotes(fileUri, repositoryPath, true);
+      } else {
+        this.statusBar.notesCount = this.manager.getExistingRepositoryDetails(repositoryPath)?.length || 0;
+        this.statusBar.update();
+      }
     }
   }
-  public async pushGitNotes(fileUri?: vscode.Uri, repositoryPath?: string): Promise<void> {
+
+  public async pushGitNotes(fileUri?: vscode.Uri, repositoryPath?: string, force?: boolean): Promise<void> {
     this.logger.debug(`pushGitNotes(${fileUri}, ${repositoryPath})`);
     repositoryPath = this.manager.getGitRepositoryPath(fileUri, repositoryPath);
     this._setRepositoryPath(this.repositoryPath);
@@ -302,17 +319,13 @@ export class GitCommands {
         this.statusBar.message = "Pushing ...";
         this.statusBar.update();
         const refspec = 'refs/notes/commits'; // Set the refspec to fetch the Git notes. Make this a setting
-        await this.git.push('origin', refspec)
+        const cmdList = force ? ['origin', refspec, '--force'] : ['origin', refspec];
+        await this.git.push(cmdList)
         .then((message) => {
-          if (message.pushed.length > 0) {
-            this.statusBar.showInformationMessage("Git Notes: Everything up-to-date");
-          } else {
-            this.statusBar.showInformationMessage(`Git Notes: Pushed ${message.update?.hash.from} -> ${message.update?.hash.to}`);
-          }
+          const showMsg = message.pushed.length > 0 ? "Everything up-to-date": "Pushed " + message.update?.hash.from + " -> " + message.update?.hash.to;
+          this.statusBar.showInformationMessage(`Git Notes: ${showMsg}`);
           this.manager.clearRepositoryDetails(undefined, repositoryPath);
-        }).catch((error) => {
-          this.logger.error(`An error occurred while pushing Git notes: ${error}`);
-          this.statusBar.showErrorMessage(`Git Notes: ${error}`);
+
         });
         this.getNotes(this.repositoryPath);
       } else {
@@ -321,7 +334,17 @@ export class GitCommands {
       }
     } catch (error) {
       this.logger.error(`An error occurred while pushing Git notes: ${error}`);
-      this.statusBar.showErrorMessage(`Git Notes: An error occurred while pushing Git notes: ${error}`);
+      this.statusBar.showErrorMessage('Git Notes: An error occurred while pushing Git notes: ' + error);
+      const messageItem: vscode.MessageItem[] = [{ title: "Fetch notes" }, {title: "Force push"}, {title: "Cancel"}];
+      const selected = await this.input.showInputWindowMessage("Failed to push Git Notes", messageItem, true, true);
+      if (selected?.title === "Fetch notes") {
+        await this.fetchGitNotes(fileUri, repositoryPath);
+      } else if (selected?.title === "Force push") {
+        await this.pushGitNotes(fileUri, repositoryPath, true);
+      } else {
+        this.statusBar.notesCount = this.manager.getExistingRepositoryDetails(repositoryPath)?.length || 0;
+        this.statusBar.update();
+      }
     }
   }
 
@@ -338,12 +361,9 @@ export class GitCommands {
         this.logger.debug(`cmdList: ${cmdList} for ${repositoryPath}`);
         await this.git.raw(cmdList)
         .then(() => {
-          const showMsg = prune ? "Git Notes: Pruned notes" : "Git Notes: Removed note for commit " + commitHash + "\nPath: " + repositoryPath;
-          this.statusBar.showInformationMessage(showMsg);
+          const showMsg = prune ? "Pruned notes" : "Removed note for commit " + commitHash + "\nPath: " + repositoryPath;
+          this.statusBar.showInformationMessage(`Git Notes: ${showMsg}`);
           this.manager.clearRepositoryDetails(undefined, repositoryPath);
-        }).catch((error) => {
-          this.logger.error(`An error occurred while removing Git notes: ${error}`);
-          this.statusBar.showErrorMessage(`Git Notes: ${error}`);
         });
         this.getNotes(repositoryPath);
       } else {
@@ -353,6 +373,14 @@ export class GitCommands {
     } catch (error) {
       this.logger.error(`An error occurred while pushing Git notes: ${error}`);
       this.statusBar.showErrorMessage(`Git Notes: An error occurred while pushing Git notes: ${error}`);
+      const messageItem: vscode.MessageItem[] = [ { title: "Prune notes" }, {title: "Cancel"} ];
+      const selected = await this.input.showInputWindowMessage("Failed to remove Git note", messageItem, true, true);
+      if (selected?.title === "Prune notes") {
+        await this.removeGitNote(commitHash, fileUri, repositoryPath, true);
+      } else {
+        this.statusBar.notesCount = this.manager.getExistingRepositoryDetails(repositoryPath)?.length || 0;
+        this.statusBar.update();
+      }
     }
   }
 
