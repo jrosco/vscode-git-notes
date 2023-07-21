@@ -329,7 +329,7 @@ const fileChanges = await this._getCommitFileChanges(commitSHA);
       if (repositoryPath !== undefined) {
         this.statusBar.message = "Removing ...";
         this.statusBar.update();
-        const cmdList = prune ? ['notes', 'prune'] : ['notes', 'remove', commitHash.replace(/\s/g, '')];
+        const cmdList = prune ? ['notes', 'prune'] : ['notes', 'remove', commitHash];
         console.log("cmdList: " + cmdList + "for " + repositoryPath);
         await this.git.raw(cmdList)
         .then(() => {
@@ -347,7 +347,7 @@ const fileChanges = await this._getCommitFileChanges(commitSHA);
       this.statusBar.showErrorMessage('Git Notes: An error occurred while removing Git notes: ' + error);
       const prune = await this.input.showInputWindowMessage("Failed to remove Git note", "Prune Notes?", true, true);
       if (prune) {
-        await this.removeGitNote(commitHash.replace(/\s/g, ''), fileUri, repositoryPath, true);
+        await this.removeGitNote(commitHash, fileUri, repositoryPath, true);
       }
     }
   }
