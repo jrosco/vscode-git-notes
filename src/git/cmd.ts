@@ -271,7 +271,8 @@ export class GitCommands {
     return commits;
   }
 
-  public async addGitNotes(message: string, commitHash: string, fileUri?: vscode.Uri, repositoryPath?: string): Promise<void> {
+  public async addGitNotes(message: string, commitHash: string, fileUri?: vscode.Uri, repositoryPath?: string, force?: boolean): Promise<void> {
+    this.logger.debug(`addGitNotes(${message}, ${commitHash}, ${fileUri}, ${repositoryPath})`);
     repositoryPath = this.manager.getGitRepositoryPath(fileUri, repositoryPath);
     this._setRepositoryPath(repositoryPath);
     this.statusBar.reset();
@@ -279,19 +280,28 @@ export class GitCommands {
       if (repositoryPath !== undefined) {
         this.statusBar.message = "Adding Message ...";
         this.statusBar.update();
-        await this.git.raw(['notes', 'add', commitHash, '-m', message])
+        const cmdList = force ? ['notes', 'add', commitHash, '-m', message, '--force'] : ['notes', 'add', commitHash, '-m', message];
+        await this.git.raw(cmdList)
         .then((message) => {
           this.output.log(message);
           this.manager.clearRepositoryDetails(undefined, repositoryPath);
         });
         this.getNotes(repositoryPath);
       } else {
-        this.output.log("Not a git repository (or any of the parent directories): .git ");
+        this.logger.error("Not a git repository (or any of the parent directories): .git ");
         this.statusBar.showInformationMessage("Git Notes: Not a git repository (or any of the parent directories): .git");
       }
     } catch (error) {
-      this.output.log('An error occurred while adding Git note:'+ error);
-      this.statusBar.showErrorMessage("Git Notes: An error occurred while adding Git note:" + error);
+      this.logger.error('An error occurred while adding Git note:'+ error);
+      this.statusBar.showErrorMessage(`Git Notes: An error occurred while adding Git note: ${error}`);
+      const messageItem: vscode.MessageItem[] = [{ title: "Force overwrite" }, {title: "Cancel"}];
+      const selected = await this.input.showInputWindowMessage("Failed to Add Git Note", messageItem, true, true);
+      if (selected?.title === "Force overwrite") {
+        await this.addGitNotes(message, commitHash, undefined, repositoryPath, true);
+      } else {
+        this.statusBar.notesCount = this.manager.getExistingRepositoryDetails(repositoryPath)?.length || 0;
+        this.statusBar.update();
+      }
     }
   }
 
@@ -319,7 +329,7 @@ export class GitCommands {
       }
     } catch (error) {
       this.output.log('An error occurred while fetching Git notes:'+ error);
-      this.statusBar.showErrorMessage("Git Notes: An error occurred while fetching Git notes:" + error);
+      this.statusBar.showErrorMessage(`Git Notes: An error occurred while fetching Git notes: ${error}`);
       const messageItem: vscode.MessageItem[] = [{ title: "Push notes" }, {title: "Force fetch"}, {title: "Cancel"}];
       const selected = await this.input.showInputWindowMessage("Failed to fetch Git Notes", messageItem, true, true);
       if (selected?.title === "Push notes") {
@@ -346,7 +356,7 @@ export class GitCommands {
         const cmdList = force ? ['origin', refspec, '--force'] : ['origin', refspec];
         await this.git.push(cmdList)
         .then((message) => {
-          const showMsg = message.pushed.length > 0 ? "Everything up-to-date": "Pushed " + message.update?.hash.from + " -> " + message.update?.hash.to;
+          const showMsg = message.pushed.length > 0 ? "Everything up-to-date": `Pushed ${message.update?.hash.from} -> ${message.update?.hash.to}`;
           this.statusBar.showInformationMessage(`Git Notes: ${showMsg}`);
           this.manager.clearRepositoryDetails(undefined, repositoryPath);
 
@@ -358,7 +368,7 @@ export class GitCommands {
       }
     } catch (error) {
       this.logger.error(`An error occurred while pushing Git notes: ${error}`);
-      this.statusBar.showErrorMessage('Git Notes: An error occurred while pushing Git notes: ' + error);
+      this.statusBar.showErrorMessage(`Git Notes: An error occurred while pushing Git notes: ${error}`);
       const messageItem: vscode.MessageItem[] = [{ title: "Fetch notes" }, {title: "Force push"}, {title: "Cancel"}];
       const selected = await this.input.showInputWindowMessage("Failed to push Git Notes", messageItem, true, true);
       if (selected?.title === "Fetch notes") {
@@ -385,7 +395,7 @@ export class GitCommands {
         this.logger.debug(`cmdList: ${cmdList} for ${repositoryPath}`);
         await this.git.raw(cmdList)
         .then(() => {
-          const showMsg = prune ? "Pruned notes" : "Removed note for commit " + commitHash + "\nPath: " + repositoryPath;
+          const showMsg = prune ? "Pruned notes" : `Removed note for commit ${commitHash} \nPath: ${repositoryPath}`;
           this.statusBar.showInformationMessage(`Git Notes: ${showMsg}`);
           this.manager.clearRepositoryDetails(undefined, repositoryPath);
         });

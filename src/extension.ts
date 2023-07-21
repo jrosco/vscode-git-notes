@@ -140,6 +140,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   // Register the command opening a editor for adding git notes to commits
   let gitAddNoteMessageDisposable = vscode.commands.registerCommand('extension.addGitNoteMessage', async () => {
+    logger.info("extension.addGitNoteMessage command called");
     input.setup('Add a Git Note', 'Enter the Commit hash add a message to....', false);
     const commitHashInput = await input.showInputBox();
     const activeFileRepoPath = notes.repositoryPath;
@@ -173,9 +174,9 @@ export function activate(context: vscode.ExtensionContext) {
                 onDidChangeDisposable.dispose();
               }
               // You can perform any cleanup or handling here
-              fs.unlink(tempFilePath, (err) => {
-                if (err) {
-                  console.error('Error removing the file:', err);
+              fs.unlink(tempFilePath, (error) => {
+                if (error) {
+                  logger.debug(`Error removing the file: ${error}`);
                 }
               });
               return;
