@@ -72,13 +72,13 @@ export class RepositoryManager {
     return undefined; // Return undefined if commit or file change is not found
   }
 
-  public getGetNoteMessage(commitDetails?: CommitDetails[], commitHash?: string): string | undefined {
-    this.logger.debug(`getGetNoteMessage(${commitHash})`);
+  public getGitNoteMessage(commitDetails?: CommitDetails[], commitHash?: string): string | undefined {
+    this.logger.debug(`getGitNoteMessage(${commitDetails}, ${commitHash})`);
     const commit = commitDetails?.find(commit => commit.commitHash === commitHash);
     if (commit) {
       const note = commit.note;
       if (note) {
-        this.logger.debug(`getGetNoteMessage(${commitHash}) = ${note}`);
+        this.logger.debug(`getGitNoteMessage(${commitHash}) = ${note}`);
         return note;
       }
     }
