@@ -4,13 +4,15 @@ import { NotesInput } from './ui/input';
 
 import { GitCommands } from './git/cmd';
 import { RepositoryManager } from './interface';
+import { LoggerService, LogLevel } from './log/service';
 
 const notes = new GitCommands();
 const manager = RepositoryManager.getInstance();
 const input = NotesInput.getInstance();
+const logger = LoggerService.getInstance();
 
 export function activate(context: vscode.ExtensionContext) {
-  console.log('Your extension "git-notes" has been activated.');
+  logger.info("Your extension 'git-notes' has been activated.");
 
   // Get the URIs of open files when Visual Studio Code first opens
   // Iterate through the currently open files
@@ -41,6 +43,7 @@ export function activate(context: vscode.ExtensionContext) {
   let gitCheckNotesDisposable = vscode.commands.registerCommand(
     "extension.checkGitNotes",
     async () => {
+      logger.info("extension.checkGitNotes command called");
       const activeEditor = vscode.window.activeTextEditor;
       if (notes.repositoryPath !== undefined) {
         await manager.clearRepositoryDetails(undefined, notes.repositoryPath);
@@ -57,6 +60,7 @@ export function activate(context: vscode.ExtensionContext) {
   let gitFetchNoteRefDisposable = vscode.commands.registerCommand(
     "extension.fetchGitNotes",
     async () => {
+      logger.info("extension.fetchGitNotes command called");
       const activeEditor = vscode.window.activeTextEditor;
       if (notes.repositoryPath !== undefined) {
         await notes.fetchGitNotes(undefined,notes.repositoryPath);
@@ -70,6 +74,7 @@ export function activate(context: vscode.ExtensionContext) {
   let gitPushNoteRefDisposable = vscode.commands.registerCommand(
     "extension.pushGitNotes",
     async () => {
+      logger.info("extension.pushGitNotes command called");
       const activeEditor = vscode.window.activeTextEditor;
       if (notes.repositoryPath !== undefined) {
         await notes.pushGitNotes(undefined,notes.repositoryPath);
@@ -83,6 +88,7 @@ export function activate(context: vscode.ExtensionContext) {
   let runWebviewDisposable = vscode.commands.registerCommand(
     "extension.runWebview",
     async () => {
+      logger.info("extension.runWebview command called");
       const activeEditor = vscode.window.activeTextEditor;
       if (activeEditor !== undefined) {
         notes.repositoryPath = manager.getGitRepositoryPath(activeEditor.document.uri);
@@ -94,6 +100,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   let removeGitNotePromptDisposable = vscode.commands.registerCommand('extension.removeGitNotePrompt',
     async () => {
+      logger.info("extension.removeGitNotePrompt command called");
       const activeEditor = vscode.window.activeTextEditor;
       const repositoryPath = notes.repositoryPath;
       if (activeEditor !== undefined || repositoryPath !== undefined) {
@@ -112,6 +119,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   let pruneGitNotePromptDisposable = vscode.commands.registerCommand('extension.pruneGitNotePrompt',
     async () => {
+      logger.info("extension.pruneGitNotePrompt command called");
       const activeEditor = vscode.window.activeTextEditor;
       if (activeEditor !== undefined || notes.repositoryPath !== undefined) {
         if (notes.repositoryPath !== undefined) {
@@ -133,5 +141,5 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 export function deactivate() {
-  console.log('Your extension "git-notes" has been deactivated.');
+  logger.info("Your extension 'git-notes' has been deactivated.");
 }
