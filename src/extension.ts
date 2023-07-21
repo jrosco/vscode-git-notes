@@ -141,7 +141,7 @@ export function activate(context: vscode.ExtensionContext) {
   // Register the command opening a editor for adding git notes to commits
   let gitAddNoteMessageDisposable = vscode.commands.registerCommand('extension.addGitNoteMessage', async () => {
     logger.info("extension.addGitNoteMessage command called");
-    input.setup('Add a Git Note', 'Enter the Commit hash add a message to....', false);
+    input.setup('Add/Edit a Git Note', 'Enter the Commit hash or leave blank to apply to last commit ....', false);
     const commitHashInput = await input.showInputBox();
     let currentNote = '';
     let editNote = false;
