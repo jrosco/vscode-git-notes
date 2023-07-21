@@ -146,8 +146,9 @@ export function activate(context: vscode.ExtensionContext) {
     const activeFileRepoPath = notes.repositoryPath;
     // TODO: If not commitHashInput, then use last commit message details
     if (commitHashInput !== undefined && commitHashInput !== "") {
+      const commitHash = commitHashInput.replace(/\s/g, '');
       const tempDir = os.tmpdir();
-      const tempFilePath = path.join(tempDir, commitHashInput + '.vscode-git-notes-autosave_msg.txt');
+      const tempFilePath = path.join(tempDir, commitHash + '.vscode-git-notes-autosave_msg.txt');
       fs.writeFileSync(tempFilePath, '');
       vscode.workspace.openTextDocument(tempFilePath).then((doc) => {
         vscode.window.showTextDocument(doc, { preview: true }).then((editor) => {
@@ -169,7 +170,7 @@ export function activate(context: vscode.ExtensionContext) {
           const onDidChangeActiveDisposable = vscode.window.onDidChangeActiveTextEditor((editor) => {
             if (!editor) {
               if (bufferContent !== '') {
-                notes.addGitNotes(bufferContent, commitHashInput, undefined, activeFileRepoPath);
+                notes.addGitNotes(bufferContent, commitHash, 'add', undefined, activeFileRepoPath);
                 onDidChangeActiveDisposable.dispose();
                 onDidChangeDisposable.dispose();
               }
