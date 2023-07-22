@@ -3,11 +3,13 @@
 [![Version](https://vsmarketplacebadge.apphb.com/version/jrosco.git-notes.png)](https://marketplace.visualstudio.com/items?itemName=jrosco.git-notes)
 [![License](https://img.shields.io/badge/license-GPL3-blue.png)](https://github.com/jrosco/vscode-git-notes/blob/master/LICENSE)
 
-The [Git Notes] extension for Visual Studio Code provides a convenient way to work with Git notes directly within the editor. It allows you to check for Git notes when opening a file, displaying the current number of notes found in the repository associated with that file. Additionally, you can easily push and fetch notes to and from local and remote repositories. When notes are found, a status bar button is available, which opens an overview of the notes, complete with commit links to the remote commits.
+The Visual Studio Code extension known as `git-notes` offers a user-friendly method of handling [Git Notes] directly within the editor. With this extension, you can effortlessly access Git notes when opening a file, displaying the total number of notes in the associated repository. Moreover, it simplifies the process of pushing and fetching notes to and from both local and remote repositories.
+
+When Git notes are detected, a convenient status bar button becomes available. By clicking on it, you can access an overview of the notes, complete with links to the corresponding remote commits. This feature enhances code management and collaboration by allowing easy tracking of changes, discussions, and tasks linked to specific lines of code. The seamless teamwork is further supported as these notes can be conveniently pushed to your remote repository.
+
+Additionally, the extension facilitates editing and removing note messages, ensuring that the code's documentation remains up-to-date and relevant throughout the entire development process. This streamlines the workflow and fosters efficient collaboration among developers.
 
 ## Features
-
-Managing code notes and collaboration becomes even more streamlined. You can now easily keep track of changes, discussions, and tasks associated with specific lines of code and push them to your remote repository for seamless teamwork. Additionally, the ability to edit and remove note messages ensures that the code's documentation stays up-to-date and relevant throughout the development process.
 
 - **Add/ Edit/ Remove Note Messages**: Users can add, edit, and remove note messages associated with specific lines or sections of code in the file. This feature allows you to leave comments, feedback, or reminders directly in the code and manage them efficiently.
 - **Git Notes Detection**: Automatically checks for [Git Notes] when opening a file and displays the current number of notes found in the associated repository.
@@ -33,7 +35,21 @@ Managing code notes and collaboration becomes even more streamlined. You can now
 1. Open a file that is part of a Git repository.
 2. The extension will automatically detect and display the number of [Git Notes] associated with the repository in the status bar.
 3. Click on the status bar button to open the note overview, which provides a detailed list of the notes and commit links to the remote commits.
-4. Use the provided options (`Ctrl+Shift+P` or `Cmd+Shift+P`) to [`Push`|`Fetch Git Notes`] between the local and remote repositories.
+4. Use the provided options (`Ctrl+Shift+P` or `Cmd+Shift+P`) to [`Push`|`Fetch`|`Add/Edit`|`Prune`|`Remove` `Notes`] between the local and remote repositories.
+
+### Command List
+
+Open the command list with `Ctrl+Shift+P` (Windows) or `Cmd+Shift+P` (MacOS)
+
+| Command                       | Description                                                                                                       |
+| ---                           | ---                                                                                                               |
+| `Git Note: Check Notes`       | Verify whether the currently opened file within the directory/workspace contains any Git Notes.                   |
+| `Git Note: View Notes`        | Launch the vscode Webview to view Git notes within the current directory.                                         |
+| `Git Note: Add/Edit Notes`    | Allows you to add/edit or append additional information, comments, or annotations to Git objects such as commits. |
+| `Git Note: Fetch Notes`       | Retrieve Git notes from a remote repository and store them locally in your repository.                            |
+| `Git Note: Push Notes`        | Send local Git notes to a remote repository.                                                                      |
+| `Git Note: Remove Notes`      | Remove a Git notes associated with a specific Git object, such as a commit.                                       |
+| `Git Note: Prune Notes`       | Remove orphaned Git notes from a repository.                                                                      |
 
 ## License
 
