@@ -7,6 +7,9 @@ The [Git Notes] extension for Visual Studio Code provides a convenient way to wo
 
 ## Features
 
+Managing code notes and collaboration becomes even more streamlined. You can now easily keep track of changes, discussions, and tasks associated with specific lines of code and push them to your remote repository for seamless teamwork. Additionally, the ability to edit and remove note messages ensures that the code's documentation stays up-to-date and relevant throughout the development process.
+
+- **Add/ Edit/ Remove Note Messages**: Users can add, edit, and remove note messages associated with specific lines or sections of code in the file. This feature allows you to leave comments, feedback, or reminders directly in the code and manage them efficiently.
 - **Git Notes Detection**: Automatically checks for [Git Notes] when opening a file and displays the current number of notes found in the associated repository.
 - **Push and Fetch Notes**: Easily push your local notes to a remote repository or fetch notes from a remote repository to your local workspace.
 - **Note Overview**: Access a comprehensive overview of the notes found in the file repository, along with convenient commit links to the corresponding remote commits.
