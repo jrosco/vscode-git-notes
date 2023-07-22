@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { LoggerService, LogLevel } from './log/service';
+import { LoggerService } from './log/service';
 
 export class GitNotesSettings {
 
@@ -26,6 +26,10 @@ export class GitNotesSettings {
 			this._onDidChangeConfig.fire(event);
 		}
 	}
+
+	public get logLevel(): 0|1|2|3|4 {
+		return this._config.get<0|1|2|3|4>('logLevel', 2);
+  }
 
 	public get localNoteRef(): string {
 		this.logger.debug("GitNotesSettings get localNoteRef called");
@@ -55,4 +59,4 @@ export class GitNotesSettings {
 
 }
 
-export default GitNotesSettings;
+// export default GitNotesSettings;

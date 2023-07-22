@@ -25,6 +25,11 @@
       "type": "object",
       "title": "Git Notes Extension Settings",
       "properties": {
+        "git-notes.logLevel": {
+          "type": "number",
+          "default": 2,
+          "description": "Set the logging level (trace=0, debug=1, info=2, warn=3, error=4)"
+        },
         "git-notes.localNoteRef": {
           "type": "string",
           "default": "refs/notes/commits",
