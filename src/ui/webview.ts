@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 
 import { RepositoryManager, RepositoryDetails } from '../interface';
 import { GitNotesStatusBar } from '../ui/status';
+import { GitNotesSettings } from '../settings';
 
 export class GitNotesPanel {
   public static currentPanel: GitNotesPanel | undefined;
@@ -15,6 +16,7 @@ export class GitNotesPanel {
   private readonly _panel: vscode.WebviewPanel;
   private readonly _document: vscode.Uri;
   private _disposables: vscode.Disposable[] = [];
+  private settings: GitNotesSettings;
 
   private constructor(panel: vscode.WebviewPanel, document: vscode.Uri, repositoryDetails: RepositoryDetails[]) {
     this._panel = panel;
@@ -22,6 +24,7 @@ export class GitNotesPanel {
     this.manager = RepositoryManager.getInstance();
     this.statusBar = GitNotesStatusBar.getInstance();
     repositoryDetails = this.manager.getRepositoryDetailsInterface();
+    this.settings = new GitNotesSettings();
 
     // Set up the webview panel
     this.repositoryPath = this.manager.getGitRepositoryPath(document);
@@ -75,15 +78,29 @@ export class GitNotesPanel {
       this.statusBar.update();
 
       // Use the passed variable value in the HTML content
+      const isDarkTheme = this.settings.isDarkThemeEnabled;
+      // heading colors
+      const headingColor = isDarkTheme ? 'black': 'black';
+      const headingBgColor = isDarkTheme ? 'LightGray': 'LightGray';
+      // commit hash colors
+      const commitHashColor = isDarkTheme ? 'white': 'black';
+      const commitHashBgColor = isDarkTheme ? '#92a8d1': '#92a8d1';
+      // note hash colors
+      const noteHashColor = isDarkTheme ? 'white': 'white';
+      const noteHashBgColor = isDarkTheme ? '#034f84': '#034f84';
+      // text colors
+      const color = isDarkTheme ? 'white': 'black';
+      // const bgColor = isDarkTheme ? 'LightGray': 'LightGray';
+
       const repositoryInfo = filteredRepositoryDetails.map(details => `
-        <p><h3 style="color:Black;background-color:LightGray;">Repository Path: ${details.repositoryPath}</h3></p>
+        <p><h3 style="color:${headingColor};background-color:${headingBgColor};">Repository Path: ${details.repositoryPath}</h3></p>
         <style>
           <hr {width: 10px;}>
         </style>
         ${details.commitDetails.map(commit => `
-          <p style="color:#f0efef;background-color:#92a8d1;"><b>Commit Hash: </b><a style="color:white" href="${details.repositoryUrl}/commit/${commit.commitHash}">${commit.commitHash}</a></p>
-          <p style="color:#f0efef;background-color:#034f84;"><b>Note Hash: </b>${commit.notesHash}</p>
-          <div style="color:#f0efef;">
+          <p style="color:${commitHashColor};background-color:${commitHashBgColor};"><b>Commit Hash: </b><a style="color:white" href="${details.repositoryUrl}/commit/${commit.commitHash}">${commit.commitHash}</a></p>
+          <p style="color:${noteHashColor};background-color:${noteHashBgColor};"><b>Note Hash: </b>${commit.notesHash}</p>
+          <div style="color:${color};">
           <p><strong>Author:</strong> ${commit.author}</p>
           <p><strong>Date:</strong> ${commit.date}</p>
           <p><strong>Commit Message:</strong> ${commit.message}</p>
@@ -91,7 +108,6 @@ export class GitNotesPanel {
           <p><strong>Files:</strong></p>
           <ul>
             ${commit.fileChanges.map(fileChange => {
-                const color = 'white';
                 const insertionsColor = 'green';
                 const deletionsColor = 'red';
                 const addedColor = 'blue';

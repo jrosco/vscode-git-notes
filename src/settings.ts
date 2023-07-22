@@ -61,6 +61,14 @@ export class GitNotesSettings {
 		return this._onDidChangeConfig.event;
 	}
 
+	public get isDarkThemeEnabled(): boolean {
+		const config = vscode.workspace.getConfiguration('workbench');
+		const theme = config.get<string>('colorTheme', 'default');
+		// You can check for specific dark themes if needed, but the default dark theme is usually 'Default Dark+'
+		this.logger.debug(`GitNotesSettings isDarkThemeEnabled ${theme.includes('Dark')}`);
+		return theme.includes('Dark');
+	}
+
 	// Optionally, you can create a method to apply the settings when needed
 	// public applySettings(): void {
 	//     // Apply your settings logic here
