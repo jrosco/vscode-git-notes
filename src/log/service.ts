@@ -20,6 +20,7 @@ export class LoggerService {
   }
 
   public static getInstance(logLevel?: LogLevel): LoggerService {
+    this.instance?.logMessage(LogLevel.info, `LoggerService.getInstance(${logLevel})`);
     if (!LoggerService.instance) {
       LoggerService.instance = new LoggerService(logLevel);
     }
@@ -30,7 +31,7 @@ export class LoggerService {
     if (level >= this.logLevel) {
       const logLevelNames = ['TRACE', 'DEBUG', 'INFO', 'WARN', 'ERROR'];
       const logLevelName = logLevelNames[level];
-      console.log(`[${logLevelName}]\t${new Date().toISOString()}\t- ${message}`);
+      console.log(`[${new Date().toISOString()} git-notes [${logLevelName}] ${message}`);
     }
   }
 

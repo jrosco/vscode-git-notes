@@ -21,34 +21,70 @@
   ],
   "main": "./out/extension.js",
   "contributes": {
+    "configuration": {
+      "type": "object",
+      "title": "Git Notes Extension Settings",
+      "properties": {
+        "git-notes.autoCheck": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable Auto Checking Git notes when vscode starts and when a new file is opened"
+        },
+        "git-notes.logLevel": {
+          "type": "number",
+          "default": 2,
+          "description": "Set the logging level (trace=0, debug=1, info=2, warn=3, error=4)"
+        },
+        "git-notes.localNoteRef": {
+          "type": "string",
+          "default": "refs/notes/commits",
+          "description": "The local git note ref to use"
+        },
+        "git-notes.remoteNoteRef": {
+          "type": "string",
+          "default": "refs/notes/commits",
+            "description": "The remote git note ref to use"
+        },
+        "git-notes.enableNotifications": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable General Info Notifications"
+        },
+        "git-notes.enableNotificationsWhenNotesFound": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable Notifications when Git Notes are found"
+        }
+      }
+    },
     "commands": [
       {
         "command": "extension.checkGitNotes",
-        "title": "Check Git Notes"
+        "title": "Git Note: Check Notes"
       },
       {
         "command": "extension.fetchGitNotes",
-        "title": "Fetch Git Notes"
+        "title": "Git Note: Fetch Notes"
       },
       {
         "command": "extension.pushGitNotes",
-        "title": "Push Git Notes"
+        "title": "Git Note: Push Notes"
       },
       {
         "command": "extension.runWebview",
-        "title": "Git Notes"
+        "title": "Git Note: View Notes"
       },
       {
         "command": "extension.removeGitNotePrompt",
-        "title": "Remove Git Note"
+        "title": "Git Note: Remove Notes"
       },
       {
         "command": "extension.pruneGitNotePrompt",
-        "title": "Prune Git Note"
+        "title": "Git Note: Prune Notes"
       },
       {
         "command": "extension.addGitNoteMessage",
-        "title": "Add/Edit Git Note"
+        "title": "Git Note: Add/Edit Notes"
       }
     ]
   },

@@ -1,12 +1,13 @@
 import * as vscode from 'vscode';
 
 import { LoggerService, LogLevel } from '../log/service';
-
+import { GitNotesSettings } from '../settings';
 export class GitNotesStatusBar {
 
   private static instance: GitNotesStatusBar;
   private statusBarItem: vscode.StatusBarItem | undefined;
   private logger: LoggerService;
+  private settings: GitNotesSettings;
 
   public notesCount: number;
   public message;
@@ -18,7 +19,8 @@ export class GitNotesStatusBar {
     this.message = message;
     this.repositoryPath = repositoryPath;
     this.command = command;
-    this.logger = LoggerService.getInstance();
+    this.settings = new GitNotesSettings();
+    this.logger = LoggerService.getInstance(this.settings.logLevel);
   }
 
   public static getInstance(): GitNotesStatusBar {
@@ -34,6 +36,9 @@ export class GitNotesStatusBar {
       this.statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left);
     }
     if (this.notesCount > 0 && this.command === undefined) {
+      if (this.settings.enableNotificationsWhenNotesFound) {
+        vscode.window.showInformationMessage(`Git Notes: Found in ${this.repositoryPath}.`);
+      }
       this.statusBarItem.text = `Git Notes: ${this.notesCount}`;
       this.statusBarItem.command = this.command ? this.command: "extension.runWebview";
       this.statusBarItem.show();
@@ -56,17 +61,21 @@ export class GitNotesStatusBar {
 
   // TODO: Need to prove this works
   public async showTimedInformationMessage(message: string, duration: number): Promise<void> {
-  const promise = vscode.window.showInformationMessage(message);
-  setTimeout(async () => {
-    const choice = await promise;
-    if (choice) {
-      this.logger.debug(`User selected ${choice}`);
+    if (this.settings.enableNotifications) {
+      const promise = vscode.window.showInformationMessage(message);
+      setTimeout(async () => {
+        const choice = await promise;
+        if (choice) {
+          this.logger.debug(`User selected ${choice}`);
+        }
+      }, duration);
     }
-  }, duration);
-}
+  }
 
   public showInformationMessage(message: string) {
-    vscode.window.showInformationMessage(message);
+    if (this.settings.enableNotifications) {
+      vscode.window.showInformationMessage(message);
+    }
   }
 
   public showErrorMessage(message: string) {

@@ -1,0 +1,8 @@
+{
+    "git-notes.autoCheck": true,
+    "git-notes.logLevel": 2,
+    "git-notes.localNoteRef": "refs/notes/commits",
+    "git-notes.remoteNoteRef": "refs/notes/commits",
+    "git-notes.enableNotifications": true,
+    "git-notes.enableNotificationsWhenNotesFound": false
+}
