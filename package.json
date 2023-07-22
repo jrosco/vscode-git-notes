@@ -60,31 +60,31 @@
     "commands": [
       {
         "command": "extension.checkGitNotes",
-        "title": "Check Git Notes"
+        "title": "Git Note: Check Notes"
       },
       {
         "command": "extension.fetchGitNotes",
-        "title": "Fetch Git Notes"
+        "title": "Git Note: Fetch Notes"
       },
       {
         "command": "extension.pushGitNotes",
-        "title": "Push Git Notes"
+        "title": "Git Note: Push Notes"
       },
       {
         "command": "extension.runWebview",
-        "title": "Git Notes"
+        "title": "Git Note: View Notes"
       },
       {
         "command": "extension.removeGitNotePrompt",
-        "title": "Remove Git Note"
+        "title": "Git Note: Remove Notes"
       },
       {
         "command": "extension.pruneGitNotePrompt",
-        "title": "Prune Git Note"
+        "title": "Git Note: Prune Notes"
       },
       {
         "command": "extension.addGitNoteMessage",
-        "title": "Add/Edit Git Note"
+        "title": "Git Note: Add/Edit Notes"
       }
     ]
   },
