@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 
 import { LoggerService, LogLevel } from './log/service';
+import { GitNotesSettings } from './settings';
 
 export interface RepositoryDetails {
   repositoryPath: string | undefined;
@@ -36,12 +37,14 @@ export class RepositoryManager {
   
   private logger: LoggerService;
   private static instance: RepositoryManager;
+  private settings: GitNotesSettings;
 
   constructor() {
     this.repositoryDetailsInterface = [];
     this.commitDetailsInterface = [];
     this.fileChangeInterface = [];
-    this.logger = LoggerService.getInstance();
+    this.settings = new GitNotesSettings();
+    this.logger = LoggerService.getInstance(this.settings.logLevel);
   }
 
   public static getInstance(): RepositoryManager {

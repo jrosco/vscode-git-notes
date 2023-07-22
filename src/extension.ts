@@ -14,8 +14,8 @@ import { GitNotesSettings } from './settings';
 const notes = new GitCommands();
 const manager = RepositoryManager.getInstance();
 const input = NotesInput.getInstance();
-const logger = LoggerService.getInstance();
 const settings = new GitNotesSettings();
+const logger = LoggerService.getInstance(settings.logLevel);
 
 export function activate(context: vscode.ExtensionContext) {
   logger.info("Your extension 'git-notes' has been activated.");

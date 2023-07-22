@@ -19,8 +19,8 @@ export class GitNotesStatusBar {
     this.message = message;
     this.repositoryPath = repositoryPath;
     this.command = command;
-    this.logger = LoggerService.getInstance();
     this.settings = new GitNotesSettings();
+    this.logger = LoggerService.getInstance(this.settings.logLevel);
   }
 
   public static getInstance(): GitNotesStatusBar {

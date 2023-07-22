@@ -30,10 +30,10 @@ export class GitCommands {
     this.manager = RepositoryManager.getInstance();
     this.statusBar = GitNotesStatusBar.getInstance();
     this.output = new NotesOutputChannel();
-    this.logger = LoggerService.getInstance();
+    this.settings = new GitNotesSettings();
+    this.logger = LoggerService.getInstance(this.settings.logLevel);
     this.repositoryPath = "";
     this.input = NotesInput.getInstance();
-    this.settings = new GitNotesSettings();
 
     this.logger.debug(`GitCommands constructor: ${Object.getOwnPropertyNames(this)}`);
   }

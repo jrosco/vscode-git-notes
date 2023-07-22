@@ -1,18 +1,20 @@
 import * as vscode from 'vscode';
-import { LoggerService } from './log/service';
+import { LoggerService, LogLevel } from './log/service';
 
 export class GitNotesSettings {
 
 	private _config: vscode.WorkspaceConfiguration;
 	private _onDidChangeConfig: vscode.EventEmitter<vscode.ConfigurationChangeEvent>;
-	private logger = LoggerService.getInstance();
+	private logger: LoggerService;
 
 	constructor() {
-		this.logger.debug("GitNotesSettings constructor called");
 		this._config = vscode.workspace.getConfiguration('git-notes');
+		this.logger = LoggerService.getInstance(this._config.get('logLevel', LogLevel.info));
+		this.logger.debug("GitNotesSettings constructor called");
 		this._onDidChangeConfig = new vscode.EventEmitter<vscode.ConfigurationChangeEvent>();
 		// Listen for configuration changes and trigger the event emitter
 		vscode.workspace.onDidChangeConfiguration(this.onDidChangeConfiguration, this);
+		console.log(`GitNotesSettings constructor called ${this.logLevel}`);
 	}
 
 	private onDidChangeConfiguration(event: vscode.ConfigurationChangeEvent) {
@@ -32,8 +34,9 @@ export class GitNotesSettings {
 		return this._config.get('autoCheck', true);
 	}
 
-	public get logLevel(): 0|1|2|3|4 {
-		return this._config.get<0|1|2|3|4>('logLevel', 2);
+	public get logLevel(): LogLevel {
+		this.logger.debug("GitNotesSettings get logLevel called");
+		return this._config.get<LogLevel>('logLevel', LogLevel.info);
   	}
 
 	public get localNoteRef(): string {
