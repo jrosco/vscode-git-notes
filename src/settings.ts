@@ -43,7 +43,12 @@ export class GitNotesSettings {
 
 	public get enableNotifications(): boolean {
 		this.logger.debug("GitNotesSettings get enableNotifications called");
-		return this._config.get('enableNotifications', false);
+		return this._config.get('enableNotifications', true);
+	}
+
+	public get enableNotificationsWhenNotesFound(): boolean {
+		this.logger.debug("GitNotesSettings get enableNotificationsWhenNotesFound called");
+		return this._config.get('enableNotificationsWhenNotesFound', false);
 	}
 
 	public get onDidChangeConfig(): vscode.Event<vscode.ConfigurationChangeEvent> {

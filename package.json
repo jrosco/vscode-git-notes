@@ -42,8 +42,13 @@
         },
         "git-notes.enableNotifications": {
           "type": "boolean",
+          "default": true,
+          "description": "Enable General Info Notifications"
+        },
+        "git-notes.enableNotificationsWhenNotesFound": {
+          "type": "boolean",
           "default": false,
-          "description": "Enable Notifications when git notes are found"
+          "description": "Enable Notifications when Git Notes are found"
         }
       }
     },

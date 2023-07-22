@@ -36,6 +36,9 @@ export class GitNotesStatusBar {
       this.statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left);
     }
     if (this.notesCount > 0 && this.command === undefined) {
+      if (this.settings.enableNotificationsWhenNotesFound) {
+        vscode.window.showInformationMessage(`Git Notes: Found in ${this.repositoryPath}.`);
+      }
       this.statusBarItem.text = `Git Notes: ${this.notesCount}`;
       this.statusBarItem.command = this.command ? this.command: "extension.runWebview";
       this.statusBarItem.show();
