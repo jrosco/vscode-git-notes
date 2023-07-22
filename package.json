@@ -81,6 +81,10 @@
       {
         "command": "extension.pruneGitNotePrompt",
         "title": "Prune Git Note"
+      },
+      {
+        "command": "extension.addGitNoteMessage",
+        "title": "Add/Edit Git Note"
       }
     ]
   },

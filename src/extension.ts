@@ -1,4 +1,8 @@
 import * as vscode from 'vscode';
+import * as fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
+
 import { GitNotesPanel } from './ui/webview';
 import { NotesInput } from './ui/input';
 
@@ -106,6 +110,7 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
+  // Register the command for removing git notes on commits
   let removeGitNotePromptDisposable = vscode.commands.registerCommand('extension.removeGitNotePrompt',
     async () => {
       logger.info("extension.removeGitNotePrompt command called");
@@ -126,6 +131,7 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
+  // Register the command for pruning git notes from stale commits
   let pruneGitNotePromptDisposable = vscode.commands.registerCommand('extension.pruneGitNotePrompt',
     async () => {
       logger.info("extension.pruneGitNotePrompt command called");
@@ -140,12 +146,74 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
+  // Register the command opening a editor for adding git notes to commits
+  let gitAddNoteMessageDisposable = vscode.commands.registerCommand('extension.addGitNoteMessage', 
+    async () => {
+      logger.info("extension.addGitNoteMessage command called");
+      input.setup('Add/Edit a Git Note', 'Enter the Commit hash or leave blank to apply to last commit ....', false);
+      const commitHashInput = await input.showInputBox();
+      let currentNote = '';
+      let editNote = false;
+      const activeFileRepoPath = notes.repositoryPath;
+      const commitHash = commitHashInput ? commitHashInput.replace(/\s/g, '') : (await notes.getLatestCommit(undefined, activeFileRepoPath));
+      if (commitHash !== undefined) {
+        const existingNote = manager.getGitNoteMessage(manager.getExistingRepositoryDetails(activeFileRepoPath), commitHash);
+        if (existingNote !== undefined) {
+          currentNote = existingNote;
+          editNote = true;
+        }
+      }
+      const tempDir = os.tmpdir(); const filePrefix = commitHash ? commitHash : 'last_commit';
+      const tempFilePath = path.join(tempDir, filePrefix + '.vscode-git-notes-autosave_msg.txt');
+
+      fs.writeFileSync(tempFilePath, `${currentNote}`);
+      vscode.workspace.openTextDocument(tempFilePath).then((doc) => {
+        vscode.window.showTextDocument(doc, { preview: true }).then((editor) => {
+          // Define bufferContent outside of the callback functions
+          let bufferContent = '';
+          // Listen for changes in the document to extract the commit message
+          const onDidChangeDisposable = vscode.workspace.onDidChangeTextDocument((event) => {
+            let activeEditor = vscode.window.activeTextEditor;
+            if (!activeEditor) {
+              return;
+            }
+            const document = activeEditor.document;
+            bufferContent = document.getText();
+            // Perform any operations you need with the buffer content here
+            document.save();
+          });
+          // Dispose the event listener when the editor is closed
+          const onDidChangeActiveDisposable = vscode.window.onDidChangeActiveTextEditor((editor) => {
+            if (!editor) {
+              if (bufferContent !== '' && commitHash !== undefined) {
+                notes.addGitNotes(bufferContent, commitHash, 'add', undefined, activeFileRepoPath, editNote);
+                onDidChangeActiveDisposable.dispose();
+                onDidChangeDisposable.dispose();
+              }
+              // You can perform any cleanup or handling here
+              fs.unlink(tempFilePath, (error) => {
+                if (error) {
+                  logger.debug(`Error removing the file: ${error}`);
+                }
+              });
+              return;
+            }
+          });
+          // Store the disposables in the extension context
+          context.subscriptions.push(onDidChangeDisposable);
+          context.subscriptions.push(onDidChangeActiveDisposable);
+        });
+      });
+    }
+  );
+
   context.subscriptions.push(gitCheckNotesDisposable,
     gitFetchNoteRefDisposable,
     gitPushNoteRefDisposable,
     runWebviewDisposable,
     removeGitNotePromptDisposable,
-    pruneGitNotePromptDisposable
+    pruneGitNotePromptDisposable,
+    gitAddNoteMessageDisposable
   );
 }
 
