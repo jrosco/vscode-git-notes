@@ -21,6 +21,27 @@
   ],
   "main": "./out/extension.js",
   "contributes": {
+    "configuration": {
+      "type": "object",
+      "title": "Git Notes Extension Settings",
+      "properties": {
+        "git-notes.localNoteRef": {
+          "type": "string",
+          "default": "refs/notes/commits",
+          "description": "The local git note ref to use"
+        },
+        "git-notes.remoteNoteRef": {
+          "type": "string",
+          "default": "refs/notes/commits",
+            "description": "The remote git note ref to use"
+        },
+        "git-notes.enableNotifications": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable Notifications when git notes are found"
+        }
+      }
+    },
     "commands": [
       {
         "command": "extension.checkGitNotes",

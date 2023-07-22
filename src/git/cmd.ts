@@ -10,6 +10,7 @@ import { GitNotesStatusBar } from '../ui/status';
 import { NotesOutputChannel } from '../ui/output';
 import { NotesInput } from '../ui/input';
 import { LoggerService, LogLevel } from '../log/service';
+import { GitNotesSettings } from '../settings';
 
 import {
   RepositoryManager,
@@ -26,6 +27,7 @@ export class GitCommands {
   private statusBar: GitNotesStatusBar;
   private output: NotesOutputChannel;
   private input: NotesInput;
+  private settings: GitNotesSettings;
 
   constructor() {
     this.git = simpleGit();
@@ -35,6 +37,7 @@ export class GitCommands {
     this.logger = LoggerService.getInstance();
     this.repositoryPath = "";
     this.input = NotesInput.getInstance();
+    this.settings = new GitNotesSettings();
 
     this.logger.debug(`GitCommands constructor: ${Object.getOwnPropertyNames(this)}`);
   }
@@ -95,7 +98,7 @@ export class GitCommands {
   private _getGitNotes(): Promise<any[]> {
     this.logger.trace("_getGitNotes()");
     return new Promise<any[]>(async(resolve, reject) => {
-      this.git.raw(["notes", "--ref=refs/notes/commits", "list"], (err, result) => {
+      this.git.raw(["notes", `--ref=${this.settings.localNoteRef}`, "list"], (err, result) => {
         if (err) {
           reject(err);
         } else {
@@ -142,7 +145,7 @@ export class GitCommands {
     this.logger.trace(`_getGitNoteMessage(${commitHash})`);
     return new Promise<string>(async (resolve, reject) => {
       this.git.raw(
-        ["notes", "--ref=refs/notes/commits", "show", commitHash],
+        ["notes", `--ref=${this.settings.localNoteRef}`, "show", commitHash],
         (error, result) => {
           if (error) {
             const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
@@ -280,7 +283,7 @@ export class GitCommands {
       if (repositoryPath !== undefined) {
         this.statusBar.message = "Fetching ...";
         this.statusBar.update();
-        const refspec = 'refs/notes/commits:refs/notes/commits'; // Set the refspec to fetch the Git notes. Make this a setting
+        const refspec = `${this.settings.localNoteRef}:${this.settings.remoteNoteRef}`;
         const cmdList = force ? ['origin', refspec, '--force'] : ['origin', refspec];
         await this.git.fetch(cmdList)
         .then((message) => {
@@ -318,7 +321,7 @@ export class GitCommands {
       if (repositoryPath !== undefined) {
         this.statusBar.message = "Pushing ...";
         this.statusBar.update();
-        const refspec = 'refs/notes/commits'; // Set the refspec to fetch the Git notes. Make this a setting
+        const refspec = `${this.settings.localNoteRef}:${this.settings.remoteNoteRef}`;
         const cmdList = force ? ['origin', refspec, '--force'] : ['origin', refspec];
         await this.git.push(cmdList)
         .then((message) => {

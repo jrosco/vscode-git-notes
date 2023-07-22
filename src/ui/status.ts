@@ -1,12 +1,13 @@
 import * as vscode from 'vscode';
 
 import { LoggerService, LogLevel } from '../log/service';
-
+import { GitNotesSettings } from '../settings';
 export class GitNotesStatusBar {
 
   private static instance: GitNotesStatusBar;
   private statusBarItem: vscode.StatusBarItem | undefined;
   private logger: LoggerService;
+  private settings: GitNotesSettings;
 
   public notesCount: number;
   public message;
@@ -19,6 +20,7 @@ export class GitNotesStatusBar {
     this.repositoryPath = repositoryPath;
     this.command = command;
     this.logger = LoggerService.getInstance();
+    this.settings = new GitNotesSettings();
   }
 
   public static getInstance(): GitNotesStatusBar {
@@ -56,17 +58,21 @@ export class GitNotesStatusBar {
 
   // TODO: Need to prove this works
   public async showTimedInformationMessage(message: string, duration: number): Promise<void> {
-  const promise = vscode.window.showInformationMessage(message);
-  setTimeout(async () => {
-    const choice = await promise;
-    if (choice) {
-      this.logger.debug(`User selected ${choice}`);
+    if (this.settings.enableNotifications) {
+      const promise = vscode.window.showInformationMessage(message);
+      setTimeout(async () => {
+        const choice = await promise;
+        if (choice) {
+          this.logger.debug(`User selected ${choice}`);
+        }
+      }, duration);
     }
-  }, duration);
-}
+  }
 
   public showInformationMessage(message: string) {
-    vscode.window.showInformationMessage(message);
+    if (this.settings.enableNotifications) {
+      vscode.window.showInformationMessage(message);
+    }
   }
 
   public showErrorMessage(message: string) {
