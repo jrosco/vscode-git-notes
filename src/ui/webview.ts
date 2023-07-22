@@ -87,7 +87,7 @@ export class GitNotesPanel {
           <p><strong>Author:</strong> ${commit.author}</p>
           <p><strong>Date:</strong> ${commit.date}</p>
           <p><strong>Commit Message:</strong> ${commit.message}</p>
-          <p><strong>Note:</strong> ${commit.note}</p>
+          <p><strong>Note:</strong><pre>${commit.note}</pre></p>
           <p><strong>Files:</strong></p>
           <ul>
             ${commit.fileChanges.map(fileChange => {

@@ -72,6 +72,19 @@ export class RepositoryManager {
     return undefined; // Return undefined if commit or file change is not found
   }
 
+  public getGitNoteMessage(commitDetails?: CommitDetails[], commitHash?: string): string | undefined {
+    this.logger.debug(`getGitNoteMessage(${commitDetails}, ${commitHash})`);
+    const commit = commitDetails?.find(commit => commit.commitHash === commitHash);
+    if (commit) {
+      const note = commit.note;
+      if (note) {
+        this.logger.debug(`getGitNoteMessage(${commitHash}) = ${note}`);
+        return note;
+      }
+    }
+    return undefined; // Return undefined if commit or note is not found
+  }
+
   public updateRepositoryDetails(repositoryPath: string | undefined, repositoryUrl: string, notes: CommitDetails[]): void {
     this.logger.debug(`updateRepositoryDetails(${repositoryPath}, ${repositoryUrl}, ${notes})`);
     const index = this.repositoryDetailsInterface.findIndex(
