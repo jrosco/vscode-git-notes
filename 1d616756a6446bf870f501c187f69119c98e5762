@@ -1,0 +1,8 @@
+#!/bin/bash
+
+# comment asdf
+var="somevar"
+
+echo "$var"
+
+really_important_cmd=`ping google.com -c 4`
