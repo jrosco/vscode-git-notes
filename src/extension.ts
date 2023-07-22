@@ -5,11 +5,13 @@ import { NotesInput } from './ui/input';
 import { GitCommands } from './git/cmd';
 import { RepositoryManager } from './interface';
 import { LoggerService, LogLevel } from './log/service';
+import { GitNotesSettings } from './settings';
 
 const notes = new GitCommands();
 const manager = RepositoryManager.getInstance();
 const input = NotesInput.getInstance();
 const logger = LoggerService.getInstance();
+const settings = new GitNotesSettings();
 
 export function activate(context: vscode.ExtensionContext) {
   logger.info("Your extension 'git-notes' has been activated.");
@@ -19,7 +21,9 @@ export function activate(context: vscode.ExtensionContext) {
   vscode.workspace.textDocuments.forEach(async (document: vscode.TextDocument) => {
     if (document.uri.scheme === "file") {
       notes.repositoryPath = manager.getGitRepositoryPath(document.uri);
-      await notes.getNotes(notes.repositoryPath);
+      if (settings.autoCheck) {
+        await notes.getNotes(notes.repositoryPath);
+      }
     }
   });
 
@@ -27,15 +31,19 @@ export function activate(context: vscode.ExtensionContext) {
   vscode.workspace.onDidOpenTextDocument(async (document: vscode.TextDocument) => {
     if (document.uri.scheme === "file") {
       notes.repositoryPath = manager.getGitRepositoryPath(document.uri);
-      await notes.getNotes(notes.repositoryPath);
+      if (settings.autoCheck) {
+        await notes.getNotes(notes.repositoryPath);
+      }
     }
   });
 
   // Register the event listener for switching between file tabs
   vscode.window.onDidChangeActiveTextEditor(async (editor) => {
-    if (editor && editor.document.uri.scheme === "file") {
+    if (editor && editor.document.uri.scheme) {
       notes.repositoryPath = manager.getGitRepositoryPath(editor.document.uri);
-      await notes.getNotes(notes.repositoryPath);
+      if (settings.autoCheck) {
+        await notes.getNotes(notes.repositoryPath);
+      }
     }
   });
 

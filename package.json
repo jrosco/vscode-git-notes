@@ -25,6 +25,11 @@
       "type": "object",
       "title": "Git Notes Extension Settings",
       "properties": {
+        "git-notes.autoCheck": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable Auto Checking Git notes when vscode starts and when a new file is opened"
+        },
         "git-notes.logLevel": {
           "type": "number",
           "default": 2,

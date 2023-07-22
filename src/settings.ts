@@ -27,9 +27,14 @@ export class GitNotesSettings {
 		}
 	}
 
+	public get autoCheck(): boolean {
+		this.logger.debug("GitNotesSettings get autoCheck called");
+		return this._config.get('autoCheck', true);
+	}
+
 	public get logLevel(): 0|1|2|3|4 {
 		return this._config.get<0|1|2|3|4>('logLevel', 2);
-  }
+  	}
 
 	public get localNoteRef(): string {
 		this.logger.debug("GitNotesSettings get localNoteRef called");
