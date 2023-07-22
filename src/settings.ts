@@ -59,6 +59,11 @@ export class GitNotesSettings {
 		return this._config.get('enableNotificationsWhenNotesFound', false);
 	}
 
+	public get confirmPushAndFetchCommands(): boolean {
+		this.logger.debug("GitNotesSettings get confirmPushAndFetchCommands called");
+		return this._config.get('confirmPushAndFetchCommands', true);
+	}
+
 	public get onDidChangeConfig(): vscode.Event<vscode.ConfigurationChangeEvent> {
 		this.logger.debug("GitNotesSettings get onDidChangeConfig called");
 		return this._onDidChangeConfig.event;

@@ -38,12 +38,12 @@
         "git-notes.localNoteRef": {
           "type": "string",
           "default": "refs/notes/commits",
-          "description": "The local git note ref to use"
+          "description": "The local git note ref to use (advanced usage)"
         },
         "git-notes.remoteNoteRef": {
           "type": "string",
           "default": "refs/notes/commits",
-            "description": "The remote git note ref to use"
+            "description": "The remote git note ref to use (advanced usage)"
         },
         "git-notes.enableNotifications": {
           "type": "boolean",
@@ -54,6 +54,11 @@
           "type": "boolean",
           "default": false,
           "description": "Enable Notifications when Git Notes are found"
+        },
+        "git-notes.confirmPushAndFetchCommands": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable confirmation before a Git Push or Git Fetch (enabling this is recommended)"
         }
       }
     },
