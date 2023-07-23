@@ -1,7 +1,6 @@
 # Git Notes Extension for Visual Studio Code
 
-[![Version](https://vsmarketplacebadge.apphb.com/version/jrosco.git-notes.png)](https://marketplace.visualstudio.com/items?itemName=jrosco.git-notes)
-[![License](https://img.shields.io/badge/license-GPL3-blue.png)](https://github.com/jrosco/vscode-git-notes/blob/master/LICENSE)
+[![Visual Studio Marketplace Last Updated](https://img.shields.io/visual-studio-marketplace/last-updated/jrosco.git-notes)](https://marketplace.visualstudio.com/items?itemName=jrosco.git-notes) [![Visual Studio Marketplace Release Date](https://img.shields.io/visual-studio-marketplace/release-date/jrosco.git-notes)](https://marketplace.visualstudio.com/items/jrosco.git-notes/changelog)[![Visual Studio Marketplace Installs](https://img.shields.io/visual-studio-marketplace/i/jrosco.git-notes)](vscode:extension/jrosco.git-notes) ![Visual Studio Marketplace Downloads](https://img.shields.io/visual-studio-marketplace/d/jrosco.git-notes) [![GitHub pull requests](https://img.shields.io/github/issues-pr-raw/jrosco/vscode-git-notes)](https://github.com/jrosco/vscode-git-notes/pulls) [![License](https://img.shields.io/badge/license-GPL3-blue.png)](https://github.com/jrosco/vscode-git-notes/blob/master/LICENSE.md)
 
 The Visual Studio Code extension known as `git-notes` offers a user-friendly method of handling [Git Notes] directly within the editor. With this extension, you can effortlessly access Git notes when opening a file, displaying the total number of notes in the associated repository. Moreover, it simplifies the process of pushing and fetching notes to and from both local and remote repositories.
 
