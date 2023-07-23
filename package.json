@@ -57,7 +57,7 @@
         },
         "git-notes.confirmPushAndFetchCommands": {
           "type": "boolean",
-          "default": false,
+          "default": true,
           "description": "Enable confirmation before a Git Push or Git Fetch (enabling this is recommended)"
         }
       }
