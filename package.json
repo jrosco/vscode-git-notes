@@ -62,7 +62,7 @@
         },
         "git-notes.sortDateNewestFirst": {
           "type": "boolean",
-          "default": false,
+          "default": true,
           "description": "Sort Git Notes by date (newest first)"
         }
       }
