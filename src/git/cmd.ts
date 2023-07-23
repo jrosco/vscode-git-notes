@@ -336,12 +336,20 @@ export class GitCommands {
         this.statusBar.update();
         const refspec = `${this.settings.localNoteRef}:${this.settings.remoteNoteRef}`;
         const cmdList = force ? ['origin', refspec, '--force'] : ['origin', refspec];
-        await this.git.fetch(cmdList)
-        .then((message) => {
-          this.logger.debug(`message: ${message.raw}`);
-          this.statusBar.showInformationMessage("Git Notes: Fetched");
-          this.manager.clearRepositoryDetails(undefined, repositoryPath);
-        });
+        let confirm = undefined;
+        const title = force ? "Confirm Fetch Force" : "Fetch Notes";
+        if (this.settings.confirmPushAndFetchCommands) {
+          const messageItem: vscode.MessageItem[] = [{ title: title }, {title: "Cancel"}];
+          confirm = await this.input.showInputWindowMessage(`Directory: ${repositoryPath}`, messageItem, true, false);
+        }
+        if (confirm?.title === title || !this.settings.confirmPushAndFetchCommands) {
+          await this.git.fetch(cmdList)
+          .then((message) => {
+            this.logger.debug(`message: ${message.raw}`);
+            this.statusBar.showInformationMessage("Git Notes: Fetched");
+            this.manager.clearRepositoryDetails(undefined, repositoryPath);
+          });
+        }
         this.getNotes(repositoryPath);
       } else {
         this.logger.debug("Not a git repository (or any of the parent directories): .git ");
@@ -374,13 +382,20 @@ export class GitCommands {
         this.statusBar.update();
         const refspec = `${this.settings.localNoteRef}:${this.settings.remoteNoteRef}`;
         const cmdList = force ? ['origin', refspec, '--force'] : ['origin', refspec];
-        await this.git.push(cmdList)
-        .then((message) => {
-          const showMsg = message.pushed.length > 0 ? "Everything up-to-date": `Pushed ${message.update?.hash.from} -> ${message.update?.hash.to}`;
-          this.statusBar.showInformationMessage(`Git Notes: ${showMsg}`);
-          this.manager.clearRepositoryDetails(undefined, repositoryPath);
-
-        });
+        let confirm = undefined;
+        const title = force ? "Confirm Push Force" : "Push Notes";
+        if (this.settings.confirmPushAndFetchCommands) {
+          const messageItem: vscode.MessageItem[] = [{ title: title }, {title: "Cancel"}];
+          confirm = await this.input.showInputWindowMessage(`Directory: ${repositoryPath}`, messageItem, true, false);
+        }
+        if (confirm?.title === title || !this.settings.confirmPushAndFetchCommands) {
+          await this.git.push(cmdList)
+          .then((message) => {
+            const showMsg = message.pushed.length > 0 ? "Everything up-to-date": `Pushed ${message.update?.hash.from} -> ${message.update?.hash.to}`;
+            this.statusBar.showInformationMessage(`Git Notes: ${showMsg}`);
+            this.manager.clearRepositoryDetails(undefined, repositoryPath);
+          });
+        }
         this.getNotes(this.repositoryPath);
       } else {
         this.logger.debug("Not a git repository (or any of the parent directories): .git");
