@@ -51,6 +51,10 @@ Open the command list with `Ctrl+Shift+P` (Windows) or `Cmd+Shift+P` (MacOS)
 | `Git Note: Remove Notes`      | Remove a Git notes associated with a specific Git object, such as a commit.                                       |
 | `Git Note: Prune Notes`       | Remove orphaned Git notes from a repository.                                                                      |
 
+## TODO
+
+- [ ] Improve the WebView Panel for the Git Notes Summary Page - <https://github.com/jrosco/vscode-git-notes/pull/6#issuecomment-1646719619>
+
 ## License
 
 This extension is licensed under the [GPLv3 License](https://github.com/jrosco/vscode-git-notes/blob/master/LICENSE.md).
