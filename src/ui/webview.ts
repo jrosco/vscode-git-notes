@@ -93,13 +93,24 @@ export class GitNotesPanel {
       // const bgColor = isDarkTheme ? 'LightGray': 'LightGray';
 
       const repositoryInfo = filteredRepositoryDetails.map(details => `
-        <p><h3 style="color:${headingColor};background-color:${headingBgColor};">Repository Path: ${details.repositoryPath}</h3></p>
+        <div>
+          <p><h3 style="color:${headingColor};background-color:${headingBgColor};">Repository Path: ${details.repositoryPath}</h3></p>
+          <p><button type="button" onclick="alert('Hello world!')">Open Repo</button><button type="button" onclick="alert('Hello world!')">Add Note</button>
+          <button type="button" onclick="alert('Hello world!')">Check</button><button type="button" onclick="alert('Hello world!')">Prune Notes</button>
+          <button type="button" onclick="alert('Hello world!')">Push Notes</button><button type="button" onclick="alert('Hello world!')">Fetch Notes</button></p>
+        </div>
         <style>
           <hr {width: 10px;}>
         </style>
         ${details.commitDetails.map(commit => `
+          <hr>
+          <div>
           <p style="color:${commitHashColor};background-color:${commitHashBgColor};"><b>Commit Hash: </b><a style="color:white" href="${details.repositoryUrl}/commit/${commit.commitHash}">${commit.commitHash}</a></p>
           <p style="color:${noteHashColor};background-color:${noteHashBgColor};"><b>Note Hash: </b>${commit.notesHash}</p>
+          <p><button type="button" onclick="alert('Hello world!')">Open Commit</button>
+          <button type="button" onclick="alert('Hello world!')">Edit</button>
+          <button type="button" onclick="alert('Hello world!')">Remove</button></p>
+          </div>
           <div style="color:${color};">
           <p><strong>Author:</strong> ${commit.author}</p>
           <p><strong>Date:</strong> ${commit.date}</p>
