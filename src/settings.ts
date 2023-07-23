@@ -14,7 +14,6 @@ export class GitNotesSettings {
 		this._onDidChangeConfig = new vscode.EventEmitter<vscode.ConfigurationChangeEvent>();
 		// Listen for configuration changes and trigger the event emitter
 		vscode.workspace.onDidChangeConfiguration(this.onDidChangeConfiguration, this);
-		console.log(`GitNotesSettings constructor called ${this.logLevel}`);
 	}
 
 	private onDidChangeConfiguration(event: vscode.ConfigurationChangeEvent) {
@@ -57,6 +56,11 @@ export class GitNotesSettings {
 	public get enableNotificationsWhenNotesFound(): boolean {
 		this.logger.debug("GitNotesSettings get enableNotificationsWhenNotesFound called");
 		return this._config.get('enableNotificationsWhenNotesFound', false);
+	}
+
+	public get confirmPushAndFetchCommands(): boolean {
+		this.logger.debug("GitNotesSettings get confirmPushAndFetchCommands called");
+		return this._config.get('confirmPushAndFetchCommands', true);
 	}
 
 	public get onDidChangeConfig(): vscode.Event<vscode.ConfigurationChangeEvent> {
