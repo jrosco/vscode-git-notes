@@ -94,7 +94,11 @@ export class RepositoryManager {
       repo => repo.repositoryPath === repositoryPath
     );
     // Sort the notes array by date before assigning
-    notes.sort((a, b) => a.date.getTime() - b.date.getTime());
+    if (!this.settings.sortDateNewestFirst) {
+      notes.sort((a, b) => a.date.getTime() - b.date.getTime());
+    } else {
+      notes.sort((a, b) => b.date.getTime() - a.date.getTime());
+    }
     if (index !== -1) {
       this.repositoryDetailsInterface[index].commitDetails = notes;
       this.repositoryDetailsInterface[index].repositoryUrl = repositoryUrl;
