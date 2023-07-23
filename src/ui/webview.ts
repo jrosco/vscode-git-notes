@@ -53,7 +53,7 @@ export class GitNotesPanel {
     );
 
     let webViewTab = vscode.window.onDidChangeActiveTextEditor((editor) => {
-      // Check if the WebView panel is not active and not close / dispose of panel
+      // Check if the WebView panel is not active and close / dispose of panel
       if (editor?.document !== undefined) {
         GitNotesPanel.currentPanel?._panel.dispose();
         webViewTab.dispose();

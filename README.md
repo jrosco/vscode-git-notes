@@ -53,7 +53,7 @@ Open the command list with `Ctrl+Shift+P` (Windows) or `Cmd+Shift+P` (MacOS)
 
 ## TODO
 
-- [ ] Improve the WebView Panel for the Git Notes Summary Page - <https://github.com/jrosco/vscode-git-notes/pull/6>
+- [ ] Improve the WebView Panel for the Git Notes Summary Page - <https://github.com/jrosco/vscode-git-notes/pull/6#issuecomment-1646719619>
 
 ## License
 
