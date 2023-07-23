@@ -14,7 +14,6 @@ export class GitNotesSettings {
 		this._onDidChangeConfig = new vscode.EventEmitter<vscode.ConfigurationChangeEvent>();
 		// Listen for configuration changes and trigger the event emitter
 		vscode.workspace.onDidChangeConfiguration(this.onDidChangeConfiguration, this);
-		console.log(`GitNotesSettings constructor called ${this.logLevel}`);
 	}
 
 	private onDidChangeConfiguration(event: vscode.ConfigurationChangeEvent) {
