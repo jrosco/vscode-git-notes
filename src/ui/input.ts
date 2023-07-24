@@ -39,7 +39,7 @@ export class NotesInput {
 
 		if (inputValue === undefined) {
 			vscode.window.showInformationMessage('No value provided.');
-			return "";
+			return false;
 		}
 		if (inputConfirmation) {
 			const confirm = await vscode.window.showInformationMessage(
