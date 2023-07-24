@@ -15,7 +15,7 @@ export interface CommitDetails {
   notesHash: string;
   note: string;
   author: string;
-  date: string;
+  date: Date;
   message: string;
   fileChanges: FileChanges[];
 }
@@ -93,7 +93,12 @@ export class RepositoryManager {
     const index = this.repositoryDetailsInterface.findIndex(
       repo => repo.repositoryPath === repositoryPath
     );
-
+    // Sort the notes array by date before assigning
+    if (!this.settings.sortDateNewestFirst) {
+      notes.sort((a, b) => a.date.getTime() - b.date.getTime());
+    } else {
+      notes.sort((a, b) => b.date.getTime() - a.date.getTime());
+    }
     if (index !== -1) {
       this.repositoryDetailsInterface[index].commitDetails = notes;
       this.repositoryDetailsInterface[index].repositoryUrl = repositoryUrl;
