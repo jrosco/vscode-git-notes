@@ -124,18 +124,18 @@ export class GitNotesPanel {
       this.statusBar.update();
 
       // Use the passed variable value in the HTML content
-      const isDarkTheme = this.settings.isDarkThemeEnabled;
+      const isDarkTheme       = this.settings.isDarkThemeEnabled;
       // heading colors
-      const headingColor = isDarkTheme ? 'black': 'black';
-      const headingBgColor = isDarkTheme ? 'LightGray': 'LightGray';
+      const headingColor      = isDarkTheme ? 'black': 'black';
+      const headingBgColor    = isDarkTheme ? 'LightGray': 'LightGray';
       // commit hash colors
-      const commitHashColor = isDarkTheme ? 'white': 'black';
+      const commitHashColor   = isDarkTheme ? 'white': 'black';
       const commitHashBgColor = isDarkTheme ? '#92a8d1': '#92a8d1';
       // note hash colors
-      const noteHashColor = isDarkTheme ? 'white': 'white';
-      const noteHashBgColor = isDarkTheme ? '#034f84': '#034f84';
+      const noteHashColor     = isDarkTheme ? 'white': 'white';
+      const noteHashBgColor   = isDarkTheme ? '#034f84': '#034f84';
       // text colors
-      const color = isDarkTheme ? 'white': 'black';
+      const color             = isDarkTheme ? 'white': 'black';
       // const bgColor = isDarkTheme ? 'LightGray': 'LightGray';
 
       const script = `<script>
