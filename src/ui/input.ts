@@ -38,8 +38,8 @@ export class NotesInput {
 		});
 
 		if (inputValue === undefined) {
-			vscode.window.showInformationMessage('No value provided.');
-			return "";
+			vscode.window.showInformationMessage(`${this.prompt} Cancelled`);
+			return false;
 		}
 		if (inputConfirmation) {
 			const confirm = await vscode.window.showInformationMessage(
