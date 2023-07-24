@@ -21,10 +21,10 @@ export class GitNotesPanel {
   private constructor(panel: vscode.WebviewPanel, document: vscode.Uri, repositoryDetails: RepositoryDetails[]) {
     this._panel = panel;
     this._document = document;
+    this.settings = new GitNotesSettings();
     this.manager = RepositoryManager.getInstance();
     this.statusBar = GitNotesStatusBar.getInstance();
     repositoryDetails = this.manager.getRepositoryDetailsInterface();
-    this.settings = new GitNotesSettings();
 
     // Set up the webview panel
     this.repositoryPath = this.manager.getGitRepositoryPath(document);
@@ -56,45 +56,36 @@ export class GitNotesPanel {
     panel.webview.onDidReceiveMessage((message) => {
       switch (message.command) {
         case 'repoOpen':
-          console.log(message);
           vscode.env.openExternal(vscode.Uri.parse(message.repositoryUrl));
           break;
         case 'repoAdd':
-          console.log(message);
           vscode.commands.executeCommand('extension.addGitNoteMessage',
             undefined, message.repositoryPath);
           break;
         case 'repoCheck':
-          console.log(message);
           vscode.commands.executeCommand('extension.checkGitNotes',
             message.repositoryPath);
           break;
         case 'repoPrune':
-          console.log(message);
           vscode.commands.executeCommand('extension.pruneGitNotePrompt',
             message.repositoryPath);
           break;
         case 'repoPush':
-          console.log(message);
           vscode.commands.executeCommand('extension.pushGitNotes',
             message.repositoryPath);
           break;
         case 'repoFetch':
-          console.log(message);
           vscode.commands.executeCommand('extension.fetchGitNotes',
             message.repositoryPath);
           break;
         case 'commitOpen':
-          console.log(message);
           vscode.env.openExternal(vscode.Uri.parse(message.commitUrl));
           break;
         case 'commitEdit':
-          console.log(message);
           vscode.commands.executeCommand('extension.addGitNoteMessage',
             message.commitHash, message.repositoryPath);
           break;
         case 'commitRemove':
-          console.log(message);
           vscode.commands.executeCommand('extension.removeGitNotePrompt',
             message.commitHash, message.repositoryPath);
           break;
