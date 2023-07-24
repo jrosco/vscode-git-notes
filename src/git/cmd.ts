@@ -253,13 +253,14 @@ export class GitCommands {
       line.startsWith("Date:")
     );
     const date: string = dateLine ? dateLine.replace("Date:", "").trim() : "";
+    const dateObject = new Date(date);
 
     // Get file changes
     const fileChanges = await this._getCommitFileChanges(commitSHA);
 
     const commit = {
       author: author,
-      date: date,
+      date: dateObject,
       message: message,
       fileChanges: fileChanges,
     };
