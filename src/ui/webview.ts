@@ -52,6 +52,43 @@ export class GitNotesPanel {
       }
     );
 
+    // Handle messages from the Webview
+    panel.webview.onDidReceiveMessage((message) => {
+      switch (message.command) {
+        case 'add':
+          // Perform the 'add' task and send updates back to the Webview
+          console.log(message);
+          vscode.commands.executeCommand('extension.addGitNoteMessage');
+          break;
+        case 'check':
+          // Perform the 'check' task and log the message
+          console.log(message);
+          vscode.commands.executeCommand('extension.checkGitNotes');
+          break;
+        case 'prune':
+          // Perform the 'check' task and log the message
+          console.log(message);
+          vscode.commands.executeCommand('extension.pruneGitNotePrompt');
+          break;
+        case 'push':
+          // Perform the 'check' task and log the message
+          console.log(message);
+          vscode.commands.executeCommand('extension.pushGitNotes');
+          break;
+        case 'fetch':
+          // Perform the 'check' task and log the message
+          console.log(message);
+          vscode.commands.executeCommand('extension.fetchGitNotes');
+          break;
+        // Add additional cases for other commands if needed
+        default:
+          // Handle any unknown commands
+          console.warn('Unknown command:', message.command);
+          break;
+      }
+    });
+
+
     let webViewTab = vscode.window.onDidChangeActiveTextEditor((editor) => {
       // Check if the WebView panel is not active and close / dispose of panel
       if (editor?.document !== undefined) {
@@ -101,12 +138,45 @@ export class GitNotesPanel {
       const color = isDarkTheme ? 'white': 'black';
       // const bgColor = isDarkTheme ? 'LightGray': 'LightGray';
 
+      const script = `<script>
+        function initWebview() {
+          const vscode = acquireVsCodeApi();
+          document.getElementById('addBtn').addEventListener('click', () => {
+            // When the button is clicked, call the extension method to perform the task
+            vscode.postMessage({ command: 'add' });
+          });
+          document.getElementById('checkBtn').addEventListener('click', () => {
+            // When the button is clicked, call the extension method to perform the task
+            vscode.postMessage({ command: 'check' });
+          });
+          document.getElementById('pruneBtn').addEventListener('click', () => {
+            // When the button is clicked, call the extension method to perform the task
+            vscode.postMessage({ command: 'prune' });
+          });
+          document.getElementById('pushBtn').addEventListener('click', () => {
+            // When the button is clicked, call the extension method to perform the task
+            vscode.postMessage({ command: 'push' });
+          });
+          document.getElementById('fetchBtn').addEventListener('click', () => {
+            // When the button is clicked, call the extension method to perform the task
+            vscode.postMessage({ command: 'fetch' });
+          });
+        }
+        // Wait for the DOM to be fully loaded before initializing the Webview
+        document.addEventListener('DOMContentLoaded', initWebview);
+      </script>`;
+
       const repositoryInfo = filteredRepositoryDetails.map(details => `
         <div>
           <p><h3 style="color:${headingColor};background-color:${headingBgColor};">Repository Path: ${details.repositoryPath}</h3></p>
-          <p><button type="button" onclick="alert('Hello world!')">Open Repo</button><button type="button" onclick="alert('Hello world!')">Add Note</button>
-          <button type="button" onclick="alert('Hello world!')">Check</button><button type="button" onclick="alert('Hello world!')">Prune Notes</button>
-          <button type="button" onclick="alert('Hello world!')">Push Notes</button><button type="button" onclick="alert('Hello world!')">Fetch Notes</button></p>
+          <p><a href="google.com">
+            <button id="openRepo" >Open Repo</button>
+          </a>
+          <button id="addBtn">Add Note</button>
+          <button id="checkBtn">Check</button>
+          <button id="pruneBtn">Prune Notes</button>
+          <button id="pushBtn">Push Notes</button>
+          <button id="fetchBtn">Fetch Notes</button></p>
         </div>
         <style>
           <hr {width: 10px;}>
@@ -116,9 +186,9 @@ export class GitNotesPanel {
           <div>
           <p style="color:${commitHashColor};background-color:${commitHashBgColor};"><b>Commit Hash: </b><a style="color:white" href="${details.repositoryUrl}/commit/${commit.commitHash}">${commit.commitHash}</a></p>
           <p style="color:${noteHashColor};background-color:${noteHashBgColor};"><b>Note Hash: </b>${commit.notesHash}</p>
-          <p><button type="button" onclick="alert('Hello world!')">Open Commit</button>
-          <button type="button" onclick="alert('Hello world!')">Edit</button>
-          <button type="button" onclick="alert('Hello world!')">Remove</button></p>
+          <p><button id="open-${commit.commitHash}">Open Commit</button>
+          <button id="edit-${commit.commitHash}">Edit</button>
+          <button id="remove-${commit.commitHash}">Remove</button></p>
           </div>
           <div style="color:${color};">
           <p><strong>Author:</strong> ${commit.author}</p>
@@ -149,6 +219,7 @@ export class GitNotesPanel {
       return `
         <html>
           <body>
+            ${script}
             <h1>Git Notes</h1>
             ${repositoryInfo}
           </body>
