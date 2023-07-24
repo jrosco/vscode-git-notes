@@ -88,7 +88,6 @@ export class GitNotesPanel {
       }
     });
 
-
     let webViewTab = vscode.window.onDidChangeActiveTextEditor((editor) => {
       // Check if the WebView panel is not active and close / dispose of panel
       if (editor?.document !== undefined) {
@@ -138,33 +137,51 @@ export class GitNotesPanel {
       const color             = isDarkTheme ? 'white': 'black';
       // const bgColor = isDarkTheme ? 'LightGray': 'LightGray';
 
-      const script = `<script>
+      const vscodeScript: string = `
         function initWebview() {
           const vscode = acquireVsCodeApi();
-          document.getElementById('addBtn').addEventListener('click', () => {
-            // When the button is clicked, call the extension method to perform the task
-            vscode.postMessage({ command: 'add' });
-          });
-          document.getElementById('checkBtn').addEventListener('click', () => {
-            // When the button is clicked, call the extension method to perform the task
-            vscode.postMessage({ command: 'check' });
-          });
-          document.getElementById('pruneBtn').addEventListener('click', () => {
-            // When the button is clicked, call the extension method to perform the task
-            vscode.postMessage({ command: 'prune' });
-          });
-          document.getElementById('pushBtn').addEventListener('click', () => {
-            // When the button is clicked, call the extension method to perform the task
-            vscode.postMessage({ command: 'push' });
-          });
-          document.getElementById('fetchBtn').addEventListener('click', () => {
-            // When the button is clicked, call the extension method to perform the task
-            vscode.postMessage({ command: 'fetch' });
-          });
-        }
+      `;
+      const repoEventListenersScript: string = `
+        document.getElementById('addBtn').addEventListener('click', () => {
+          // When the button is clicked, call the extension method to perform the task
+          vscode.postMessage({ command: 'add' });
+        });
+        document.getElementById('checkBtn').addEventListener('click', () => {
+          // When the button is clicked, call the extension method to perform the task
+          vscode.postMessage({ command: 'check' });
+        });
+        document.getElementById('pruneBtn').addEventListener('click', () => {
+          // When the button is clicked, call the extension method to perform the task
+          vscode.postMessage({ command: 'prune' });
+        });
+        document.getElementById('pushBtn').addEventListener('click', () => {
+          // When the button is clicked, call the extension method to perform the task
+          vscode.postMessage({ command: 'push' });
+        });
+        document.getElementById('fetchBtn').addEventListener('click', () => {
+          // When the button is clicked, call the extension method to perform the task
+          vscode.postMessage({ command: 'fetch' });
+        });
+      `;
+      const commitEventListenersScript: string = filteredRepositoryDetails.map(details => {
+        return details.commitDetails.map(commit => {
+          return `
+            document.getElementById('open-${commit.commitHash}').addEventListener('click', () => {
+              // When the button is clicked, call the extension method to perform the task
+              vscode.postMessage({ command: 'openCommit', commitHash: '${commit.commitHash}' });
+            });
+            `;
+           })
+          .join('\n');
+        })
+        .join('\n');
+      const endScript: string = `
+        };
         // Wait for the DOM to be fully loaded before initializing the Webview
         document.addEventListener('DOMContentLoaded', initWebview);
-      </script>`;
+      `;
+      // Combine all scripts into one string
+      const combinedScript: string = vscodeScript + repoEventListenersScript + commitEventListenersScript + endScript;
 
       const repositoryInfo = filteredRepositoryDetails.map(details => `
         <div>
@@ -219,7 +236,9 @@ export class GitNotesPanel {
       return `
         <html>
           <body>
-            ${script}
+            <script>
+            ${combinedScript}
+            </script>
             <h1>Git Notes</h1>
             ${repositoryInfo}
           </body>
