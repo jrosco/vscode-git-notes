@@ -57,37 +57,46 @@ export class GitNotesPanel {
       switch (message.command) {
         case 'repoOpen':
           console.log(message);
+          vscode.env.openExternal(vscode.Uri.parse(message.repositoryUrl));
           break;
         case 'repoAdd':
           console.log(message);
-          vscode.commands.executeCommand('extension.addGitNoteMessage');
+          vscode.commands.executeCommand('extension.addGitNoteMessage',
+            undefined, message.repositoryPath);
           break;
         case 'repoCheck':
           console.log(message);
-          vscode.commands.executeCommand('extension.checkGitNotes');
+          vscode.commands.executeCommand('extension.checkGitNotes',
+            message.repositoryPath);
           break;
         case 'repoPrune':
           console.log(message);
-          vscode.commands.executeCommand('extension.pruneGitNotePrompt');
+          vscode.commands.executeCommand('extension.pruneGitNotePrompt',
+            message.repositoryPath);
           break;
         case 'repoPush':
           console.log(message);
-          vscode.commands.executeCommand('extension.pushGitNotes');
+          vscode.commands.executeCommand('extension.pushGitNotes',
+            message.repositoryPath);
           break;
         case 'repoFetch':
           console.log(message);
-          vscode.commands.executeCommand('extension.fetchGitNotes');
+          vscode.commands.executeCommand('extension.fetchGitNotes',
+            message.repositoryPath);
           break;
         case 'commitOpen':
           console.log(message);
+          vscode.env.openExternal(vscode.Uri.parse(message.commitUrl));
           break;
         case 'commitEdit':
           console.log(message);
-          vscode.commands.executeCommand('extension.addGitNoteMessage');
+          vscode.commands.executeCommand('extension.addGitNoteMessage',
+            message.commitHash, message.repositoryPath);
           break;
         case 'commitRemove':
           console.log(message);
-          vscode.commands.executeCommand('extension.removeGitNotePrompt');
+          vscode.commands.executeCommand('extension.removeGitNotePrompt',
+            message.commitHash, message.repositoryPath);
           break;
         default:
           console.warn('Unknown command:', message.command);
@@ -148,59 +157,53 @@ export class GitNotesPanel {
         function initWebview() {
           const vscode = acquireVsCodeApi();
       `;
-      const repoEventListenersScript: string = `
+      const eventListenersScript: string = filteredRepositoryDetails.map(details => `
         document.getElementById('repoOpen').addEventListener('click', () => {
           // When the button is clicked, call the extension method to perform the task
-          vscode.postMessage({ command: 'repoOpen' });
+          vscode.postMessage({ command: 'repoOpen', repositoryUrl: '${details.repositoryUrl}' });
         });
         document.getElementById('repoAdd').addEventListener('click', () => {
           // When the button is clicked, call the extension method to perform the task
-          vscode.postMessage({ command: 'repoAdd' });
+          vscode.postMessage({ command: 'repoAdd', repositoryPath: '${details.repositoryPath}' });
         });
         document.getElementById('repoCheck').addEventListener('click', () => {
           // When the button is clicked, call the extension method to perform the task
-          vscode.postMessage({ command: 'repoCheck' });
+          vscode.postMessage({ command: 'repoCheck', repositoryPath: '${details.repositoryPath}' });
         });
         document.getElementById('repoPrune').addEventListener('click', () => {
           // When the button is clicked, call the extension method to perform the task
-          vscode.postMessage({ command: 'repoPrune' });
+          vscode.postMessage({ command: 'repoPrune', repositoryPath: '${details.repositoryPath}' });
         });
         document.getElementById('repoPush').addEventListener('click', () => {
           // When the button is clicked, call the extension method to perform the task
-          vscode.postMessage({ command: 'repoPush' });
+          vscode.postMessage({ command: 'repoPush', repositoryPath: '${details.repositoryPath}' });
         });
         document.getElementById('repoFetch').addEventListener('click', () => {
           // When the button is clicked, call the extension method to perform the task
-          vscode.postMessage({ command: 'repoFetch' });
+          vscode.postMessage({ command: 'repoFetch', repositoryPath: '${details.repositoryPath}' });
         });
-      `;
-      const commitEventListenersScript: string = filteredRepositoryDetails.map(details => {
-        return details.commitDetails.map(commit => {
-          return `
-            document.getElementById('open-${commit.commitHash}').addEventListener('click', () => {
-              // When the button is clicked, call the extension method to perform the task
-              vscode.postMessage({ command: 'commitOpen', commitHash: '${commit.commitHash}' });
-            });
-            document.getElementById('edit-${commit.commitHash}').addEventListener('click', () => {
-              // When the button is clicked, call the extension method to perform the task
-              vscode.postMessage({ command: 'commitEdit', commitHash: '${commit.commitHash}' });
-            });
-            document.getElementById('remove-${commit.commitHash}').addEventListener('click', () => {
-              // When the button is clicked, call the extension method to perform the task
-              vscode.postMessage({ command: 'commitRemove', commitHash: '${commit.commitHash}' });
-            });
-            `;
-           })
-          .join('\n');
-        })
-        .join('\n');
+        ${details.commitDetails.map(commit => `
+        document.getElementById('open-${commit.commitHash}').addEventListener('click', () => {
+          // When the button is clicked, call the extension method to perform the task
+          vscode.postMessage({ command: 'commitOpen', commitUrl: '${details.repositoryUrl}/commit/${commit.commitHash}' });
+        });
+        document.getElementById('edit-${commit.commitHash}').addEventListener('click', () => {
+          // When the button is clicked, call the extension method to perform the task
+          vscode.postMessage({ command: 'commitEdit', commitHash: '${commit.commitHash}', repositoryPath: '${details.repositoryPath}' });
+        });
+        document.getElementById('remove-${commit.commitHash}').addEventListener('click', () => {
+          // When the button is clicked, call the extension method to perform the task
+          vscode.postMessage({ command: 'commitRemove', commitHash: '${commit.commitHash}', repositoryPath: '${details.repositoryPath}' });
+        });
+        `).join('\n')}
+      `).join('\n');
       const endScript: string = `
         };
         // Wait for the DOM to be fully loaded before initializing the Webview
         document.addEventListener('DOMContentLoaded', initWebview);
       `;
       // Combine all scripts into one string
-      const combinedScript: string = vscodeScript + repoEventListenersScript + commitEventListenersScript + endScript;
+      const combinedScript: string = vscodeScript + eventListenersScript + endScript;
 
       const repositoryInfo = filteredRepositoryDetails.map(details => `
         <div>
@@ -220,7 +223,7 @@ export class GitNotesPanel {
         ${details.commitDetails.map(commit => `
           <hr>
           <div>
-          <p style="color:${commitHashColor};background-color:${commitHashBgColor};"><b>Commit Hash: </b><a style="color:white" href="${details.repositoryUrl}/commit/${commit.commitHash}">${commit.commitHash}</a></p>
+          <p style="color:${commitHashColor};background-color:${commitHashBgColor};"><b>Commit Hash: </b>${commit.commitHash}</p>
           <p style="color:${noteHashColor};background-color:${noteHashBgColor};"><b>Note Hash: </b>${commit.notesHash}</p>
           <p><button id="open-${commit.commitHash}">Open Commit</button>
           <button id="edit-${commit.commitHash}">Edit</button>
