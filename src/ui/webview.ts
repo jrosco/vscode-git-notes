@@ -55,34 +55,41 @@ export class GitNotesPanel {
     // Handle messages from the Webview
     panel.webview.onDidReceiveMessage((message) => {
       switch (message.command) {
-        case 'add':
-          // Perform the 'add' task and send updates back to the Webview
+        case 'repoOpen':
+          console.log(message);
+          break;
+        case 'repoAdd':
           console.log(message);
           vscode.commands.executeCommand('extension.addGitNoteMessage');
           break;
-        case 'check':
-          // Perform the 'check' task and log the message
+        case 'repoCheck':
           console.log(message);
           vscode.commands.executeCommand('extension.checkGitNotes');
           break;
-        case 'prune':
-          // Perform the 'check' task and log the message
+        case 'repoPrune':
           console.log(message);
           vscode.commands.executeCommand('extension.pruneGitNotePrompt');
           break;
-        case 'push':
-          // Perform the 'check' task and log the message
+        case 'repoPush':
           console.log(message);
           vscode.commands.executeCommand('extension.pushGitNotes');
           break;
-        case 'fetch':
-          // Perform the 'check' task and log the message
+        case 'repoFetch':
           console.log(message);
           vscode.commands.executeCommand('extension.fetchGitNotes');
           break;
-        // Add additional cases for other commands if needed
+        case 'commitOpen':
+          console.log(message);
+          break;
+        case 'commitEdit':
+          console.log(message);
+          vscode.commands.executeCommand('extension.addGitNoteMessage');
+          break;
+        case 'commitRemove':
+          console.log(message);
+          vscode.commands.executeCommand('extension.removeGitNotePrompt');
+          break;
         default:
-          // Handle any unknown commands
           console.warn('Unknown command:', message.command);
           break;
       }
@@ -142,25 +149,29 @@ export class GitNotesPanel {
           const vscode = acquireVsCodeApi();
       `;
       const repoEventListenersScript: string = `
-        document.getElementById('addBtn').addEventListener('click', () => {
+        document.getElementById('repoOpen').addEventListener('click', () => {
           // When the button is clicked, call the extension method to perform the task
-          vscode.postMessage({ command: 'add' });
+          vscode.postMessage({ command: 'repoOpen' });
         });
-        document.getElementById('checkBtn').addEventListener('click', () => {
+        document.getElementById('repoAdd').addEventListener('click', () => {
           // When the button is clicked, call the extension method to perform the task
-          vscode.postMessage({ command: 'check' });
+          vscode.postMessage({ command: 'repoAdd' });
         });
-        document.getElementById('pruneBtn').addEventListener('click', () => {
+        document.getElementById('repoCheck').addEventListener('click', () => {
           // When the button is clicked, call the extension method to perform the task
-          vscode.postMessage({ command: 'prune' });
+          vscode.postMessage({ command: 'repoCheck' });
         });
-        document.getElementById('pushBtn').addEventListener('click', () => {
+        document.getElementById('repoPrune').addEventListener('click', () => {
           // When the button is clicked, call the extension method to perform the task
-          vscode.postMessage({ command: 'push' });
+          vscode.postMessage({ command: 'repoPrune' });
         });
-        document.getElementById('fetchBtn').addEventListener('click', () => {
+        document.getElementById('repoPush').addEventListener('click', () => {
           // When the button is clicked, call the extension method to perform the task
-          vscode.postMessage({ command: 'fetch' });
+          vscode.postMessage({ command: 'repoPush' });
+        });
+        document.getElementById('repoFetch').addEventListener('click', () => {
+          // When the button is clicked, call the extension method to perform the task
+          vscode.postMessage({ command: 'repoFetch' });
         });
       `;
       const commitEventListenersScript: string = filteredRepositoryDetails.map(details => {
@@ -168,7 +179,15 @@ export class GitNotesPanel {
           return `
             document.getElementById('open-${commit.commitHash}').addEventListener('click', () => {
               // When the button is clicked, call the extension method to perform the task
-              vscode.postMessage({ command: 'openCommit', commitHash: '${commit.commitHash}' });
+              vscode.postMessage({ command: 'commitOpen', commitHash: '${commit.commitHash}' });
+            });
+            document.getElementById('edit-${commit.commitHash}').addEventListener('click', () => {
+              // When the button is clicked, call the extension method to perform the task
+              vscode.postMessage({ command: 'commitEdit', commitHash: '${commit.commitHash}' });
+            });
+            document.getElementById('remove-${commit.commitHash}').addEventListener('click', () => {
+              // When the button is clicked, call the extension method to perform the task
+              vscode.postMessage({ command: 'commitRemove', commitHash: '${commit.commitHash}' });
             });
             `;
            })
@@ -187,13 +206,13 @@ export class GitNotesPanel {
         <div>
           <p><h3 style="color:${headingColor};background-color:${headingBgColor};">Repository Path: ${details.repositoryPath}</h3></p>
           <p><a href="google.com">
-            <button id="openRepo" >Open Repo</button>
+            <button id="repoOpen" >Open Repo</button>
           </a>
-          <button id="addBtn">Add Note</button>
-          <button id="checkBtn">Check</button>
-          <button id="pruneBtn">Prune Notes</button>
-          <button id="pushBtn">Push Notes</button>
-          <button id="fetchBtn">Fetch Notes</button></p>
+          <button id="repoAdd">Add Note</button>
+          <button id="repoCheck">Check</button>
+          <button id="repoPrune">Prune Notes</button>
+          <button id="repoPush">Push Notes</button>
+          <button id="repoFetch">Fetch Notes</button></p>
         </div>
         <style>
           <hr {width: 10px;}>
