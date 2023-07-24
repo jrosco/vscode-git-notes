@@ -51,12 +51,12 @@ export function activate(context: vscode.ExtensionContext) {
     }
   });
 
-  // Register the command for manual Git notes check
-  let gitCheckNotesDisposable = vscode.commands.registerCommand(
-    "extension.checkGitNotes",
-    async () => {
+  // Register the command for manual Git notes check. Can take optional parameter `cmdRepositoryPath`
+  let gitCheckNotesDisposable = vscode.commands.registerCommand("extension.checkGitNotes",
+    async (cmdRepositoryPath?) => {
       logger.info("extension.checkGitNotes command called");
       const activeEditor = vscode.window.activeTextEditor;
+      notes.repositoryPath = cmdRepositoryPath ? cmdRepositoryPath: notes.repositoryPath;
       if (notes.repositoryPath !== undefined) {
         await manager.clearRepositoryDetails(undefined, notes.repositoryPath);
         await notes.getNotes(notes.repositoryPath);
@@ -68,12 +68,12 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
-  // Register the command for manual Fetch notes
-  let gitFetchNoteRefDisposable = vscode.commands.registerCommand(
-    "extension.fetchGitNotes",
-    async () => {
+  // Register the command for manual Fetch notes. Can take optional parameter `cmdRepositoryPath`
+  let gitFetchNoteRefDisposable = vscode.commands.registerCommand("extension.fetchGitNotes",
+    async (cmdRepositoryPath?) => {
       logger.info("extension.fetchGitNotes command called");
       const activeEditor = vscode.window.activeTextEditor;
+      notes.repositoryPath = cmdRepositoryPath ? cmdRepositoryPath: notes.repositoryPath;
       if (notes.repositoryPath !== undefined) {
         await notes.fetchGitNotes(undefined,notes.repositoryPath);
        } else if (activeEditor) {
@@ -82,12 +82,12 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
-  // Register the command for manual Push notes
-  let gitPushNoteRefDisposable = vscode.commands.registerCommand(
-    "extension.pushGitNotes",
-    async () => {
+  // Register the command for manual Push notes. Can take optional parameter `cmdRepositoryPath`
+  let gitPushNoteRefDisposable = vscode.commands.registerCommand("extension.pushGitNotes",
+    async (cmdRepositoryPath?) => {
       logger.info("extension.pushGitNotes command called");
       const activeEditor = vscode.window.activeTextEditor;
+      notes.repositoryPath = cmdRepositoryPath ? cmdRepositoryPath: notes.repositoryPath;
       if (notes.repositoryPath !== undefined) {
         await notes.pushGitNotes(undefined,notes.repositoryPath);
        } else if (activeEditor) {
@@ -110,15 +110,17 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
-  // Register the command for removing git notes on commits
+  // Register the command for removing git notes on commits.
+  // Can take optional parameters `cmdCommitHash` and `cmdRepositoryPath` passing these to the function will
+  // bypass the input prompt and use the passed values instead.
   let removeGitNotePromptDisposable = vscode.commands.registerCommand('extension.removeGitNotePrompt',
-    async () => {
+    async (cmdCommitHash?, cmdRepositoryPath?) => {
       logger.info("extension.removeGitNotePrompt command called");
       const activeEditor = vscode.window.activeTextEditor;
-      const repositoryPath = notes.repositoryPath;
+      const repositoryPath = cmdRepositoryPath ? cmdRepositoryPath: notes.repositoryPath;
       if (activeEditor !== undefined || repositoryPath !== undefined) {
-        input.setup('Remove a Git Note', 'Enter the Commit hash of the note to remove....', true);
-        const commitHashInput = await input.showInputBox();
+        cmdCommitHash ? undefined: input.setup('Remove a Git Note', 'Enter the Commit hash of the note to remove....', true);
+        const commitHashInput = cmdCommitHash ? cmdCommitHash: await input.showInputBox();
         const commitHash = commitHashInput ? commitHashInput.replace(/\s/g, '') : undefined;
         if (commitHash !== undefined) {
           if (repositoryPath !== undefined) {
@@ -131,10 +133,12 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
-  // Register the command for pruning git notes from stale commits
+  // Register the command for pruning git notes from stale commits.
+  // Can take optional parameter `cmdRepositoryPath`
   let pruneGitNotePromptDisposable = vscode.commands.registerCommand('extension.pruneGitNotePrompt',
-    async () => {
+      async (cmdRepositoryPath?) => {
       logger.info("extension.pruneGitNotePrompt command called");
+      notes.repositoryPath = cmdRepositoryPath ? cmdRepositoryPath: notes.repositoryPath;
       const activeEditor = vscode.window.activeTextEditor;
       if (activeEditor !== undefined || notes.repositoryPath !== undefined) {
         if (notes.repositoryPath !== undefined) {
@@ -147,14 +151,14 @@ export function activate(context: vscode.ExtensionContext) {
   );
 
   // Register the command opening a editor for adding git notes to commits
-  let gitAddNoteMessageDisposable = vscode.commands.registerCommand('extension.addGitNoteMessage', 
-    async () => {
-      logger.info("extension.addGitNoteMessage command called");
-      input.setup('Add/Edit a Git Note', 'Enter the Commit hash or leave blank to apply to last commit ....', false);
-      const commitHashInput = await input.showInputBox();
+  let gitAddNoteMessageDisposable = vscode.commands.registerCommand('extension.addGitNoteMessage',
+    async (cmdCommitHash?, cmdRepositoryPath?) => {
+      logger.info("extension.addOrEditGitNote command called");
+      cmdCommitHash ? undefined: input.setup('Add/Edit a Git Note', 'Enter the Commit hash or leave blank to apply to last commit ....', false);
+      const commitHashInput = cmdCommitHash ? cmdCommitHash: await input.showInputBox();
       let currentNote = '';
       let editNote = false;
-      const activeFileRepoPath = notes.repositoryPath;
+      const activeFileRepoPath = cmdRepositoryPath ? cmdRepositoryPath: notes.repositoryPath;
       const commitHash = commitHashInput ? commitHashInput.replace(/\s/g, '') : (await notes.getLatestCommit(undefined, activeFileRepoPath));
       if (commitHash !== undefined && commitHashInput !== false) {
         const existingNote = manager.getGitNoteMessage(manager.getExistingRepositoryDetails(activeFileRepoPath), commitHash);
