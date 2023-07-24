@@ -113,9 +113,9 @@ export function activate(context: vscode.ExtensionContext) {
   // Register the command for removing git notes on commits.
   // Can take optional parameters `cmdCommitHash` and `cmdRepositoryPath` passing these to the function will
   // bypass the input prompt and use the passed values instead.
-  let removeGitNotePromptDisposable = vscode.commands.registerCommand('extension.removeGitNotePrompt',
+  let removeGitNoteDisposable = vscode.commands.registerCommand('extension.removeGitNote',
     async (cmdCommitHash?, cmdRepositoryPath?) => {
-      logger.info("extension.removeGitNotePrompt command called");
+      logger.info("extension.removeGitNote command called");
       const activeEditor = vscode.window.activeTextEditor;
       const repositoryPath = cmdRepositoryPath ? cmdRepositoryPath: notes.repositoryPath;
       if (activeEditor !== undefined || repositoryPath !== undefined) {
@@ -135,9 +135,9 @@ export function activate(context: vscode.ExtensionContext) {
 
   // Register the command for pruning git notes from stale commits.
   // Can take optional parameter `cmdRepositoryPath`
-  let pruneGitNotePromptDisposable = vscode.commands.registerCommand('extension.pruneGitNotePrompt',
+  let pruneGitNotesDisposable = vscode.commands.registerCommand('extension.pruneGitNotes',
       async (cmdRepositoryPath?) => {
-      logger.info("extension.pruneGitNotePrompt command called");
+      logger.info("extension.pruneGitNotes command called");
       notes.repositoryPath = cmdRepositoryPath ? cmdRepositoryPath: notes.repositoryPath;
       const activeEditor = vscode.window.activeTextEditor;
       if (activeEditor !== undefined || notes.repositoryPath !== undefined) {
@@ -151,7 +151,7 @@ export function activate(context: vscode.ExtensionContext) {
   );
 
   // Register the command opening a editor for adding git notes to commits
-  let gitAddNoteMessageDisposable = vscode.commands.registerCommand('extension.addGitNoteMessage',
+  let gitAddNoteMessageDisposable = vscode.commands.registerCommand('extension.addOrEditGitNote',
     async (cmdCommitHash?, cmdRepositoryPath?) => {
       logger.info("extension.addOrEditGitNote command called");
       cmdCommitHash ? undefined: input.setup('Add/Edit a Git Note', 'Enter the Commit hash or leave blank to apply to last commit ....', false);
@@ -214,8 +214,8 @@ export function activate(context: vscode.ExtensionContext) {
     gitFetchNoteRefDisposable,
     gitPushNoteRefDisposable,
     runWebviewDisposable,
-    removeGitNotePromptDisposable,
-    pruneGitNotePromptDisposable,
+    removeGitNoteDisposable,
+    pruneGitNotesDisposable,
     gitAddNoteMessageDisposable
   );
 }
