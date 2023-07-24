@@ -59,6 +59,11 @@
           "type": "boolean",
           "default": true,
           "description": "Enable confirmation before a Git Push or Git Fetch (enabling this is recommended)"
+        },
+        "git-notes.sortDateNewestFirst": {
+          "type": "boolean",
+          "default": true,
+          "description": "Sort Git Notes by date (newest first)"
         }
       }
     },

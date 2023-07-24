@@ -10,6 +10,10 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 - When user hit ESC from `InputBox` when running `extension.addGitNoteMessage` the command tries to add a message/note instead of cancelling input (<https://github.com/jrosco/vscode-git-notes/pull/11>)
 
+### Changed
+
+- Webview date arrangement / sorting (<https://github.com/jrosco/vscode-git-notes/pull/9>)
+
 ## [Released]
 
 ## [0.0.1] - 2023-07-23
