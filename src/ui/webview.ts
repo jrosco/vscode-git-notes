@@ -137,7 +137,7 @@ export class GitNotesPanel {
     // Filter repositoryDetails based on exact match of repositoryPath
     if (this.repositoryPath !== undefined) {
       const filteredRepositoryDetails = repositoryDetails.filter(details =>
-        details.repositoryPath === this.repositoryPath
+        details.repositoryPath === repositoryPath
       );
       this.statusBar.message = "Close Tab";
       this.statusBar.command = "workbench.action.closeActiveEditor";
