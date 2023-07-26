@@ -276,7 +276,7 @@ export class GitNotesPanel {
         </html>
       `;
     } else {
-    return "Path not found";
+    return "No Git notes ref found";
     }
   }
 }
