@@ -3,6 +3,7 @@ import * as vscode from 'vscode';
 import { RepositoryManager, RepositoryDetails } from '../interface';
 import { GitNotesStatusBar } from '../ui/status';
 import { GitNotesSettings } from '../settings';
+import { LoggerService, LogLevel } from '../log/service';
 
 export class GitNotesPanel {
   public static currentPanel: GitNotesPanel | undefined;
@@ -17,11 +18,13 @@ export class GitNotesPanel {
   private readonly _document: vscode.Uri;
   private _disposables: vscode.Disposable[] = [];
   private settings: GitNotesSettings;
+  private logger: LoggerService;
 
   private constructor(panel: vscode.WebviewPanel, document: vscode.Uri, repositoryDetails: RepositoryDetails[]) {
     this._panel = panel;
     this._document = document;
     this.settings = new GitNotesSettings();
+    this.logger = LoggerService.getInstance(this.settings.logLevel);
     this.manager = RepositoryManager.getInstance();
     this.statusBar = GitNotesStatusBar.getInstance();
     repositoryDetails = this.manager.getRepositoryDetailsInterface();
@@ -99,23 +102,23 @@ export class GitNotesPanel {
       }
     });
 
-    let webViewTab = vscode.window.onDidChangeActiveTextEditor((editor) => {
-      // Check if the WebView panel is not active and close / dispose of panel
-      if (editor?.document !== undefined) {
-        GitNotesPanel.currentPanel?._panel.dispose();
-        webViewTab.dispose();
-      }
-    });
+    // let webViewTab = vscode.window.onDidChangeActiveTextEditor((editor) => {
+    //   // Check if the WebView panel is not active and close / dispose of panel
+    //   if (editor?.document !== undefined) {
+    //     GitNotesPanel.currentPanel?._panel.dispose();
+    //     webViewTab.dispose();
+    //   }
+    // });
     GitNotesPanel.currentPanel = new GitNotesPanel(panel, document, repositoryDetails);
   }
 
   public refreshWebViewContent(repositoryPath: string) {
     // Your logic to update the WebView content here
     const repositoryDetails = this.manager.getRepositoryDetailsInterface();
-    console.log(`refreshWebViewContent(${repositoryPath}, ${this.manager.repositoryDetailsInterface})`);
-    if (this._panel && this.manager.repositoryDetailsInterface !== undefined) {
-      console.log('refreshWebViewContent: _panel');
-      const webViewContent = this._getWebviewContent(this.repositoryPath, this.manager.repositoryDetailsInterface);
+    this.logger.debug(`refreshWebViewContent(${repositoryPath}, ${repositoryDetails})`);
+    if (this._panel && repositoryDetails !== undefined) {
+      this.logger.debug(`refreshWebViewContent _panel: ${this._panel}`);
+      const webViewContent = this._getWebviewContent(this.repositoryPath, repositoryDetails);
       this._panel.webview.html = webViewContent;
     }
   }

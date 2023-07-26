@@ -185,10 +185,11 @@ export function activate(context: vscode.ExtensionContext) {
               document.save();
             });
             // Dispose the event listener when the editor is closed
-            const onDidChangeActiveDisposable = vscode.window.onDidChangeActiveTextEditor((editor) => {
+            const onDidChangeActiveDisposable = vscode.window.onDidChangeActiveTextEditor(
+              async (editor) => {
               if (!editor) {
                 if (bufferContent !== '' && commitHash !== undefined) {
-                  notes.addGitNotes(bufferContent, commitHash, 'add', undefined, activeFileRepoPath, editNote);
+                  await notes.addGitNotes(bufferContent, commitHash, 'add', undefined, activeFileRepoPath, editNote);
                   onDidChangeActiveDisposable.dispose();
                   onDidChangeDisposable.dispose();
                 }
