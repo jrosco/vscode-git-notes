@@ -112,6 +112,15 @@ export class GitNotesPanel {
     GitNotesPanel.currentPanel = new GitNotesPanel(panel, document, repositoryDetails);
   }
 
+  public postMessage(message: any) {
+    if (this._panel) {
+      console.debug('postMessage: ', message.command, message.repositoryPath);
+      this._panel.webview.postMessage({ message });
+    } else {
+      return;
+    }
+  }
+
   public refreshWebViewContent(repositoryPath: string) {
     // Your logic to update the WebView content here
     const repositoryDetails = this.manager.getRepositoryDetailsInterface();
@@ -166,6 +175,19 @@ export class GitNotesPanel {
           const vscode = acquireVsCodeApi();
       `;
       const eventListenersScript: string = filteredRepositoryDetails.map(details => `
+        // Handle the message inside the webview
+        window.addEventListener('message', event => {
+          const message = event.data.message; // The JSON data our extension sent
+          console.log('command:' + message.command + ' repositoryPath:' + message.repositoryPath);
+          switch (message.command) {
+            case 'repoCheck':
+              vscode.postMessage({ command: 'repoCheck', repositoryPath: message.repositoryPath, refresh: true });
+              break;
+            default:
+              console.warn('Unknown command:', message);
+              break;
+          }
+        });
         document.getElementById('repoOpen').addEventListener('click', () => {
           // When the button is clicked, call the extension method to perform the task
           vscode.postMessage({ command: 'repoOpen', repositoryUrl: '${details.repositoryUrl}' });
