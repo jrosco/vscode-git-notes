@@ -216,6 +216,7 @@ export class GitNotesPanel {
       const repositoryInfo = filteredRepositoryDetails.map(details => `
         <div>
           <p><h3 style="color:${headingColor};background-color:${headingBgColor};">Repository Path: ${details.repositoryPath}</h3></p>
+          <p><h4 style="color:${headingColor};background-color:${headingBgColor};">Notes Found: ${details.commitDetails.length}</h4></p>
           <p><a href="google.com">
             <button id="repoOpen" >Open Repo</button>
           </a>
