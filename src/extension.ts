@@ -119,7 +119,7 @@ export function activate(context: vscode.ExtensionContext) {
       const activeEditor = vscode.window.activeTextEditor;
       const repositoryPath = cmdRepositoryPath ? cmdRepositoryPath: notes.repositoryPath;
       if (activeEditor !== undefined || repositoryPath !== undefined) {
-        cmdCommitHash ? undefined: input.setup('Remove a Git Note', 'Enter the Commit hash of the note to remove....', true);
+        cmdCommitHash ? undefined: input.setup('Remove a Git Note', 'Enter the Commit hash of the note to remove....', false);
         const commitHashInput = cmdCommitHash ? cmdCommitHash: await input.showInputBox();
         const commitHash = commitHashInput ? commitHashInput.replace(/\s/g, '') : undefined;
         if (commitHash !== undefined) {

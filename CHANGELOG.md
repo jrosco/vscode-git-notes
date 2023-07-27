@@ -9,6 +9,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 ### Added
 
 - Develop interactive HTML buttons that utilize JavaScript to send messages to a Visual Studio Code function. Upon receiving the messages, the corresponding extension.[code] will be executed. (<https://github.com/jrosco/vscode-git-notes/pull/12>)
+- Add confirmation message for note removal and pruning git repos (<https://github.com/jrosco/vscode-git-notes/pull/15>)
 - Webview can now refresh on updates e.g removing a note message (<https://github.com/jrosco/vscode-git-notes/pull/14>)
 
 ### Fixed
@@ -19,10 +20,14 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 - Webview date arrangement / sorting (<https://github.com/jrosco/vscode-git-notes/pull/9>)
 
-## [Released]
+## Released
 
 ## [0.0.1] - 2023-07-23
 
 ### Added
 
 - Initial Release
+
+[Unreleased Changes]: https://github.com/jrosco/vscode-git-notes/compare/0.0.1...HEAD
+
+[0.0.1]: https://github.com/jrosco/vscode-git-notes/compare/a9fdfb1...0.0.1

@@ -60,6 +60,16 @@
           "default": true,
           "description": "Enable confirmation before a Git Push or Git Fetch (enabling this is recommended)"
         },
+        "git-notes.confirmRemovalCommands": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable confirmation before a Git Note Remove (enabling this is recommended)"
+        },
+        "git-notes.confirmPruneCommands": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable confirmation before a Git Prune in Directory (enabling this is recommended)"
+        },
         "git-notes.sortDateNewestFirst": {
           "type": "boolean",
           "default": true,
