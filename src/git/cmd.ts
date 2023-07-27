@@ -443,7 +443,7 @@ export class GitCommands {
             this.statusBar.showInformationMessage(`Git Notes: ${showMsg}`);
             this.manager.clearRepositoryDetails(undefined, repositoryPath);
           });
-          this.getNotes(repositoryPath);
+          await this.getNotes(repositoryPath);
         }
       } else {
         this.logger.debug("Not a git repository (or any of the parent directories): .git");
