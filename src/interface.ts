@@ -122,6 +122,13 @@ export class RepositoryManager {
     }
   }
 
+  public async removeCommitByHash(commitHashToRemove: string) {
+    this.logger.debug(`removeCommitByHash(${commitHashToRemove})`);
+    this.repositoryDetailsInterface[0].commitDetails = this.repositoryDetailsInterface[0].commitDetails.filter(
+      (commit) => commit.commitHash !== commitHashToRemove
+    );
+  }
+
   public getGitRepositoryPath(fileUri?: vscode.Uri | undefined, repositoryPath?: string | undefined): string {
     this.logger.debug(`getGitRepositoryPath(${fileUri}, ${repositoryPath})`);
     let workspaceFolder;

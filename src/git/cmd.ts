@@ -441,7 +441,7 @@ export class GitCommands {
           .then(() => {
             const showMsg = prune ? "Pruned notes" : `Removed note for commit ${commitHash} \nPath: ${repositoryPath}`;
             this.statusBar.showInformationMessage(`Git Notes: ${showMsg}`);
-            this.manager.clearRepositoryDetails(undefined, repositoryPath);
+            this.manager.removeCommitByHash(commitHash);
           });
           await this.getNotes(repositoryPath);
         }
