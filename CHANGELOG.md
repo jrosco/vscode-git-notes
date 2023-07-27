@@ -4,7 +4,7 @@ All notable changes to the "git-notes" extension will be documented in this file
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
-## [Unreleased Changes]
+## [0.1.0]
 
 ### Added
 
@@ -31,3 +31,4 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 [Unreleased Changes]: https://github.com/jrosco/vscode-git-notes/compare/0.0.1...HEAD
 
 [0.0.1]: https://github.com/jrosco/vscode-git-notes/compare/a9fdfb1...0.0.1
+[0.1.0]: https://github.com/jrosco/vscode-git-notes/compare/0.0.1...0.1.0
