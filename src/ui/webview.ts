@@ -3,6 +3,7 @@ import * as vscode from 'vscode';
 import { RepositoryManager, RepositoryDetails } from '../interface';
 import { GitNotesStatusBar } from '../ui/status';
 import { GitNotesSettings } from '../settings';
+import { LoggerService, LogLevel } from '../log/service';
 
 export class GitNotesPanel {
   public static currentPanel: GitNotesPanel | undefined;
@@ -17,11 +18,13 @@ export class GitNotesPanel {
   private readonly _document: vscode.Uri;
   private _disposables: vscode.Disposable[] = [];
   private settings: GitNotesSettings;
+  private logger: LoggerService;
 
   private constructor(panel: vscode.WebviewPanel, document: vscode.Uri, repositoryDetails: RepositoryDetails[]) {
     this._panel = panel;
     this._document = document;
     this.settings = new GitNotesSettings();
+    this.logger = LoggerService.getInstance(this.settings.logLevel);
     this.manager = RepositoryManager.getInstance();
     this.statusBar = GitNotesStatusBar.getInstance();
     repositoryDetails = this.manager.getRepositoryDetailsInterface();
@@ -53,57 +56,80 @@ export class GitNotesPanel {
     );
 
     // Handle messages from the Webview
-    panel.webview.onDidReceiveMessage((message) => {
+    panel.webview.onDidReceiveMessage(async (message) => {
       switch (message.command) {
         case 'repoOpen':
-          vscode.env.openExternal(vscode.Uri.parse(message.repositoryUrl));
+          await vscode.env.openExternal(vscode.Uri.parse(message.repositoryUrl));
           break;
         case 'repoAdd':
-          vscode.commands.executeCommand('extension.addGitNoteMessage',
+          await vscode.commands.executeCommand('extension.addOrEditGitNote',
             undefined, message.repositoryPath);
           break;
         case 'repoCheck':
-          vscode.commands.executeCommand('extension.checkGitNotes',
+          await vscode.commands.executeCommand('extension.checkGitNotes',
             message.repositoryPath);
           break;
         case 'repoPrune':
-          vscode.commands.executeCommand('extension.pruneGitNotePrompt',
+          await vscode.commands.executeCommand('extension.pruneGitNotes',
             message.repositoryPath);
           break;
         case 'repoPush':
-          vscode.commands.executeCommand('extension.pushGitNotes',
+          await vscode.commands.executeCommand('extension.pushGitNotes',
             message.repositoryPath);
           break;
         case 'repoFetch':
-          vscode.commands.executeCommand('extension.fetchGitNotes',
+          await vscode.commands.executeCommand('extension.fetchGitNotes',
             message.repositoryPath);
           break;
         case 'commitOpen':
-          vscode.env.openExternal(vscode.Uri.parse(message.commitUrl));
+          await vscode.env.openExternal(vscode.Uri.parse(message.commitUrl));
           break;
         case 'commitEdit':
-          vscode.commands.executeCommand('extension.addGitNoteMessage',
+          await vscode.commands.executeCommand('extension.addOrEditGitNote',
             message.commitHash, message.repositoryPath);
           break;
         case 'commitRemove':
-          vscode.commands.executeCommand('extension.removeGitNotePrompt',
+          await vscode.commands.executeCommand('extension.removeGitNote',
             message.commitHash, message.repositoryPath);
           break;
         default:
           console.warn('Unknown command:', message.command);
           break;
       }
-    });
-
-    let webViewTab = vscode.window.onDidChangeActiveTextEditor((editor) => {
-      // Check if the WebView panel is not active and close / dispose of panel
-      if (editor?.document !== undefined) {
-        GitNotesPanel.currentPanel?._panel.dispose();
-        webViewTab.dispose();
+      // Update the content of the webview panel, if `message.repositoryPath` is set
+      if (GitNotesPanel.currentPanel && message.refresh) {
+        GitNotesPanel.currentPanel.refreshWebViewContent(message.repositoryPath);
       }
     });
 
+    // let webViewTab = vscode.window.onDidChangeActiveTextEditor((editor) => {
+    //   // Check if the WebView panel is not active and close / dispose of panel
+    //   if (editor?.document !== undefined) {
+    //     GitNotesPanel.currentPanel?._panel.dispose();
+    //     webViewTab.dispose();
+    //   }
+    // });
     GitNotesPanel.currentPanel = new GitNotesPanel(panel, document, repositoryDetails);
+  }
+
+  public postMessage(message: any) {
+    if (this._panel) {
+      console.debug('postMessage: ', message.command, message.repositoryPath);
+      this._panel.webview.postMessage({ message });
+    } else {
+      return;
+    }
+  }
+
+  public refreshWebViewContent(repositoryPath: string) {
+    // Your logic to update the WebView content here
+    const repositoryDetails = this.manager.getRepositoryDetailsInterface();
+    this.logger.debug(`refreshWebViewContent(${repositoryPath}, ${repositoryDetails})`);
+    if (this._panel && repositoryDetails !== undefined) {
+      this.logger.debug(`refreshWebViewContent _panel: ${this._panel}`);
+      const webViewContent = this._getWebviewContent(this.repositoryPath, repositoryDetails);
+      this._panel.webview.html = webViewContent;
+    }
   }
 
   public dispose() {
@@ -123,7 +149,7 @@ export class GitNotesPanel {
     // Filter repositoryDetails based on exact match of repositoryPath
     if (this.repositoryPath !== undefined) {
       const filteredRepositoryDetails = repositoryDetails.filter(details =>
-        details.repositoryPath === this.repositoryPath
+        details.repositoryPath === repositoryPath
       );
       this.statusBar.message = "Close Tab";
       this.statusBar.command = "workbench.action.closeActiveEditor";
@@ -149,29 +175,42 @@ export class GitNotesPanel {
           const vscode = acquireVsCodeApi();
       `;
       const eventListenersScript: string = filteredRepositoryDetails.map(details => `
+        // Handle the message inside the webview
+        window.addEventListener('message', event => {
+          const message = event.data.message; // The JSON data our extension sent
+          console.log('command:' + message.command + ' repositoryPath:' + message.repositoryPath);
+          switch (message.command) {
+            case 'repoCheck':
+              vscode.postMessage({ command: 'repoCheck', repositoryPath: message.repositoryPath, refresh: true });
+              break;
+            default:
+              console.warn('Unknown command:', message);
+              break;
+          }
+        });
         document.getElementById('repoOpen').addEventListener('click', () => {
           // When the button is clicked, call the extension method to perform the task
           vscode.postMessage({ command: 'repoOpen', repositoryUrl: '${details.repositoryUrl}' });
         });
         document.getElementById('repoAdd').addEventListener('click', () => {
           // When the button is clicked, call the extension method to perform the task
-          vscode.postMessage({ command: 'repoAdd', repositoryPath: '${details.repositoryPath}' });
+          vscode.postMessage({ command: 'repoAdd', repositoryPath: '${details.repositoryPath}', refresh: true });
         });
         document.getElementById('repoCheck').addEventListener('click', () => {
           // When the button is clicked, call the extension method to perform the task
-          vscode.postMessage({ command: 'repoCheck', repositoryPath: '${details.repositoryPath}' });
+          vscode.postMessage({ command: 'repoCheck', repositoryPath: '${details.repositoryPath}', refresh: true });
         });
         document.getElementById('repoPrune').addEventListener('click', () => {
           // When the button is clicked, call the extension method to perform the task
-          vscode.postMessage({ command: 'repoPrune', repositoryPath: '${details.repositoryPath}' });
+          vscode.postMessage({ command: 'repoPrune', repositoryPath: '${details.repositoryPath}'});
         });
         document.getElementById('repoPush').addEventListener('click', () => {
           // When the button is clicked, call the extension method to perform the task
-          vscode.postMessage({ command: 'repoPush', repositoryPath: '${details.repositoryPath}' });
+          vscode.postMessage({ command: 'repoPush', repositoryPath: '${details.repositoryPath}', refresh: true });
         });
         document.getElementById('repoFetch').addEventListener('click', () => {
           // When the button is clicked, call the extension method to perform the task
-          vscode.postMessage({ command: 'repoFetch', repositoryPath: '${details.repositoryPath}' });
+          vscode.postMessage({ command: 'repoFetch', repositoryPath: '${details.repositoryPath}', refresh: true });
         });
         ${details.commitDetails.map(commit => `
         document.getElementById('open-${commit.commitHash}').addEventListener('click', () => {
@@ -180,11 +219,11 @@ export class GitNotesPanel {
         });
         document.getElementById('edit-${commit.commitHash}').addEventListener('click', () => {
           // When the button is clicked, call the extension method to perform the task
-          vscode.postMessage({ command: 'commitEdit', commitHash: '${commit.commitHash}', repositoryPath: '${details.repositoryPath}' });
+          vscode.postMessage({ command: 'commitEdit', commitHash: '${commit.commitHash}', repositoryPath: '${details.repositoryPath}', refresh: true });
         });
         document.getElementById('remove-${commit.commitHash}').addEventListener('click', () => {
           // When the button is clicked, call the extension method to perform the task
-          vscode.postMessage({ command: 'commitRemove', commitHash: '${commit.commitHash}', repositoryPath: '${details.repositoryPath}' });
+          vscode.postMessage({ command: 'commitRemove', commitHash: '${commit.commitHash}', repositoryPath: '${details.repositoryPath}', refresh: true });
         });
         `).join('\n')}
       `).join('\n');
@@ -199,6 +238,7 @@ export class GitNotesPanel {
       const repositoryInfo = filteredRepositoryDetails.map(details => `
         <div>
           <p><h3 style="color:${headingColor};background-color:${headingBgColor};">Repository Path: ${details.repositoryPath}</h3></p>
+          <p><h4 style="color:${headingColor};background-color:${headingBgColor};">Notes Found: ${details.commitDetails.length}</h4></p>
           <p><a href="google.com">
             <button id="repoOpen" >Open Repo</button>
           </a>
@@ -258,7 +298,7 @@ export class GitNotesPanel {
         </html>
       `;
     } else {
-    return "Path not found";
+    return "No Git notes ref found";
     }
   }
 }

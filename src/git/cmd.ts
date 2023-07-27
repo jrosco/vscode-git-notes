@@ -305,7 +305,7 @@ export class GitCommands {
           this.output.log(message);
           this.manager.clearRepositoryDetails(undefined, repositoryPath);
         });
-        this.getNotes(repositoryPath);
+        await this.getNotes(repositoryPath);
       } else {
         this.logger.error("Not a git repository (or any of the parent directories): .git ");
         this.statusBar.showInformationMessage("Git Notes: Not a git repository (or any of the parent directories): .git");
@@ -351,7 +351,7 @@ export class GitCommands {
             this.manager.clearRepositoryDetails(undefined, repositoryPath);
           });
         }
-        this.getNotes(repositoryPath);
+        await this.getNotes(repositoryPath);
       } else {
         this.logger.debug("Not a git repository (or any of the parent directories): .git ");
         this.statusBar.showInformationMessage("Git Notes: Not a git repository (or any of the parent directories): .git");
@@ -397,7 +397,7 @@ export class GitCommands {
             this.manager.clearRepositoryDetails(undefined, repositoryPath);
           });
         }
-        this.getNotes(this.repositoryPath);
+        await this.getNotes(this.repositoryPath);
       } else {
         this.logger.debug("Not a git repository (or any of the parent directories): .git");
         this.statusBar.showInformationMessage("Git Notes: Not a git repository (or any of the parent directories): .git");
