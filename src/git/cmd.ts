@@ -433,8 +433,10 @@ export class GitCommands {
         const title = prune ? "Confirm Prune" : "Confirm Note Removal";
         const messageItemTitle = prune ? `Prune Directory ${repositoryPath}` : `Note Commit Removal: ${commitHash}`;
         const messageItem: vscode.MessageItem[] = [{ title: title }, {title: "Cancel"}];
-        confirm = await this.input.showInputWindowMessage(`${messageItemTitle}`, messageItem, true, false);
-        if (confirm?.title === title) {
+        if ((prune && this.settings.confirmPruneCommands) || (!prune && this.settings.confirmRemovalCommands)) {
+          confirm = await this.input.showInputWindowMessage(`${messageItemTitle}`, messageItem, true, false);
+        }
+        if (confirm?.title === title || (prune && !this.settings.confirmPruneCommands) || (!prune && !this.settings.confirmRemovalCommands)) {
           await this.git.raw(cmdList)
           .then(() => {
             const showMsg = prune ? "Pruned notes" : `Removed note for commit ${commitHash} \nPath: ${repositoryPath}`;

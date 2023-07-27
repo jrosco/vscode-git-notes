@@ -5,5 +5,7 @@
     "git-notes.remoteNoteRef": "refs/notes/commits",
     "git-notes.enableNotifications": true,
     "git-notes.enableNotificationsWhenNotesFound": false,
-    "git-notes.confirmPushAndFetchCommands": true
+    "git-notes.confirmPushAndFetchCommands": true,
+    "git-notes.confirmRemovalCommands": true,
+    "git-notes.confirmPruneCommands": true
 }
