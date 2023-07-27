@@ -185,15 +185,21 @@ export function activate(context: vscode.ExtensionContext) {
               document.save();
             });
             // Dispose the event listener when the editor is closed
-            const onDidChangeActiveDisposable = vscode.window.onDidChangeActiveTextEditor((editor) => {
+            const onDidChangeActiveDisposable = vscode.window.onDidChangeActiveTextEditor(
+              async (editor) => {
               if (!editor) {
                 if (bufferContent !== '' && commitHash !== undefined) {
-                  notes.addGitNotes(bufferContent, commitHash, 'add', undefined, activeFileRepoPath, editNote);
+                  await notes.addGitNotes(bufferContent, commitHash, 'add', undefined, activeFileRepoPath, editNote);
                   onDidChangeActiveDisposable.dispose();
                   onDidChangeDisposable.dispose();
                 }
                 // You can perform any cleanup or handling here
                 fs.unlink(tempFilePath, (error) => {
+                  if (GitNotesPanel.currentPanel) {
+                    logger.debug(`Sending [repoCheck] command [repositoryPath:${activeFileRepoPath}] to webview`);
+                    GitNotesPanel.currentPanel.postMessage({ command: 'repoCheck',
+                      repositoryPath: activeFileRepoPath });
+                  }
                   if (error) {
                     logger.debug(`Error removing the file: ${error}`);
                   }
