@@ -92,12 +92,14 @@ export class GitNotesPanel {
           await vscode.commands.executeCommand('extension.removeGitNote',
             message.commitHash, message.repositoryPath);
           break;
+        case 'refresh':
+          break;
         default:
           console.warn('Unknown command:', message.command);
           break;
       }
       // Update the content of the webview panel, if `message.repositoryPath` is set
-      if (GitNotesPanel.currentPanel && message.refresh) {
+      if (GitNotesPanel.currentPanel && (message.refresh || message.command === 'refresh')) {
         GitNotesPanel.currentPanel.refreshWebViewContent(message.repositoryPath);
       }
     });
@@ -179,14 +181,7 @@ export class GitNotesPanel {
         window.addEventListener('message', event => {
           const message = event.data.message; // The JSON data our extension sent
           console.log('command:' + message.command + ' repositoryPath:' + message.repositoryPath);
-          switch (message.command) {
-            case 'repoCheck':
-              vscode.postMessage({ command: 'repoCheck', repositoryPath: message.repositoryPath, refresh: true });
-              break;
-            default:
-              console.warn('Unknown command:', message);
-              break;
-          }
+          vscode.postMessage({ command: message.command, repositoryPath: message.repositoryPath, refresh: true });
         });
         document.getElementById('repoOpen').addEventListener('click', () => {
           // When the button is clicked, call the extension method to perform the task

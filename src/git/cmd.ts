@@ -301,9 +301,8 @@ export class GitCommands {
         this.statusBar.update();
         const cmdList = force ? ['notes', subCmd, commitHash, '-m', message, '--force'] : ['notes', subCmd, commitHash, '-m', message];
         await this.git.raw(cmdList)
-        .then((message) => {
-          this.output.log(message);
-          this.manager.clearRepositoryDetails(undefined, repositoryPath);
+        .then(() => {
+          this.manager.updateNoteMessage(commitHash, message, repositoryPath);
         });
         await this.getNotes(repositoryPath);
       } else {
