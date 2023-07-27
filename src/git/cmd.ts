@@ -146,7 +146,6 @@ export class GitCommands {
           if (error) {
             const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
             reject(new Error(`Error retrieving note details: ${errorMessage}`));
-            this.statusBar.showErrorMessage(`Git Notes: Error retrieving note: ${errorMessage}`);
           } else {
             resolve(result);
           }
