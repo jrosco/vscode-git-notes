@@ -62,7 +62,7 @@ export class GitNotesPanel {
           await vscode.env.openExternal(vscode.Uri.parse(message.repositoryUrl));
           break;
         case 'repoAdd':
-          vscode.commands.executeCommand('extension.addOrEditGitNote',
+          await vscode.commands.executeCommand('extension.addOrEditGitNote',
             undefined, message.repositoryPath);
           break;
         case 'repoCheck':
@@ -70,7 +70,7 @@ export class GitNotesPanel {
             message.repositoryPath);
           break;
         case 'repoPrune':
-          vscode.commands.executeCommand('extension.pruneGitNotes',
+          await vscode.commands.executeCommand('extension.pruneGitNotes',
             message.repositoryPath);
           break;
         case 'repoPush':
@@ -85,11 +85,11 @@ export class GitNotesPanel {
           await vscode.env.openExternal(vscode.Uri.parse(message.commitUrl));
           break;
         case 'commitEdit':
-          vscode.commands.executeCommand('extension.addOrEditGitNote',
+          await vscode.commands.executeCommand('extension.addOrEditGitNote',
             message.commitHash, message.repositoryPath);
           break;
         case 'commitRemove':
-          vscode.commands.executeCommand('extension.removeGitNote',
+          await vscode.commands.executeCommand('extension.removeGitNote',
             message.commitHash, message.repositoryPath);
           break;
         default:
