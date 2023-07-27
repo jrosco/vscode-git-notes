@@ -138,11 +138,17 @@ export class RepositoryManager {
     }
   }
 
-  public async removeCommitByHash(commitHashToRemove: string) {
+  public async removeCommitByHash(commitHashToRemove: string, repositoryPath?: string | undefined) {
     this.logger.debug(`removeCommitByHash(${commitHashToRemove})`);
-    this.repositoryDetailsInterface[0].commitDetails = this.repositoryDetailsInterface[0].commitDetails.filter(
-      (commit) => commit.commitHash !== commitHashToRemove
+    const index = this.repositoryDetailsInterface.findIndex(
+      repo => repo.repositoryPath === repositoryPath
     );
+
+    if (index !== -1) {
+      this.repositoryDetailsInterface[index].commitDetails = this.repositoryDetailsInterface[index].commitDetails.filter(
+        (commit) => commit.commitHash !== commitHashToRemove
+      );
+    }
   }
 
   public getGitRepositoryPath(fileUri?: vscode.Uri | undefined, repositoryPath?: string | undefined): string {
