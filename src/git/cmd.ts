@@ -429,13 +429,20 @@ export class GitCommands {
         this.statusBar.update();
         const cmdList = prune ? ['notes', 'prune'] : ['notes', 'remove', commitHash];
         this.logger.debug(`cmdList: ${cmdList} for ${repositoryPath}`);
-        await this.git.raw(cmdList)
-        .then(() => {
-          const showMsg = prune ? "Pruned notes" : `Removed note for commit ${commitHash} \nPath: ${repositoryPath}`;
-          this.statusBar.showInformationMessage(`Git Notes: ${showMsg}`);
-          this.manager.clearRepositoryDetails(undefined, repositoryPath);
-        });
-        this.getNotes(repositoryPath);
+        let confirm = undefined;
+        const title = prune ? "Confirm Prune" : "Confirm Note Removal";
+        const messageItemTitle = prune ? `Prune Directory ${repositoryPath}` : `Note Commit Removal: ${commitHash}`;
+        const messageItem: vscode.MessageItem[] = [{ title: title }, {title: "Cancel"}];
+        confirm = await this.input.showInputWindowMessage(`${messageItemTitle}`, messageItem, true, false);
+        if (confirm?.title === title) {
+          await this.git.raw(cmdList)
+          .then(() => {
+            const showMsg = prune ? "Pruned notes" : `Removed note for commit ${commitHash} \nPath: ${repositoryPath}`;
+            this.statusBar.showInformationMessage(`Git Notes: ${showMsg}`);
+            this.manager.clearRepositoryDetails(undefined, repositoryPath);
+          });
+          this.getNotes(repositoryPath);
+        }
       } else {
         this.logger.debug("Not a git repository (or any of the parent directories): .git");
         this.statusBar.showInformationMessage("Git Notes: Not a git repository (or any of the parent directories): .git");
