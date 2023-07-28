@@ -260,7 +260,7 @@ export class GitNotesPanel {
           <p><strong>Date:</strong> ${commit.date}</p>
           <p><strong>Commit Message:</strong> ${commit.message}</p>
           <p><strong>Note:</strong><pre>${commit.note}</pre></p>
-          <p><strong>Files:</strong></p>
+          ${commit.fileChanges.length > 0 ? '<p><strong>File Changes:</strong></p>' : '<p><strong>No File Changes</strong></p>'}
           <ul>
             ${commit.fileChanges.map(fileChange => {
                 const insertionsColor = 'green';
