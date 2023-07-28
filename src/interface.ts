@@ -75,15 +75,15 @@ export class RepositoryManager {
     return undefined; // Return undefined if commit or file change is not found
   }
 
-  public commitDetailsExist(repositoryPath: string, commitHash: string): CommitDetails | undefined {
-    this.logger.debug(`commitDetailsExist(${repositoryPath}, ${commitHash})`);
+  public getExistingCommitDetails(repositoryPath: string, commitHash: string): CommitDetails | undefined {
+    this.logger.debug(`getExistingCommitDetails(${repositoryPath}, ${commitHash})`);
     const commitDetails = this.getExistingRepositoryDetails(repositoryPath);
     const commit = commitDetails?.find(commit => commit.commitHash === commitHash);
     if (commit) {
-      this.logger.debug(`commitDetailsExist(${commitHash}) found ${commit}`);
+      this.logger.debug(`getExistingCommitDetails(${commitHash}) found ${commit}`);
       return commit;
     } else {
-      this.logger.debug(`commitDetailsExist(${commitHash}) returned false`);
+      this.logger.debug(`getExistingCommitDetails(${commitHash}) returned false`);
       return undefined; // Return false if commit is not found
     }
   }
@@ -95,7 +95,7 @@ export class RepositoryManager {
     if (commit) {
       const note = commit.note;
       if (note) {
-        this.logger.debug(`noteExists(${commitHash}) = true`);
+        this.logger.debug(`A note was found for commit ${commitHash}`);
         return true;
       }
     }
