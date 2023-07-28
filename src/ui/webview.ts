@@ -95,7 +95,7 @@ export class GitNotesPanel {
             message.commitHash, message.repositoryPath);
           break;
         case 'commitLoad':
-          cmd.loadNoteDetails(message.repositoryPath, message.commitHash);
+          await cmd.loadNoteDetails(message.repositoryPath, message.commitHash);
           break;
         default:
           console.warn('Unknown command:', message.command);
