@@ -111,17 +111,18 @@ export class GitCommands {
       const note = await this._getGitNotes(commitHash);
       const details = this.manager.commitDetailsExist(repositoryPath, note[0].commitHash);
       if (details !== undefined) {
-        this.logger.debug(`note details found for ${repositoryPath} ... loading`);
-        const commitDetails = await this._getCommitDetails(commitHash);
-        // details.commitHash = note[0].commitHash;
-        // details.notesHash = note[0].notesHash;
-        details.author = commitDetails[0].author;
-        details.date = commitDetails[0].date;
-        details.message = commitDetails[0].message;
-        details.fileChanges = commitDetails[0].fileChanges;
-        commitDetailsInterface?.push(details);
+        this.logger.debug(`note details found for ${repositoryPath} ... loading commit details`);
+        if ((details.author && details.date && details.message) === undefined) {
+          const commitDetails = await this._getCommitDetails(commitHash);
+          details.author = commitDetails[0].author;
+          details.date = commitDetails[0].date;
+          details.message = commitDetails[0].message;
+          details.note = (await this._getGitNoteMessage(note[0].commitHash)).toString(),
+          details.fileChanges = commitDetails[0].fileChanges;
+          commitDetailsInterface?.push(details);
+        }
       } else {
-        this.logger.debug(`no note details found for ${repositoryPath} ... loading`);
+        this.logger.debug(`no note details found for ${repositoryPath} ... loading full details`);
         const commitDetails = await this._getCommitDetails(commitHash);
         const detail: CommitDetails = {
           notesHash: note[0].notesHash,
@@ -129,6 +130,7 @@ export class GitCommands {
           author: commitDetails[0].author,
           date: commitDetails[0].date,
           message: commitDetails[0].message,
+          note: (await this._getGitNoteMessage(note[0].commitHash)).toString(),
           fileChanges: commitDetails[0].fileChanges
         };
         commitDetailsInterface?.push(detail);
