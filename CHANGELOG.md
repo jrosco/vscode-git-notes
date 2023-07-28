@@ -4,6 +4,12 @@ All notable changes to the "git-notes" extension will be documented in this file
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [Unreleased Changes]
+
+### Added
+
+- Created a loader method for git notes to support things like, infinite scrolling in webview, caching etc (<https://github.com/jrosco/vscode-git-notes/pull/19>)
+
 ## [0.1.0]
 
 ### Added
@@ -28,7 +34,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 - Initial Release
 
-[Unreleased Changes]: https://github.com/jrosco/vscode-git-notes/compare/0.0.1...HEAD
+[Unreleased Changes]: https://github.com/jrosco/vscode-git-notes/compare/0.1.0...HEAD
 
 [0.0.1]: https://github.com/jrosco/vscode-git-notes/compare/a9fdfb1...0.0.1
 [0.1.0]: https://github.com/jrosco/vscode-git-notes/compare/0.0.1...0.1.0
