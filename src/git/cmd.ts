@@ -94,6 +94,7 @@ export class GitCommands {
           const detail: CommitDetails = {
             notesHash: note.notesHash,
             commitHash: note.commitHash,
+            date: new Date('1970-01-01'),
           };
           commitDetailsInterface.push(detail);
         }
