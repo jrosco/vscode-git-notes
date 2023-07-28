@@ -111,7 +111,7 @@ export class GitCommands {
       const note = await this._getGitNotes(commitHash);
       const details = this.manager.commitDetailsExist(repositoryPath, note[0].commitHash);
       if (details !== undefined) {
-        this.logger.debug(`note details found for ${repositoryPath} ... loading commit details`);
+        this.logger.debug(`commit and note hashes found for commit ${commitHash} ... loading commit details`);
         if ((details.author && details.date && details.message) === undefined) {
           const commitDetails = await this._getCommitDetails(commitHash);
           details.author = commitDetails[0].author;
@@ -122,7 +122,7 @@ export class GitCommands {
           commitDetailsInterface?.push(details);
         }
       } else {
-        this.logger.debug(`no note details found for ${repositoryPath} ... loading full details`);
+        this.logger.debug(`no commit or note hashes details found for commit ${commitHash} ... loading full details`);
         const commitDetails = await this._getCommitDetails(commitHash);
         const detail: CommitDetails = {
           notesHash: note[0].notesHash,
