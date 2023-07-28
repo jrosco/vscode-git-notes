@@ -197,7 +197,7 @@ export function activate(context: vscode.ExtensionContext) {
                 fs.unlink(tempFilePath, (error) => {
                   if (GitNotesPanel.currentPanel) {
                     logger.debug(`Sending [repoCheck] command [repositoryPath:${activeFileRepoPath}] to webview`);
-                    GitNotesPanel.currentPanel.postMessage({ command: 'repoCheck',
+                    GitNotesPanel.currentPanel.postMessage({ command: 'refresh',
                       repositoryPath: activeFileRepoPath });
                   }
                   if (error) {

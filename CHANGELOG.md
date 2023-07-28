@@ -6,6 +6,10 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [Unreleased Changes]
 
+### Added
+
+- Remove and Add committed notes from the `CommitDetails[]` interface class (<https://github.com/jrosco/vscode-git-notes/pull/18>)
+  
 ### Fixed
 
 - Don't show files in webview if no file changes found (<https://github.com/jrosco/vscode-git-notes/pull/17>)
