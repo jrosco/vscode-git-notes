@@ -407,7 +407,6 @@ export class GitCommands {
         await this.git.raw(cmdList)
         .then((message) => {
           this.output.log(message);
-          this.manager.clearRepositoryDetails(undefined, repositoryPath);
         });
         await this.loadNoteDetails(repositoryPath, commitHash);
       } else {
@@ -498,7 +497,6 @@ export class GitCommands {
           .then((message) => {
             const showMsg = message.pushed.length > 0 ? "Everything up-to-date": `Pushed ${message.update?.hash.from} -> ${message.update?.hash.to}`;
             this.statusBar.showInformationMessage(`Git Notes: ${showMsg}`);
-            this.manager.clearRepositoryDetails(undefined, repositoryPath);
           });
         }
         await this.loader(repositoryPath);
@@ -545,7 +543,6 @@ export class GitCommands {
           .then(() => {
             const showMsg = prune ? "Pruned notes" : `Removed note for commit ${commitHash} \nPath: ${repositoryPath}`;
             this.statusBar.showInformationMessage(`Git Notes: ${showMsg}`);
-            this.manager.clearRepositoryDetails(undefined, repositoryPath);
           });
           await this.loader(repositoryPath);
         }

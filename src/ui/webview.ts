@@ -67,10 +67,6 @@ export class GitNotesPanel {
           await vscode.commands.executeCommand('extension.addOrEditGitNote',
             undefined, message.repositoryPath);
           break;
-        case 'repoCheck':
-          await vscode.commands.executeCommand('extension.checkGitNotes',
-            message.repositoryPath);
-          break;
         case 'repoPrune':
           await vscode.commands.executeCommand('extension.pruneGitNotes',
             message.repositoryPath);
@@ -93,6 +89,13 @@ export class GitNotesPanel {
         case 'commitRemove':
           await vscode.commands.executeCommand('extension.removeGitNote',
             message.commitHash, message.repositoryPath);
+          break;
+        case 'repoLoadMore':
+          await cmd.loader(message.repositoryPath);
+          break;
+        case 'repoClearCache':
+          await vscode.commands.executeCommand('extension.checkGitNotes',
+            message.repositoryPath, true);
           break;
         case 'commitLoad':
           await cmd.loadNoteDetails(message.repositoryPath, message.commitHash);
@@ -201,10 +204,6 @@ export class GitNotesPanel {
           // When the button is clicked, call the extension method to perform the task
           vscode.postMessage({ command: 'repoAdd', repositoryPath: '${details.repositoryPath}', refresh: true });
         });
-        document.getElementById('repoCheck').addEventListener('click', () => {
-          // When the button is clicked, call the extension method to perform the task
-          vscode.postMessage({ command: 'repoCheck', repositoryPath: '${details.repositoryPath}', refresh: true });
-        });
         document.getElementById('repoPrune').addEventListener('click', () => {
           // When the button is clicked, call the extension method to perform the task
           vscode.postMessage({ command: 'repoPrune', repositoryPath: '${details.repositoryPath}'});
@@ -216,6 +215,14 @@ export class GitNotesPanel {
         document.getElementById('repoFetch').addEventListener('click', () => {
           // When the button is clicked, call the extension method to perform the task
           vscode.postMessage({ command: 'repoFetch', repositoryPath: '${details.repositoryPath}', refresh: true });
+        });
+         document.getElementById('repoLoadMore').addEventListener('click', () => {
+          // When the button is clicked, call the extension method to perform the task
+          vscode.postMessage({ command: 'repoLoadMore', repositoryPath: '${details.repositoryPath}', refresh: true });
+        });
+         document.getElementById('repoClearCache').addEventListener('click', () => {
+          // When the button is clicked, call the extension method to perform the task
+          vscode.postMessage({ command: 'repoClearCache', repositoryPath: '${details.repositoryPath}', refresh: true });
         });
         ${details.commitDetails.map(commit => `
         document.getElementById('open-${commit.commitHash}').addEventListener('click', () => {
@@ -252,10 +259,11 @@ export class GitNotesPanel {
             <button id="repoOpen" >Open Repo</button>
           </a>
           <button id="repoAdd">Add Note</button>
-          <button id="repoCheck">Check</button>
           <button id="repoPrune">Prune Notes</button>
           <button id="repoPush">Push Notes</button>
-          <button id="repoFetch">Fetch Notes</button></p>
+          <button id="repoFetch">Fetch Notes</button>
+          <button id="repoLoadMore">Load More</button>
+          <button id="repoClearCache">Clear Cache</button></p>
         </div>
         <style>
           <hr {width: 10px;}>
