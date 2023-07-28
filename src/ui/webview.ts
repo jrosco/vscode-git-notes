@@ -91,7 +91,7 @@ export class GitNotesPanel {
             message.commitHash, message.repositoryPath);
           break;
         case 'repoLoadMore':
-          await cmd.loader(message.repositoryPath);
+          await cmd.loader(message.repositoryPath, 5);
           break;
         case 'repoClearCache':
           await vscode.commands.executeCommand('extension.checkGitNotes',

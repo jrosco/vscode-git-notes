@@ -114,7 +114,7 @@ export function activate(context: vscode.ExtensionContext) {
       const activeEditor = vscode.window.activeTextEditor;
       if (activeEditor !== undefined) {
         notes.repositoryPath = manager.getGitRepositoryPath(activeEditor.document.uri);
-        await notes.loader(notes.repositoryPath).then((repositoryDetails) => {
+        await notes.loader(notes.repositoryPath, 5).then((repositoryDetails) => {
           GitNotesPanel.createOrShow(activeEditor.document.uri, repositoryDetails);
         }).catch((error) => {
           logger.error(error);

@@ -71,7 +71,7 @@ export class GitCommands {
     const commitDetailsInterface: CommitDetails[] = [];
     const existing = this.manager.getExistingRepositoryDetails(repositoryPath);
     let counter = 0;
-    let max = showMax || 5;
+    let max = showMax || 0;
 
     if (existing === undefined) {
       this.logger.debug(`no details found for ${repositoryPath} ... loading`);
@@ -113,27 +113,29 @@ export class GitCommands {
       // }
       this.logger.debug(`details found for ${repositoryPath} ... loading next ${max} notes`);
       const commitDetailsInterface = this.manager.getExistingRepositoryDetails(repositoryPath);
-      for (const note of existing) {
-        console.log("existing note: " + note);
-        if (counter < max) {
-          console.log("counter is " + counter);
-          const noteExist = this.manager.noteDetailsExists(repositoryPath, note.commitHash);
-          if (!noteExist) {
-            const details = this.manager.getExistingCommitDetails(repositoryPath, note.commitHash);
-            if (details !== undefined) {
-              this.logger.debug(`commit and note hashes found for commit ${note.commitHash} ... loading commit details`);
-              if ((details.author && details.date && details.message) === undefined) {
-                const commitDetails = await this._getCommitDetails(note.commitHash);
-                const updatedCommitDetails: Partial<CommitDetails> = {
-                  author: commitDetails[0].author,
-                  date: commitDetails[0].date,
-                  message: commitDetails[0].message,
-                  note: (await this._getGitNoteMessage(note.commitHash)).toString(),
-                  fileChanges: commitDetails[0].fileChanges
-                };
-                Object.assign(details, updatedCommitDetails);
+      if (max > 0) {
+        for (const note of existing) {
+          console.log("existing note: " + note);
+          if (counter < max) {
+            console.log("counter is " + counter);
+            const noteExist = this.manager.noteDetailsExists(repositoryPath, note.commitHash);
+            if (!noteExist) {
+              const details = this.manager.getExistingCommitDetails(repositoryPath, note.commitHash);
+              if (details !== undefined) {
+                this.logger.debug(`commit and note hashes found for commit ${note.commitHash} ... loading commit details`);
+                if ((details.author && details.date && details.message) === undefined) {
+                  const commitDetails = await this._getCommitDetails(note.commitHash);
+                  const updatedCommitDetails: Partial<CommitDetails> = {
+                    author: commitDetails[0].author,
+                    date: commitDetails[0].date,
+                    message: commitDetails[0].message,
+                    note: (await this._getGitNoteMessage(note.commitHash)).toString(),
+                    fileChanges: commitDetails[0].fileChanges
+                  };
+                  Object.assign(details, updatedCommitDetails);
+                }
+                counter++;
               }
-              counter++;
             }
           }
         }
