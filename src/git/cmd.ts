@@ -1,4 +1,4 @@
-import simpleGit, { SimpleGit } from 'simple-git';
+import simpleGit, { SimpleGit, SimpleGitOptions } from 'simple-git';
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 
@@ -41,8 +41,17 @@ export class GitCommands {
   private _setRepositoryPath(repositoryPath: string): void {
     this.logger.trace(`_setRepositoryPath(${repositoryPath})`);
     this.repositoryPath = repositoryPath;
+
+    const gitOptions: SimpleGitOptions = {
+    baseDir: repositoryPath, // Change this to the path of the directory where you want to initialize the repository
+    binary: 'git',
+    maxConcurrentProcesses: 6,
+    trimmed: true,
+    config: [],
+  };
+
     try {
-      this.git = simpleGit(repositoryPath);
+      this.git = simpleGit(gitOptions);
       this.logger.debug(`this.git: ${Object.getOwnPropertyNames(this.git)}`);
     } catch (error) {
       this.logger.error(`error setting repositoryPath: ${error}`);
