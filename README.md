@@ -2,6 +2,8 @@
 
 [![Visual Studio Marketplace Last Updated](https://img.shields.io/visual-studio-marketplace/last-updated/jrosco.git-notes)](https://marketplace.visualstudio.com/items?itemName=jrosco.git-notes) [![Visual Studio Marketplace Release Date](https://img.shields.io/visual-studio-marketplace/release-date/jrosco.git-notes)](https://marketplace.visualstudio.com/items/jrosco.git-notes/changelog)[![Visual Studio Marketplace Installs](https://img.shields.io/visual-studio-marketplace/i/jrosco.git-notes)](vscode:extension/jrosco.git-notes) ![Visual Studio Marketplace Downloads](https://img.shields.io/visual-studio-marketplace/d/jrosco.git-notes) [![GitHub pull requests](https://img.shields.io/github/issues-pr-raw/jrosco/vscode-git-notes)](https://github.com/jrosco/vscode-git-notes/pulls) [![License](https://img.shields.io/badge/license-GPL3-blue.png)](https://github.com/jrosco/vscode-git-notes/blob/master/LICENSE.md)
 
+**IN EARLY DEVELOPMENT** - _Viewing more then 50 Git Notes can cause performance issues, please raise any issues [here](https://github.com/jrosco/vscode-git-notes/issues)_
+
 The Visual Studio Code extension known as `git-notes` offers a user-friendly method of handling [Git Notes] directly within the editor. With this extension, you can effortlessly access Git notes when opening a file, displaying the total number of notes in the associated repository. Moreover, it simplifies the process of pushing and fetching notes to and from both local and remote repositories.
 
 When Git notes are detected, a convenient status bar button becomes available. By clicking on it, you can access an overview of the notes, complete with links to the corresponding remote commits. This feature enhances code management and collaboration by allowing easy tracking of changes, discussions, and tasks linked to specific lines of code. The seamless teamwork is further supported as these notes can be conveniently pushed to your remote repository.
@@ -10,10 +12,10 @@ Additionally, the extension facilitates editing and removing note messages, ensu
 
 ## Features
 
+- **Note Overview**: Access a comprehensive overview of the notes found in the file repository, along with convenient commit links to the corresponding remote commits.
 - **Add/ Edit/ Remove Note Messages**: Users can add, edit, and remove note messages associated with specific lines or sections of code in the file. This feature allows you to leave comments, feedback, or reminders directly in the code and manage them efficiently.
 - **Git Notes Detection**: Automatically checks for [Git Notes] when opening a file and displays the current number of notes found in the associated repository.
 - **Push and Fetch Notes**: Easily push your local notes to a remote repository or fetch notes from a remote repository to your local workspace.
-- **Note Overview**: Access a comprehensive overview of the notes found in the file repository, along with convenient commit links to the corresponding remote commits.
 - **Status Bar Integration**: A status bar button provides quick access to the note overview, making it easily accessible while working in the editor.
 
 ## Requirements
@@ -33,7 +35,7 @@ Additionally, the extension facilitates editing and removing note messages, ensu
 
 1. Open a file that is part of a Git repository.
 2. The extension will automatically detect and display the number of [Git Notes] associated with the repository in the status bar.
-3. Click on the status bar button to open the note overview, which provides a detailed list of the notes and commit links to the remote commits.
+3. Click on the status bar button to open the note overview or use (`Ctrl+Shift+P` or `Cmd+Shift+P`) [`View Notes`], which provides a detailed list of the notes and commit links to the remote commits. The extension offers interactive buttons to efficiently manage Git notes. Users can easily perform various actions, including opening repositories, viewing commits, adding, updating, or removing notes, as well as fetching and pushing notes to and from the remote repository.
 4. Use the provided options (`Ctrl+Shift+P` or `Cmd+Shift+P`) to [`Push`|`Fetch`|`Add/Edit`|`Prune`|`Remove` `Notes`] between the local and remote repositories.
 
 ### Command List
@@ -49,10 +51,6 @@ Open the command list with `Ctrl+Shift+P` (Windows) or `Cmd+Shift+P` (MacOS)
 | `Git Note: Push Notes`        | Send local Git notes to a remote repository.                                                                      |
 | `Git Note: Remove Notes`      | Remove a Git notes associated with a specific Git object, such as a commit.                                       |
 | `Git Note: Prune Notes`       | Remove orphaned Git notes from a repository.                                                                      |
-
-## TODO
-
-- [ ] Improve the WebView Panel for the Git Notes Summary Page - <https://github.com/jrosco/vscode-git-notes/pull/6#issuecomment-1646719619>
 
 ## License
 

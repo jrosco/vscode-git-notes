@@ -63,6 +63,16 @@ export class GitNotesSettings {
 		return this._config.get('confirmPushAndFetchCommands', true);
 	}
 
+	public get confirmRemovalCommands(): boolean {
+		this.logger.debug("GitNotesSettings get confirmRemovalCommands called");
+		return this._config.get('confirmRemovalCommands', true);
+	}
+
+	public get confirmPruneCommands(): boolean {
+		this.logger.debug("GitNotesSettings get confirmPruneCommands called");
+		return this._config.get('confirmPruneCommands', true);
+	}
+
 	public get sortDateNewestFirst(): boolean {
 		this.logger.debug("GitNotesSettings get sortDateNewestFirst called");
 		return this._config.get('sortDateNewestFirst', true);

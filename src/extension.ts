@@ -113,13 +113,13 @@ export function activate(context: vscode.ExtensionContext) {
   // Register the command for removing git notes on commits.
   // Can take optional parameters `cmdCommitHash` and `cmdRepositoryPath` passing these to the function will
   // bypass the input prompt and use the passed values instead.
-  let removeGitNotePromptDisposable = vscode.commands.registerCommand('extension.removeGitNotePrompt',
+  let removeGitNoteDisposable = vscode.commands.registerCommand('extension.removeGitNote',
     async (cmdCommitHash?, cmdRepositoryPath?) => {
-      logger.info("extension.removeGitNotePrompt command called");
+      logger.info("extension.removeGitNote command called");
       const activeEditor = vscode.window.activeTextEditor;
       const repositoryPath = cmdRepositoryPath ? cmdRepositoryPath: notes.repositoryPath;
       if (activeEditor !== undefined || repositoryPath !== undefined) {
-        cmdCommitHash ? undefined: input.setup('Remove a Git Note', 'Enter the Commit hash of the note to remove....', true);
+        cmdCommitHash ? undefined: input.setup('Remove a Git Note', 'Enter the Commit hash of the note to remove....', false);
         const commitHashInput = cmdCommitHash ? cmdCommitHash: await input.showInputBox();
         const commitHash = commitHashInput ? commitHashInput.replace(/\s/g, '') : undefined;
         if (commitHash !== undefined) {
@@ -135,9 +135,9 @@ export function activate(context: vscode.ExtensionContext) {
 
   // Register the command for pruning git notes from stale commits.
   // Can take optional parameter `cmdRepositoryPath`
-  let pruneGitNotePromptDisposable = vscode.commands.registerCommand('extension.pruneGitNotePrompt',
+  let pruneGitNotesDisposable = vscode.commands.registerCommand('extension.pruneGitNotes',
       async (cmdRepositoryPath?) => {
-      logger.info("extension.pruneGitNotePrompt command called");
+      logger.info("extension.pruneGitNotes command called");
       notes.repositoryPath = cmdRepositoryPath ? cmdRepositoryPath: notes.repositoryPath;
       const activeEditor = vscode.window.activeTextEditor;
       if (activeEditor !== undefined || notes.repositoryPath !== undefined) {
@@ -151,7 +151,7 @@ export function activate(context: vscode.ExtensionContext) {
   );
 
   // Register the command opening a editor for adding git notes to commits
-  let gitAddNoteMessageDisposable = vscode.commands.registerCommand('extension.addGitNoteMessage',
+  let gitAddNoteMessageDisposable = vscode.commands.registerCommand('extension.addOrEditGitNote',
     async (cmdCommitHash?, cmdRepositoryPath?) => {
       logger.info("extension.addOrEditGitNote command called");
       cmdCommitHash ? undefined: input.setup('Add/Edit a Git Note', 'Enter the Commit hash or leave blank to apply to last commit ....', false);
@@ -185,15 +185,21 @@ export function activate(context: vscode.ExtensionContext) {
               document.save();
             });
             // Dispose the event listener when the editor is closed
-            const onDidChangeActiveDisposable = vscode.window.onDidChangeActiveTextEditor((editor) => {
+            const onDidChangeActiveDisposable = vscode.window.onDidChangeActiveTextEditor(
+              async (editor) => {
               if (!editor) {
                 if (bufferContent !== '' && commitHash !== undefined) {
-                  notes.addGitNotes(bufferContent, commitHash, 'add', undefined, activeFileRepoPath, editNote);
+                  await notes.addGitNotes(bufferContent, commitHash, 'add', undefined, activeFileRepoPath, editNote);
                   onDidChangeActiveDisposable.dispose();
                   onDidChangeDisposable.dispose();
                 }
                 // You can perform any cleanup or handling here
                 fs.unlink(tempFilePath, (error) => {
+                  if (GitNotesPanel.currentPanel) {
+                    logger.debug(`Sending [repoCheck] command [repositoryPath:${activeFileRepoPath}] to webview`);
+                    GitNotesPanel.currentPanel.postMessage({ command: 'repoCheck',
+                      repositoryPath: activeFileRepoPath });
+                  }
                   if (error) {
                     logger.debug(`Error removing the file: ${error}`);
                   }
@@ -214,8 +220,8 @@ export function activate(context: vscode.ExtensionContext) {
     gitFetchNoteRefDisposable,
     gitPushNoteRefDisposable,
     runWebviewDisposable,
-    removeGitNotePromptDisposable,
-    pruneGitNotePromptDisposable,
+    removeGitNoteDisposable,
+    pruneGitNotesDisposable,
     gitAddNoteMessageDisposable
   );
 }
