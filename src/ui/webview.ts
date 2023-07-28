@@ -277,7 +277,7 @@ export class GitNotesPanel {
           <p><strong>Note:</strong><pre>${commit.note}</pre></p>
           <p><strong>Files:</strong></p>
           <ul>
-            ${commit.fileChanges.map(fileChange => {
+            ${commit.fileChanges?.map(fileChange => {
                 const insertionsColor = 'green';
                 const deletionsColor = 'red';
                 const addedColor = 'blue';

@@ -94,7 +94,6 @@ export class GitCommands {
           const detail: CommitDetails = {
             notesHash: note.notesHash,
             commitHash: note.commitHash,
-            fileChanges: [] // TODO: Make this optional
           };
           commitDetailsInterface.push(detail);
         }

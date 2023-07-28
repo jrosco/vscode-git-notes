@@ -13,11 +13,11 @@ export interface RepositoryDetails {
 export interface CommitDetails {
   commitHash: string;
   notesHash: string;
-  note?: string;
-  author?: string;
-  date?: Date;
-  message?: string;
-  fileChanges: FileChanges[];
+  date: Date;
+  note?: string | undefined;
+  author?: string | undefined;
+  message?: string | undefined;
+  fileChanges?: FileChanges[] | [];
 }
 
 export interface FileChanges {
@@ -66,7 +66,7 @@ export class RepositoryManager {
     this.logger.debug(`getFileChangeFile(${commitHash})`);
     const commit = commitDetails.find(commit => commit.commitHash === commitHash);
     if (commit) {
-      const fileChange = commit.fileChanges[0]; // Assuming you want the first file change
+      const fileChange = commit.fileChanges ? commit.fileChanges[0]: undefined; // Assuming you want the first file change
       if (fileChange) {
         this.logger.debug(`getFileChangeFile(${commitHash}) = ${fileChange.file}`);
         return fileChange.file;
