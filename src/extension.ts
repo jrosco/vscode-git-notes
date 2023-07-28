@@ -26,7 +26,9 @@ export function activate(context: vscode.ExtensionContext) {
     if (document.uri.scheme === "file") {
       notes.repositoryPath = manager.getGitRepositoryPath(document.uri);
       if (settings.autoCheck) {
-        await notes.getNotes(notes.repositoryPath);
+        await notes.loader(notes.repositoryPath).then(() => {}).catch((error) => {
+          logger.error(error);
+        });
       }
     }
   });
@@ -36,7 +38,9 @@ export function activate(context: vscode.ExtensionContext) {
     if (document.uri.scheme === "file") {
       notes.repositoryPath = manager.getGitRepositoryPath(document.uri);
       if (settings.autoCheck) {
-        await notes.getNotes(notes.repositoryPath);
+        await notes.loader(notes.repositoryPath).then(() => {}).catch((error) => {
+          logger.error(error);
+        });
       }
     }
   });
@@ -46,7 +50,9 @@ export function activate(context: vscode.ExtensionContext) {
     if (editor && editor.document.uri.scheme) {
       notes.repositoryPath = manager.getGitRepositoryPath(editor.document.uri);
       if (settings.autoCheck) {
-        await notes.getNotes(notes.repositoryPath);
+        await notes.loader(notes.repositoryPath).then(() => {}).catch((error) => {
+          logger.error(error);
+        });
       }
     }
   });
@@ -59,11 +65,15 @@ export function activate(context: vscode.ExtensionContext) {
       notes.repositoryPath = cmdRepositoryPath ? cmdRepositoryPath: notes.repositoryPath;
       if (notes.repositoryPath !== undefined) {
         await manager.clearRepositoryDetails(undefined, notes.repositoryPath);
-        await notes.getNotes(notes.repositoryPath);
+        await notes.loader(notes.repositoryPath).then(() => {}).catch((error) => {
+          logger.error(error);
+        });
       } else if (activeEditor) {
         await manager.clearRepositoryDetails(activeEditor.document.uri);
         notes.repositoryPath = manager.getGitRepositoryPath(activeEditor.document.uri);
-        await notes.getNotes(notes.repositoryPath);
+        await notes.loader(notes.repositoryPath).then(() => {}).catch((error) => {
+          logger.error(error);
+        });
       }
     }
   );
@@ -104,8 +114,11 @@ export function activate(context: vscode.ExtensionContext) {
       const activeEditor = vscode.window.activeTextEditor;
       if (activeEditor !== undefined) {
         notes.repositoryPath = manager.getGitRepositoryPath(activeEditor.document.uri);
-        const repositoryDetails = await notes.getNotes(notes.repositoryPath);
-        GitNotesPanel.createOrShow(activeEditor.document.uri, repositoryDetails);
+        await notes.loader(notes.repositoryPath).then((repositoryDetails) => {
+          GitNotesPanel.createOrShow(activeEditor.document.uri, repositoryDetails);
+        }).catch((error) => {
+          logger.error(error);
+        });
       }
     }
   );

@@ -13,10 +13,10 @@ export interface RepositoryDetails {
 export interface CommitDetails {
   commitHash: string;
   notesHash: string;
-  note: string;
-  author: string;
-  date: Date;
-  message: string;
+  note?: string;
+  author?: string;
+  date?: Date;
+  message?: string;
   fileChanges: FileChanges[];
 }
 
@@ -73,6 +73,34 @@ export class RepositoryManager {
       }
     }
     return undefined; // Return undefined if commit or file change is not found
+  }
+
+  public commitDetailsExist(repositoryPath: string, commitHash: string): CommitDetails | undefined {
+    this.logger.debug(`commitDetailsExist(${repositoryPath}, ${commitHash})`);
+    const commitDetails = this.getExistingRepositoryDetails(repositoryPath);
+    const commit = commitDetails?.find(commit => commit.commitHash === commitHash);
+    if (commit) {
+      this.logger.debug(`commitDetailsExist(${commitHash}) found ${commit}`);
+      return commit;
+    } else {
+      this.logger.debug(`commitDetailsExist(${commitHash}) returned false`);
+      return undefined; // Return false if commit is not found
+    }
+  }
+
+  public noteDetailsExists(repositoryPath: string, commitHash: string): boolean {
+    this.logger.debug(`noteExists(${commitHash})`);
+    const commitDetails = this.getExistingRepositoryDetails(repositoryPath);
+    const commit = commitDetails?.find(commit => commit.commitHash === commitHash);
+    if (commit) {
+      const note = commit.note;
+      if (note) {
+        this.logger.debug(`noteExists(${commitHash}) = true`);
+        return true;
+      }
+    }
+    this.logger.debug(`noteExists(${commitHash}) = false`);
+    return false; // Return false if commit or note is not found
   }
 
   public getGitNoteMessage(commitDetails?: CommitDetails[], commitHash?: string): string | undefined {
