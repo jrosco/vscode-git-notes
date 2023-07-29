@@ -253,7 +253,6 @@ export class GitCommands {
           if (error) {
             const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
             reject(new Error(`Error retrieving note details: ${errorMessage}`));
-            this.statusBar.showErrorMessage(`Git Notes: Error retrieving note: ${errorMessage}`);
           } else {
             resolve(result);
           }
@@ -407,8 +406,8 @@ export class GitCommands {
         this.statusBar.update();
         const cmdList = force ? ['notes', subCmd, commitHash, '-m', message, '--force'] : ['notes', subCmd, commitHash, '-m', message];
         await this.git.raw(cmdList)
-        .then((message) => {
-          this.output.log(message);
+        .then(() => {
+          this.manager.updateNoteMessage(commitHash, message, repositoryPath);
         });
         await this.loadNoteDetails(repositoryPath, commitHash);
       } else {
@@ -545,6 +544,7 @@ export class GitCommands {
           .then(() => {
             const showMsg = prune ? "Pruned notes" : `Removed note for commit ${commitHash} \nPath: ${repositoryPath}`;
             this.statusBar.showInformationMessage(`Git Notes: ${showMsg}`);
+            this.manager.removeCommitByHash(commitHash, repositoryPath);
           });
           await this.loader(repositoryPath);
         }

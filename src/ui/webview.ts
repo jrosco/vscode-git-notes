@@ -99,13 +99,14 @@ export class GitNotesPanel {
           break;
         case 'commitLoad':
           await cmd.loadNoteDetails(message.repositoryPath, message.commitHash);
+        case 'refresh':
           break;
         default:
           console.warn('Unknown command:', message.command);
           break;
       }
       // Update the content of the webview panel, if `message.repositoryPath` is set
-      if (GitNotesPanel.currentPanel && message.refresh) {
+      if (GitNotesPanel.currentPanel && (message.refresh || message.command === 'refresh')) {
         GitNotesPanel.currentPanel.refreshWebViewContent(message.repositoryPath);
       }
     });
@@ -187,14 +188,7 @@ export class GitNotesPanel {
         window.addEventListener('message', event => {
           const message = event.data.message; // The JSON data our extension sent
           console.log('command:' + message.command + ' repositoryPath:' + message.repositoryPath);
-          switch (message.command) {
-            case 'repoCheck':
-              vscode.postMessage({ command: 'repoCheck', repositoryPath: message.repositoryPath, refresh: true });
-              break;
-            default:
-              console.warn('Unknown command:', message);
-              break;
-          }
+          vscode.postMessage({ command: message.command, repositoryPath: message.repositoryPath, refresh: true });
         });
         document.getElementById('repoOpen').addEventListener('click', () => {
           // When the button is clicked, call the extension method to perform the task
@@ -283,7 +277,7 @@ export class GitNotesPanel {
           <p><strong>Date:</strong> ${commit.date}</p>
           <p><strong>Commit Message:</strong> ${commit.message}</p>
           <p><strong>Note:</strong><pre>${commit.note}</pre></p>
-          <p><strong>Files:</strong></p>
+          ${commit.fileChanges ? '<p><strong>File Changes:</strong></p>' : '<p><strong>No File Changes</strong></p>'}
           <ul>
             ${commit.fileChanges?.map(fileChange => {
                 const insertionsColor = 'green';

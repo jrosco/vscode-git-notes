@@ -138,6 +138,22 @@ export class RepositoryManager {
     }
   }
 
+  public async updateNoteMessage(commitHashToUpdate: string, newNote: string, repositoryPath?: string | undefined) {
+    this.logger.debug(`updateNoteMessage(${commitHashToUpdate}, ${newNote})`);
+    const repoDetails = this.repositoryDetailsInterface.find(
+      repo => repo.repositoryPath === repositoryPath
+      );
+    if (repoDetails) {
+      const index = repoDetails.commitDetails.findIndex(commit => commit.commitHash === commitHashToUpdate);
+      if (index !== -1) {
+        this.logger.debug(`Note updated successfully for commit with hash ${commitHashToUpdate}`);
+        repoDetails.commitDetails[index].note = newNote;
+      } else {
+        this.logger.debug(`Commit with hash ${commitHashToUpdate} not found. Note update failed.`);
+      }
+    }
+  }
+
   public async clearRepositoryDetails(document?: vscode.Uri | undefined, repositoryPath?: string | undefined): Promise<void> {
     this.logger.debug(`clearRepositoryDetails(${document}, ${repositoryPath})`);
     repositoryPath = this.getGitRepositoryPath(document, repositoryPath);
@@ -147,6 +163,19 @@ export class RepositoryManager {
 
     if (index !== -1) {
       this.repositoryDetailsInterface.splice(index, 1);
+    }
+  }
+
+  public async removeCommitByHash(commitHashToRemove: string, repositoryPath?: string | undefined) {
+    this.logger.debug(`removeCommitByHash(${commitHashToRemove})`);
+    const index = this.repositoryDetailsInterface.findIndex(
+      repo => repo.repositoryPath === repositoryPath
+    );
+
+    if (index !== -1) {
+      this.repositoryDetailsInterface[index].commitDetails = this.repositoryDetailsInterface[index].commitDetails.filter(
+        (commit) => commit.commitHash !== commitHashToRemove
+      );
     }
   }
 
