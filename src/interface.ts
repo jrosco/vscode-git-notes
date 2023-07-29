@@ -17,7 +17,7 @@ export interface CommitDetails {
   note?: string | undefined;
   author?: string | undefined;
   message?: string | undefined;
-  fileChanges?: FileChanges[] | [];
+  fileChanges: FileChanges[] | [];
 }
 
 export interface FileChanges {

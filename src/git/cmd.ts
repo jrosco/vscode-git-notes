@@ -95,6 +95,7 @@ export class GitCommands {
             notesHash: note.notesHash,
             commitHash: note.commitHash,
             date: new Date('1970-01-01'),
+            fileChanges: []
           };
           commitDetailsInterface.push(detail);
         }
