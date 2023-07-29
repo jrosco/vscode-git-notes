@@ -116,11 +116,11 @@ export class GitCommands {
       const commitDetailsInterface = this.manager.getExistingRepositoryDetails(repositoryPath);
       if (max > 0) {
         for (const note of existing) {
-          console.log("existing note: " + note);
+          this.logger.debug(`searching existing notes: ${note}`);
           if (counter < max) {
-            console.log("counter is " + counter);
             const noteExist = this.manager.noteDetailsExists(repositoryPath, note.commitHash);
             if (!noteExist) {
+              this.logger.debug(`note message not found for commit ${note.commitHash} ... loading`);
               const details = this.manager.getExistingCommitDetails(repositoryPath, note.commitHash);
               if (details !== undefined) {
                 this.logger.debug(`commit and note hashes found for commit ${note.commitHash} ... loading commit details`);
@@ -138,6 +138,8 @@ export class GitCommands {
                 counter++;
               }
             }
+          } else {
+            break;
           }
         }
       }
