@@ -12,12 +12,12 @@ export interface RepositoryDetails {
 
 export interface CommitDetails {
   commitHash: string;
-  notesHash: string;
-  note: string;
-  author: string;
+  noteHash: string;
   date: Date;
-  message: string;
-  fileChanges: FileChanges[];
+  note?: string | undefined;
+  author?: string | undefined;
+  message?: string | undefined;
+  fileChanges: FileChanges[] | [];
 }
 
 export interface FileChanges {
@@ -66,13 +66,41 @@ export class RepositoryManager {
     this.logger.debug(`getFileChangeFile(${commitHash})`);
     const commit = commitDetails.find(commit => commit.commitHash === commitHash);
     if (commit) {
-      const fileChange = commit.fileChanges[0]; // Assuming you want the first file change
+      const fileChange = commit.fileChanges ? commit.fileChanges[0]: undefined; // Assuming you want the first file change
       if (fileChange) {
         this.logger.debug(`getFileChangeFile(${commitHash}) = ${fileChange.file}`);
         return fileChange.file;
       }
     }
     return undefined; // Return undefined if commit or file change is not found
+  }
+
+  public getExistingCommitDetails(repositoryPath: string, commitHash: string): CommitDetails | undefined {
+    this.logger.debug(`getExistingCommitDetails(${repositoryPath}, ${commitHash})`);
+    const commitDetails = this.getExistingRepositoryDetails(repositoryPath);
+    const commit = commitDetails?.find(commit => commit.commitHash === commitHash);
+    if (commit) {
+      this.logger.debug(`getExistingCommitDetails(${commitHash}) found ${commit}`);
+      return commit;
+    } else {
+      this.logger.debug(`getExistingCommitDetails(${commitHash}) returned false`);
+      return undefined; // Return false if commit is not found
+    }
+  }
+
+  public noteDetailsExists(repositoryPath: string, commitHash: string): boolean {
+    this.logger.debug(`noteExists(${commitHash})`);
+    const commitDetails = this.getExistingRepositoryDetails(repositoryPath);
+    const commit = commitDetails?.find(commit => commit.commitHash === commitHash);
+    if (commit) {
+      const note = commit.note;
+      if (note) {
+        this.logger.debug(`A note was found for commit ${commitHash}`);
+        return true;
+      }
+    }
+    this.logger.debug(`noteExists(${commitHash}) = false`);
+    return false; // Return false if commit or note is not found
   }
 
   public getGitNoteMessage(commitDetails?: CommitDetails[], commitHash?: string): string | undefined {

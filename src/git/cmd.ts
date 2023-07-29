@@ -1,4 +1,4 @@
-import simpleGit, { SimpleGit } from 'simple-git';
+import simpleGit, { SimpleGit, SimpleGitOptions, LogResult } from 'simple-git';
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 
@@ -41,8 +41,17 @@ export class GitCommands {
   private _setRepositoryPath(repositoryPath: string): void {
     this.logger.trace(`_setRepositoryPath(${repositoryPath})`);
     this.repositoryPath = repositoryPath;
+
+    const gitOptions: SimpleGitOptions = {
+    baseDir: repositoryPath, // Change this to the path of the directory where you want to initialize the repository
+    binary: 'git',
+    maxConcurrentProcesses: 6,
+    trimmed: true,
+    config: [],
+    };
+
     try {
-      this.git = simpleGit(repositoryPath);
+      this.git = simpleGit(gitOptions);
       this.logger.debug(`this.git: ${Object.getOwnPropertyNames(this.git)}`);
     } catch (error) {
       this.logger.error(`error setting repositoryPath: ${error}`);
@@ -54,57 +63,203 @@ export class GitCommands {
     return this.repositoryPath;
   }
 
-  public async getNotes(repositoryPath?: string): Promise<RepositoryDetails[]> {
-    this.logger.debug(`getNotes(${repositoryPath})`);
-    repositoryPath = repositoryPath || vscode.workspace.workspaceFolders?.toString() || "";
-    this._setRepositoryPath(repositoryPath);
+  // load the repository details from the repositoryPath when extension is activated
+  public async loader(repositoryPath: string, showMax?: number): Promise<RepositoryDetails[]> {
+    this.logger.debug(`loader(${repositoryPath})`);
     this.statusBar.reset();
-    try {
-      if (repositoryPath !== undefined) {
-        const existing = this.manager.getExistingRepositoryDetails(repositoryPath);
-        if (existing === undefined) {
-          const commitDetailsInterface: CommitDetails[] = [];
-          const notes = await this._getGitNotes();
-          for (const note of notes) {
-            const commitDetails = await this._getCommitDetails(note.commitHash);
-            const detail: CommitDetails = {
-              notesHash: note.notesHash,
-              commitHash: note.commitHash,
-              note: note.note,
-              author: commitDetails[0].author,
-              date: commitDetails[0].date,
-              message: commitDetails[0].message,
-              fileChanges: commitDetails[0].fileChanges,
-            };
-            commitDetailsInterface.push(detail);
-          }
-          const repositoryUrl = await this._getGitUrl();
-          this.manager.updateRepositoryDetails(repositoryPath, repositoryUrl, commitDetailsInterface);
+    this._setRepositoryPath(repositoryPath);
+    const commitDetailsInterface: CommitDetails[] = [];
+    const existing = this.manager.getExistingRepositoryDetails(repositoryPath);
+    let counter = 0;
+    let max = showMax || 0;
+
+    if (existing === undefined) {
+      this.logger.debug(`no details found for ${repositoryPath} ... loading`);
+      const notes = await this._getGitNotesList();
+      for (const note of notes) {
+        if (counter < max) {
+          const commitDetails = await this._getCommitDetails(note.commitHash);
+          const detail: CommitDetails = {
+            noteHash: note.noteHash,
+            commitHash: note.commitHash,
+            date: note.date,
+            author: commitDetails[0].author,
+            message: commitDetails[0].message,
+            note: (await this._getGitNoteMessage(note.commitHash)).toString(),
+            fileChanges: commitDetails[0].fileChanges
+          };
+          counter++;
+          commitDetailsInterface.push(detail);
+        } else {
+          const detail: CommitDetails = {
+            noteHash: note.noteHash,
+            commitHash: note.commitHash,
+            date: note.date,
+            fileChanges: []
+          };
+          commitDetailsInterface.push(detail);
         }
       }
-      this.statusBar.notesCount = this.manager.getExistingRepositoryDetails(repositoryPath)?.length || 0;
-      this.statusBar.repositoryPath = repositoryPath;
-      this.statusBar.update();
-    } catch (error) {
-      this.logger.error(`error getting notes: ${error}`);
+      const repositoryUrl = await this._getGitUrl();
+      this.manager.updateRepositoryDetails(repositoryPath, repositoryUrl, commitDetailsInterface);
+    } else {
+      // for (const note of existing) {
+      //   console.log("existing note: " + note);
+      //   if (counter < max) {
+      //     console.log("counter is " + counter);
+      //     const noteExist = this.manager.noteDetailsExists(repositoryPath, note.commitHash);
+      //     noteExist ? counter++: counter;
+      //     this.loadNoteDetails(repositoryPath, note.commitHash);
+      //   }
+      // }
+      this.logger.debug(`details found for ${repositoryPath} ... loading next ${max} notes`);
+      const commitDetailsInterface = this.manager.getExistingRepositoryDetails(repositoryPath);
+      if (max > 0) {
+        for (const note of existing) {
+          this.logger.debug(`searching existing notes: ${note}`);
+          if (counter < max) {
+            const noteExist = this.manager.noteDetailsExists(repositoryPath, note.commitHash);
+            if (!noteExist) {
+              this.logger.debug(`note message not found for commit ${note.commitHash} ... loading`);
+              const details = this.manager.getExistingCommitDetails(repositoryPath, note.commitHash);
+              if (details !== undefined) {
+                this.logger.debug(`commit and note hashes found for commit ${note.commitHash} ... loading commit details`);
+                if ((details.author && details.date && details.message) === undefined) {
+                  const commitDetails = await this._getCommitDetails(note.commitHash);
+                  const updatedCommitDetails: Partial<CommitDetails> = {
+                    author: commitDetails[0].author,
+                    message: commitDetails[0].message,
+                    note: (await this._getGitNoteMessage(note.commitHash)).toString(),
+                    fileChanges: commitDetails[0].fileChanges
+                  };
+                  Object.assign(details, updatedCommitDetails);
+                }
+                counter++;
+              }
+            }
+          } else {
+            break;
+          }
+        }
+      }
+      if (commitDetailsInterface) {
+        const repositoryUrl = await this._getGitUrl();
+        this.manager.updateRepositoryDetails(repositoryPath, repositoryUrl, commitDetailsInterface);
+      }
+    }
+    this.statusBar.notesCount = this.manager.getExistingRepositoryDetails(repositoryPath)?.length || 0;
+    this.statusBar.repositoryPath = repositoryPath;
+    this.statusBar.update();
+    return this.manager.repositoryDetailsInterface;
+  }
+
+  // load the repository details from the repositoryPath
+  public async loadNoteDetails(repositoryPath: string, commitHash: string): Promise<RepositoryDetails[]> {
+    this.logger.debug(`addNotes(${repositoryPath}, ${commitHash})`);
+    this._setRepositoryPath(repositoryPath);
+    this.statusBar.reset();
+    const commitDetailsInterface = this.manager.getExistingRepositoryDetails(repositoryPath);
+    const noteExist = this.manager.noteDetailsExists(repositoryPath, commitHash);
+
+    if (!noteExist) {
+      const note = await this._getGitNotesList(commitHash);
+      const details = this.manager.getExistingCommitDetails(repositoryPath, commitHash);
+      if (details !== undefined) {
+        this.logger.debug(`commit and note hashes found for commit ${commitHash} ... loading commit details`);
+        if ((details.author && details.date && details.message) === undefined) {
+          const commitDetails = await this._getCommitDetails(commitHash);
+          const updatedCommitDetails: Partial<CommitDetails> = {
+            author: commitDetails[0].author,
+            message: commitDetails[0].message,
+            note: (await this._getGitNoteMessage(note[0].commitHash)).toString(),
+            fileChanges: commitDetails[0].fileChanges
+          };
+          Object.assign(details, updatedCommitDetails);
+        }
+      } else {
+        this.logger.debug(`no commit or note hashes details found for commit ${commitHash} ... loading full details`);
+        const commitDetails = await this._getCommitDetails(commitHash);
+        const details: CommitDetails = {
+          noteHash: note[0].noteHash,
+          commitHash: note[0].commitHash,
+          date: note[0].date,
+          author: commitDetails[0].author,
+          message: commitDetails[0].message,
+          note: (await this._getGitNoteMessage(note[0].commitHash)).toString(),
+          fileChanges: commitDetails[0].fileChanges
+        };
+        commitDetailsInterface ? commitDetailsInterface.push(details): commitDetailsInterface;
+      }
+
+      if (commitDetailsInterface) {
+        const repositoryUrl = await this._getGitUrl();
+        this.manager.updateRepositoryDetails(repositoryPath, repositoryUrl, commitDetailsInterface);
+      }
     }
     return this.manager.repositoryDetailsInterface;
   }
 
-  private _getGitNotes(): Promise<any[]> {
-    this.logger.trace("_getGitNotes()");
+  private _getGitNotesList(commitHash?: string): Promise<any[]> {
+    this.logger.trace("_getGetNotesList()");
     return new Promise<any[]>(async(resolve, reject) => {
-      this.git.raw(["notes", `--ref=${this.settings.localNoteRef}`, "list"], (err, result) => {
+      this.git.log(["--date=iso", "--format=%H %cd"], (err, commitLog: LogResult) => {
         if (err) {
           reject(err);
         } else {
-          const notes = this._parseGitNotes(result);
+          const cmdList = commitHash ? ['notes', 'list', commitHash]: ['notes', 'list'];
+          const commits: any[] = [];
+          this.git.raw(cmdList, (err, notesOutput) => {
+            commitLog.all.map((commitOutput) => {
+              const commitLines = commitOutput.hash.split(/\r?\n/);
+              const noteLines = notesOutput.split(/\r?\n/);
+              // TODO: Improve this logic.
+              noteLines.forEach((noteLine) => {
+                commitLines.forEach((commitLine) => {
+                  const [noteHash, noteCommitHash] = noteLine.split(' ');
+                  const checkCommittedHash = commitHash ? commitHash : noteCommitHash;
+                  const [commitLogHash, date, dateTime, dateUTC] = commitLine.split(' ');
+                  if (checkCommittedHash === commitLogHash && noteHash) {
+                    const commit = {
+                      commitHash: commitLogHash,
+                      noteHash: noteHash,
+                      date: new Date(`${date} ${dateTime} ${dateUTC}`),
+                    };
+                    commits.push(commit);
+                  }
+                });
+              });
+              resolve(commits);
+            });
+          });
+        }
+      });
+    });
+  }
+
+  /**
+  * This function is deprecated. Use _getGitNotesList() instead.
+  * @deprecated Since version 0.2.0. Will be removed in version 1.0.0.
+  */
+  private _getGitNotes(commitHash?: string): Promise<any[]> {
+    this.logger.trace("_getGitNotes()");
+    return new Promise<any[]>(async(resolve, reject) => {
+      const cmdList = commitHash ? ["notes", `--ref=${this.settings.localNoteRef}`, "list", commitHash]: ["notes", `--ref=${this.settings.localNoteRef}`, "list"];
+      this.git.raw(cmdList, (err, result) => {
+        if (err) {
+          reject(err);
+        } else {
+          const output = commitHash ? `${result} ${commitHash}` : result;
+          const notes = this._parseGitNotes(output);
           resolve(notes);
         }
       });
     });
   }
 
+  /**
+  * This function is deprecated. Use _getGitNotesList() instead.
+  * @deprecated Since version 0.2.0. Will be removed in version 1.0.0.
+  */
   private _parseGitNotes(notesOutput: string): Promise<any[]> {
     this.logger.trace(`_parseGitNotes(${notesOutput})`);
     return new Promise<any[]>(async (resolve, reject) => {
@@ -118,11 +273,9 @@ export class GitCommands {
           if (line.length > 0) {
             const parts = line.split(" ");
             if (parts.length > 0) {
-              const message = await this._getGitNoteMessage(parts[1]);
               const note = {
-                notesHash: parts[0],
+                noteHash: parts[0],
                 commitHash: parts[1],
-                note: message,
               };
               notes.push(note);
             }
@@ -286,7 +439,6 @@ export class GitCommands {
     return undefined;
   };
 
-
   public async addGitNotes(message: string, commitHash: string, subCmd: string = 'add', fileUri?: vscode.Uri, repositoryPath?: string,
     force?: boolean, append?: boolean): Promise<void> {
 
@@ -303,7 +455,7 @@ export class GitCommands {
         .then(() => {
           this.manager.updateNoteMessage(commitHash, message, repositoryPath);
         });
-        await this.getNotes(repositoryPath);
+        await this.loadNoteDetails(repositoryPath, commitHash);
       } else {
         this.logger.error("Not a git repository (or any of the parent directories): .git ");
         this.statusBar.showInformationMessage("Git Notes: Not a git repository (or any of the parent directories): .git");
@@ -349,7 +501,7 @@ export class GitCommands {
             this.manager.clearRepositoryDetails(undefined, repositoryPath);
           });
         }
-        await this.getNotes(repositoryPath);
+        await this.loader(repositoryPath, 5);
       } else {
         this.logger.debug("Not a git repository (or any of the parent directories): .git ");
         this.statusBar.showInformationMessage("Git Notes: Not a git repository (or any of the parent directories): .git");
@@ -392,10 +544,9 @@ export class GitCommands {
           .then((message) => {
             const showMsg = message.pushed.length > 0 ? "Everything up-to-date": `Pushed ${message.update?.hash.from} -> ${message.update?.hash.to}`;
             this.statusBar.showInformationMessage(`Git Notes: ${showMsg}`);
-            this.manager.clearRepositoryDetails(undefined, repositoryPath);
           });
         }
-        await this.getNotes(this.repositoryPath);
+        await this.loader(repositoryPath);
       } else {
         this.logger.debug("Not a git repository (or any of the parent directories): .git");
         this.statusBar.showInformationMessage("Git Notes: Not a git repository (or any of the parent directories): .git");
@@ -441,7 +592,7 @@ export class GitCommands {
             this.statusBar.showInformationMessage(`Git Notes: ${showMsg}`);
             this.manager.removeCommitByHash(commitHash, repositoryPath);
           });
-          await this.getNotes(repositoryPath);
+          await this.loader(repositoryPath);
         }
       } else {
         this.logger.debug("Not a git repository (or any of the parent directories): .git");
