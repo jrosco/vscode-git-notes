@@ -12,7 +12,7 @@ export interface RepositoryDetails {
 
 export interface CommitDetails {
   commitHash: string;
-  notesHash: string;
+  noteHash: string;
   date: Date;
   note?: string | undefined;
   author?: string | undefined;
