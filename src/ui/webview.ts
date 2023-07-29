@@ -247,6 +247,7 @@ export class GitNotesPanel {
 
       const repositoryInfo = filteredRepositoryDetails.map(details => `
         <div>
+          <header>
           <p><h3 style="color:${headingColor};background-color:${headingBgColor};">Repository Path: ${details.repositoryPath}</h3></p>
           <p><h4 style="color:${headingColor};background-color:${headingBgColor};">Notes Found: ${details.commitDetails.length}</h4></p>
           <p><a href="google.com">
@@ -258,21 +259,20 @@ export class GitNotesPanel {
           <button id="repoFetch">Fetch Notes</button>
           <button id="repoLoadMore">Load More</button>
           <button id="repoClearCache">Clear Cache</button></p>
+        </header>
         </div>
         <style>
           <hr {width: 10px;}>
         </style>
         ${details.commitDetails.map(commit => `
           <hr>
-          <div>
+          <div class="content">
           <p style="color:${commitHashColor};background-color:${commitHashBgColor};"><b>Commit Hash: </b>${commit.commitHash}</p>
           <p style="color:${noteHashColor};background-color:${noteHashBgColor};"><b>Note Hash: </b>${commit.noteHash}</p>
           <p><button id="open-${commit.commitHash}">Open Commit</button>
           <button id="edit-${commit.commitHash}">Edit</button>
           <button id="remove-${commit.commitHash}">Remove</button>
           <button id="load-${commit.commitHash}">Load</button></p>
-          </div>
-          <div style="color:${color};">
           <p><strong>Author:</strong> ${commit.author}</p>
           <p><strong>Date:</strong> ${commit.date}</p>
           <p><strong>Commit Message:</strong> ${commit.message}</p>
@@ -301,9 +301,32 @@ export class GitNotesPanel {
       return `
         <html>
           <body>
-            <script>
-            ${combinedScript}
-            </script>
+            <head>
+              <style>
+                body {
+                  margin: 0;
+                  padding: 0;
+                }
+                header {
+                  background-color: ${headingBgColor};
+                  padding: 10px;
+                  position: fixed;
+                  top: 0;
+                  left: 10;
+                  right: 10;
+                  width: 100%;
+                }
+                /* Optional styles for the content to create space below the fixed header */
+                .content {
+                  style: ${color};
+                  margin-top: 60px; /* Add some margin to push content down, so it's not overlapped by the header */
+                  padding: 20px;
+                }
+              </style>
+              <script>
+                ${combinedScript}
+              </script>
+            </head>
             <h1>Git Notes</h1>
             ${repositoryInfo}
           </body>
