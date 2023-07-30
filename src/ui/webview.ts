@@ -59,6 +59,7 @@ export class GitNotesPanel {
     // Handle messages from the Webview
     panel.webview.onDidReceiveMessage(async (message) => {
       const cmd = new GitCommands();
+      const settings = new GitNotesSettings();
       switch (message.command) {
         case 'repoOpen':
           await vscode.env.openExternal(vscode.Uri.parse(message.repositoryUrl));
@@ -91,7 +92,7 @@ export class GitNotesPanel {
             message.commitHash, message.repositoryPath);
           break;
         case 'repoLoadMore':
-          await cmd.loader(message.repositoryPath, 5);
+          await cmd.loader(message.repositoryPath, settings.gitNotesLoadLimit);
           break;
         case 'repoClearCache':
           await vscode.commands.executeCommand('extension.checkGitNotes',
@@ -274,7 +275,7 @@ export class GitNotesPanel {
           <button id="repoPrune">Prune Notes</button>
           <button id="repoPush">Push Notes</button>
           <button id="repoFetch">Fetch Notes</button>
-          <button id="repoLoadMore">Load More</button>
+          <button id="repoLoadMore">Load More (${this.settings.gitNotesLoadLimit})</button>
           <button id="repoClearCache">Clear Cache</button></p>
         </header>
         </div>

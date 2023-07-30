@@ -74,6 +74,11 @@
           "type": "boolean",
           "default": true,
           "description": "Sort Git Notes by date (newest first)"
+        },
+        "git-notes.gitNotesLoadLimit": {
+          "type": "number",
+          "default": 3,
+          "description": "Number of Git Notes to load at a time."
         }
       }
     },

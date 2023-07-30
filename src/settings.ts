@@ -78,6 +78,11 @@ export class GitNotesSettings {
 		return this._config.get('sortDateNewestFirst', true);
 	}
 
+	public get gitNotesLoadLimit(): number {
+		this.logger.debug("gitNotesLoadLimit get sortDateNewestFirst called");
+		return this._config.get('gitNotesLoadLimit', 3);
+	}
+
 	public get onDidChangeConfig(): vscode.Event<vscode.ConfigurationChangeEvent> {
 		this.logger.debug("GitNotesSettings get onDidChangeConfig called");
 		return this._onDidChangeConfig.event;
