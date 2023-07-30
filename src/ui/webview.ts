@@ -250,9 +250,7 @@ export class GitNotesPanel {
           <header>
           <p><h3 style="color:${headingColor};background-color:${headingBgColor};">Repository Path: ${details.repositoryPath}</h3></p>
           <p><h4 style="color:${headingColor};background-color:${headingBgColor};">Notes Found: ${details.commitDetails.length}</h4></p>
-          <p><a href="google.com">
-            <button id="repoOpen" >Open Repo</button>
-          </a>
+          <p><button id="repoOpen" >Open Repo</button>
           <button id="repoAdd">Add Note</button>
           <button id="repoPrune">Prune Notes</button>
           <button id="repoPush">Push Notes</button>
@@ -261,9 +259,6 @@ export class GitNotesPanel {
           <button id="repoClearCache">Clear Cache</button></p>
         </header>
         </div>
-        <style>
-          <hr {width: 10px;}>
-        </style>
         ${details.commitDetails.map(commit => `
           <hr>
           <div class="content">
