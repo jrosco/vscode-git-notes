@@ -241,38 +241,56 @@ export class GitNotesPanel {
         };
         // Wait for the DOM to be fully loaded before initializing the Webview
         document.addEventListener('DOMContentLoaded', initWebview);
+
+        function hideDetails(contentId) {
+          var contentDetails = "contentDetails-"+contentId;
+          var buttonHide = "hide-"+contentId;
+          var buttonShow = "load-"+contentId;
+          var contentElement = document.getElementById(contentDetails);
+          var buttonHideElement = document.getElementById(buttonHide);
+          var buttonShowElement = document.getElementById(buttonShow);
+
+          if (buttonHideElement.style.display === "inline-block") {
+            contentElement.setAttribute("class", "contentDetails hidden");
+            buttonHideElement.style.display = "none";
+            buttonShowElement.style.display = "inline-block";
+          } else {
+            contentElement.setAttribute("class", "contentDetails");
+            buttonHideElement.style.display = "inline-block";
+            buttonShowElement.style.display = "none";
+          }
+        }
       `;
       // Combine all scripts into one string
       const combinedScript: string = vscodeScript + eventListenersScript + endScript;
 
       const repositoryInfo = filteredRepositoryDetails.map(details => `
         <div>
-          <p><h3 style="color:${headingColor};background-color:${headingBgColor};">Repository Path: ${details.repositoryPath}</h3></p>
+          <header>
+          <p><h3 style="color:${headingColor};background-color: ${headingBgColor};">Repository Path: ${details.repositoryPath}</h3></p>
           <p><h4 style="color:${headingColor};background-color:${headingBgColor};">Notes Found: ${details.commitDetails.length}</h4></p>
-          <p><a href="google.com">
-            <button id="repoOpen" >Open Repo</button>
-          </a>
+          <p><button id="repoOpen" >Open Repo</button>
           <button id="repoAdd">Add Note</button>
           <button id="repoPrune">Prune Notes</button>
           <button id="repoPush">Push Notes</button>
           <button id="repoFetch">Fetch Notes</button>
           <button id="repoLoadMore">Load More</button>
           <button id="repoClearCache">Clear Cache</button></p>
+        </header>
         </div>
-        <style>
-          <hr {width: 10px;}>
-        </style>
         ${details.commitDetails.map(commit => `
           <hr>
-          <div>
+          <div class="content">
           <p style="color:${commitHashColor};background-color:${commitHashBgColor};"><b>Commit Hash: </b>${commit.commitHash}</p>
           <p style="color:${noteHashColor};background-color:${noteHashBgColor};"><b>Note Hash: </b>${commit.noteHash}</p>
           <p><button id="open-${commit.commitHash}">Open Commit</button>
           <button id="edit-${commit.commitHash}">Edit</button>
           <button id="remove-${commit.commitHash}">Remove</button>
-          <button id="load-${commit.commitHash}">Load</button></p>
+          <button id="load-${commit.commitHash}" onclick="hideDetails('${commit.commitHash}')" style="display: ${commit.author ? 'none' : 'inline-block'}">Show Details</button>
+          <button id="hide-${commit.commitHash}" onclick="hideDetails('${commit.commitHash}')" style="display: ${!commit.author ? 'none' : 'inline-block'}">Hide Details</button>
           </div>
-          <div style="color:${color};">
+
+          ${commit.author ? `<div class="contentDetails" id="contentDetails-${commit.commitHash}"` : `<div class="hidden" style="display:none">`}
           <p><strong>Author:</strong> ${commit.author}</p>
           <p><strong>Date:</strong> ${commit.date}</p>
           <p><strong>Commit Message:</strong> ${commit.message}</p>
@@ -294,16 +312,52 @@ export class GitNotesPanel {
 
                 return `<li style="color: ${color}">${fileChange.file} ${insertionsStatus} ${deletionsStatus} ${addedStatus} ${deletedStatus} ${renamedStatus}</li>`;
             }).join('')}
-        </ul>
+          </ul>
           </div>
         `).join('')}
       `).join('');
       return `
         <html>
           <body>
-            <script>
-            ${combinedScript}
-            </script>
+            <head>
+              <style>
+                body {
+                  margin: 0;
+                  padding: 0;
+                }
+                header {
+                  background-color: ${headingBgColor};
+                  padding: 10px;
+                  position: fixed;
+                  top: 0;
+                  left: 10;
+                  right: 10;
+                  width: 100%;
+                }
+                /* Optional styles for the content to create space below the fixed header */
+                .content {
+                  style: ${color};
+                  margin-top: 50px;
+                  margin-bottom: 0px;
+                  padding: 20px;
+                  padding-bottom: 0px;
+                }
+                .contentDetails {
+                  style: ${color};
+                  margin-top: 0px;
+                  padding: 20px;
+                  padding-top: 0px;
+                  padding-bottom: 0px;
+                  display: block;
+                }
+                .hidden {
+                  display: none;
+                }
+              </style>
+              <script>
+                ${combinedScript}
+              </script>
+            </head>
             <h1>Git Notes</h1>
             ${repositoryInfo}
           </body>
