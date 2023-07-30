@@ -6,6 +6,8 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [Unreleased Changes]
 
+## [0.2.0]
+
 ### Added
 
 - Created a loader method for git notes to support things like, infinite scrolling in webview, caching etc (<https://github.com/jrosco/vscode-git-notes/pull/19>)
@@ -45,3 +47,4 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 [0.0.1]: https://github.com/jrosco/vscode-git-notes/compare/a9fdfb1...0.0.1
 [0.1.0]: https://github.com/jrosco/vscode-git-notes/compare/0.0.1...0.1.0
+[0.2.0]: https://github.com/jrosco/vscode-git-notes/compare/0.1.0...0.2.0
