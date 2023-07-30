@@ -267,7 +267,10 @@ export class GitNotesPanel {
           <p><button id="open-${commit.commitHash}">Open Commit</button>
           <button id="edit-${commit.commitHash}">Edit</button>
           <button id="remove-${commit.commitHash}">Remove</button>
-          <button id="load-${commit.commitHash}">Load</button></p>
+          <button id="load-${commit.commitHash}" style="display: ${commit.author ? 'none' : 'inline-block'}">Show Details</button>
+          </div>
+
+          ${commit.author ? '<div class="contentDetails">' : '<div class="hide-content" style="display:none">'}
           <p><strong>Author:</strong> ${commit.author}</p>
           <p><strong>Date:</strong> ${commit.date}</p>
           <p><strong>Commit Message:</strong> ${commit.message}</p>
@@ -289,7 +292,7 @@ export class GitNotesPanel {
 
                 return `<li style="color: ${color}">${fileChange.file} ${insertionsStatus} ${deletionsStatus} ${addedStatus} ${deletedStatus} ${renamedStatus}</li>`;
             }).join('')}
-        </ul>
+          </ul>
           </div>
         `).join('')}
       `).join('');
@@ -314,8 +317,21 @@ export class GitNotesPanel {
                 /* Optional styles for the content to create space below the fixed header */
                 .content {
                   style: ${color};
-                  margin-top: 60px; /* Add some margin to push content down, so it's not overlapped by the header */
+                  margin-top: 50px;
+                  margin-bottom: 0px;
                   padding: 20px;
+                  padding-bottom: 0px;
+                }
+                .contentDetails {
+                  style: ${color};
+                  margin-top: 0px;
+                  padding: 20px;
+                  padding-top: 0px;
+                  padding-bottom: 0px;
+                }
+                /* Styling for the collapsible content */
+                .hide-content {
+                  display: none;
                 }
               </style>
               <script>
