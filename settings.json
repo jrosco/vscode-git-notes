@@ -7,5 +7,6 @@
     "git-notes.enableNotificationsWhenNotesFound": false,
     "git-notes.confirmPushAndFetchCommands": true,
     "git-notes.confirmRemovalCommands": true,
-    "git-notes.confirmPruneCommands": true
+    "git-notes.confirmPruneCommands": true,
+    "git-notes.gitNotesLoadLimit": 3
 }

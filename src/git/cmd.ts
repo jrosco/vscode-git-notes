@@ -501,7 +501,7 @@ export class GitCommands {
             this.manager.clearRepositoryDetails(undefined, repositoryPath);
           });
         }
-        await this.loader(repositoryPath, 5);
+        await this.loader(repositoryPath, this.settings.gitNotesLoadLimit);
       } else {
         this.logger.debug("Not a git repository (or any of the parent directories): .git ");
         this.statusBar.showInformationMessage("Git Notes: Not a git repository (or any of the parent directories): .git");
