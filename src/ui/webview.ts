@@ -220,47 +220,32 @@ export class GitNotesPanel {
           vscode.postMessage({ command: 'repoClearCache', repositoryPath: '${details.repositoryPath}', refresh: true });
         });
         ${details.commitDetails.map(commit => `
-        document.getElementById('open-${commit.commitHash}').addEventListener('click', () => {
-          // When the button is clicked, call the extension method to perform the task
-          vscode.postMessage({ command: 'commitOpen', commitUrl: '${details.repositoryUrl}/commit/${commit.commitHash}' });
-        });
-        document.getElementById('edit-${commit.commitHash}').addEventListener('click', () => {
-          // When the button is clicked, call the extension method to perform the task
-          vscode.postMessage({ command: 'commitEdit', commitHash: '${commit.commitHash}', repositoryPath: '${details.repositoryPath}', refresh: true });
-        });
-        document.getElementById('remove-${commit.commitHash}').addEventListener('click', () => {
-          // When the button is clicked, call the extension method to perform the task
-          vscode.postMessage({ command: 'commitRemove', commitHash: '${commit.commitHash}', repositoryPath: '${details.repositoryPath}', refresh: true });
-        });
-        document.getElementById('load-${commit.commitHash}').addEventListener('click', () => {
-          // When the button is clicked, call the extension method to perform the task
-          vscode.postMessage({ command: 'commitLoad', commitHash: '${commit.commitHash}', repositoryPath: '${details.repositoryPath}', refresh: true });
-        });
+        if (document.getElementById('open-${commit.commitHash}')) {
+          document.getElementById('open-${commit.commitHash}').addEventListener('click', () => {
+            vscode.postMessage({ command: 'commitOpen', commitUrl: '${details.repositoryUrl}/commit/${commit.commitHash}' });
+          });
+        }
+        if (document.getElementById('edit-${commit.commitHash}')) {
+          document.getElementById('edit-${commit.commitHash}').addEventListener('click', () => {
+            vscode.postMessage({ command: 'commitEdit', commitHash: '${commit.commitHash}', repositoryPath: '${details.repositoryPath}', refresh: true });
+          });
+        }
+        if (document.getElementById('remove-${commit.commitHash}')) {
+          document.getElementById('remove-${commit.commitHash}').addEventListener('click', () => {
+            vscode.postMessage({ command: 'commitRemove', commitHash: '${commit.commitHash}', repositoryPath: '${details.repositoryPath}', refresh: true });
+          });
+        }
+        if (document.getElementById('load-${commit.commitHash}')) {
+          document.getElementById('load-${commit.commitHash}').addEventListener('click', () => {
+            vscode.postMessage({ command: 'commitLoad', commitHash: '${commit.commitHash}', repositoryPath: '${details.repositoryPath}', refresh: true });
+          });
+        }
         `).join('\n')}
       `).join('\n');
       const endScript: string = `
         };
         // Wait for the DOM to be fully loaded before initializing the Webview
         document.addEventListener('DOMContentLoaded', initWebview);
-
-        function hideDetails(contentId) {
-          var contentDetails = "contentDetails-"+contentId;
-          var buttonHide = "hide-"+contentId;
-          var buttonShow = "load-"+contentId;
-          var contentElement = document.getElementById(contentDetails);
-          var buttonHideElement = document.getElementById(buttonHide);
-          var buttonShowElement = document.getElementById(buttonShow);
-
-          if (buttonHideElement.style.display === "inline-block") {
-            contentElement.setAttribute("class", "contentDetails hidden");
-            buttonHideElement.style.display = "none";
-            buttonShowElement.style.display = "inline-block";
-          } else {
-            contentElement.setAttribute("class", "contentDetails");
-            buttonHideElement.style.display = "inline-block";
-            buttonShowElement.style.display = "none";
-          }
-        }
       `;
       // Combine all scripts into one string
       const combinedScript: string = vscodeScript + eventListenersScript + endScript;
@@ -287,13 +272,12 @@ export class GitNotesPanel {
           <p><button id="open-${commit.commitHash}">Open Commit</button>
           <button id="edit-${commit.commitHash}" style="display: ${commit.note ? 'inline-block' : 'none'}">Edit</button>
           <button id="remove-${commit.commitHash}">Remove</button>
-          <button id="load-${commit.commitHash}" onclick="hideDetails('${commit.commitHash}')" style="display: ${commit.author ? 'none' : 'inline-block'}">Show Details</button>
-          <button id="hide-${commit.commitHash}" onclick="hideDetails('${commit.commitHash}')" style="display: ${!commit.author ? 'none' : 'inline-block'}">Hide Details</button>
+          <button id="load-${commit.commitHash}" style="display: ${commit.note ? 'none' : 'inline-block'}">Load Details</button></p>
+          <p><b>Date: </b>${commit.date}</p>
           </div>
-
-          ${commit.author ? `<div class="contentDetails" id="contentDetails-${commit.commitHash}"` : `<div class="hidden" style="display:none">`}
+          <div class="contentDetails" id="contentDetails-${commit.commitHash}" style="display: ${commit.note ? 'inline-block' : 'none'}">
           <p><strong>Author:</strong> ${commit.author}</p>
-          <p><strong>Date:</strong> ${commit.date}</p>
+          <!-- <p><strong>Date:</strong> ${commit.date}</p> -->
           <p><strong>Commit Message:</strong> ${commit.message}</p>
           <p><strong>Note:</strong><pre>${commit.note}</pre></p>
           ${commit.fileChanges.length > 0 ? '<p><strong>File Changes:</strong></p>' : '<p><strong>No File Changes</strong></p>'}
@@ -349,7 +333,6 @@ export class GitNotesPanel {
                   padding: 20px;
                   padding-top: 0px;
                   padding-bottom: 0px;
-                  display: block;
                 }
                 .hidden {
                   display: none;
