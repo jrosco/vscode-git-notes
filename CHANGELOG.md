@@ -45,7 +45,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 - 🔖 Initial Release
 
-[Unreleased Changes]: https://github.com/jrosco/vscode-git-notes/compare/0.1.0...HEAD
+[Unreleased Changes]: https://github.com/jrosco/vscode-git-notes/compare/0.2.0...HEAD
 
 [0.0.1]: https://github.com/jrosco/vscode-git-notes/compare/a9fdfb1...0.0.1
 [0.1.0]: https://github.com/jrosco/vscode-git-notes/compare/0.0.1...0.1.0
