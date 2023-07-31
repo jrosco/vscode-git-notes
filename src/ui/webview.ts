@@ -285,7 +285,7 @@ export class GitNotesPanel {
           <p style="color:${commitHashColor};background-color:${commitHashBgColor};"><b>Commit Hash: </b>${commit.commitHash}</p>
           <p style="color:${noteHashColor};background-color:${noteHashBgColor};"><b>Note Hash: </b>${commit.noteHash}</p>
           <p><button id="open-${commit.commitHash}">Open Commit</button>
-          <button id="edit-${commit.commitHash}">Edit</button>
+          <button id="edit-${commit.commitHash}" style="display: ${commit.note ? 'inline-block' : 'none'}">Edit</button>
           <button id="remove-${commit.commitHash}">Remove</button>
           <button id="load-${commit.commitHash}" onclick="hideDetails('${commit.commitHash}')" style="display: ${commit.author ? 'none' : 'inline-block'}">Show Details</button>
           <button id="hide-${commit.commitHash}" onclick="hideDetails('${commit.commitHash}')" style="display: ${!commit.author ? 'none' : 'inline-block'}">Hide Details</button>
