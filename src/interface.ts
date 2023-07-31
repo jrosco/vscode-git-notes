@@ -104,7 +104,7 @@ export class RepositoryManager {
   }
 
   public getGitNoteMessage(commitDetails?: CommitDetails[], commitHash?: string): string | undefined {
-    this.logger.debug(`getGitNoteMessage(${commitDetails}, ${commitHash})`);
+    this.logger.debug(`getGitNoteMessage(${commitHash})`);
     const commit = commitDetails?.find(commit => commit.commitHash === commitHash);
     if (commit) {
       const note = commit.note;
@@ -117,7 +117,7 @@ export class RepositoryManager {
   }
 
   public updateRepositoryDetails(repositoryPath: string | undefined, repositoryUrl: string, notes: CommitDetails[]): void {
-    this.logger.debug(`updateRepositoryDetails(${repositoryPath}, ${repositoryUrl}, ${notes})`);
+    this.logger.debug(`updateRepositoryDetails(${repositoryPath}, ${repositoryUrl}, notes found ${notes.length})`);
     const index = this.repositoryDetailsInterface.findIndex(
       repo => repo.repositoryPath === repositoryPath
     );

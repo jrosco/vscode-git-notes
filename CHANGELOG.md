@@ -11,6 +11,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 - ⚡ Created a loader method for git notes to support things like, infinite scrolling in webview, caching etc (<https://github.com/jrosco/vscode-git-notes/pull/19>)
 - ⚡ Remove and Add committed notes from the `CommitDetails[]` interface class (<https://github.com/jrosco/vscode-git-notes/pull/18>)
 - 💄 Improve Webview for new git notes `loader()` function (<https://github.com/jrosco/vscode-git-notes/pull/20>)
+  - ⚡ RELATED: Remove the loop inside a loop in method `_getGitNotesList()` (<https://github.com/jrosco/vscode-git-notes/pull/23>)
 - 🍻 Add settings for the git notes load limit (<https://github.com/jrosco/vscode-git-notes/pull/21>)
   
 ### Fixed
