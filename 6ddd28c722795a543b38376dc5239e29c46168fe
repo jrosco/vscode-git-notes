@@ -10,4 +10,4 @@ Added
     🍻 Add settings for the git notes load limit (https://github.com/jrosco/vscode-git-notes/pull/21)
 Fixed
     ♻️ Don't show files in webview if no file changes found (https://github.com/jrosco/vscode-git-notes/pull/17)
-    🐛 Don't show the edit button if no note exist in the commit (https://github.com/jrosco/vscode-git-notes/pull/24)
+    🐛 Don't show the edit button if no note exist in the commit <a href="https://github.com/jrosco/vscode-git-notes/pull/24">#24</a>
