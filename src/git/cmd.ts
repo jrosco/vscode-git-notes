@@ -78,6 +78,7 @@ export class GitCommands {
       const notes = await this._getGitNotesList();
       for (const note of notes) {
         if (counter < max) {
+          // load commit details based off the max number of notes to show
           const commitDetails = await this._getCommitDetails(note.commitHash);
           const detail: CommitDetails = {
             noteHash: note.noteHash,
@@ -90,6 +91,7 @@ export class GitCommands {
           };
           counter++;
           commitDetailsInterface.push(detail);
+        // when limit is reached, only load the commit hash and note hash only, no details
         } else {
           const detail: CommitDetails = {
             noteHash: note.noteHash,
@@ -103,15 +105,6 @@ export class GitCommands {
       const repositoryUrl = await this._getGitUrl();
       this.manager.updateRepositoryDetails(repositoryPath, repositoryUrl, commitDetailsInterface);
     } else {
-      // for (const note of existing) {
-      //   console.log("existing note: " + note);
-      //   if (counter < max) {
-      //     console.log("counter is " + counter);
-      //     const noteExist = this.manager.noteDetailsExists(repositoryPath, note.commitHash);
-      //     noteExist ? counter++: counter;
-      //     this.loadNoteDetails(repositoryPath, note.commitHash);
-      //   }
-      // }
       this.logger.debug(`details found for ${repositoryPath} ... loading next ${max} notes`);
       const commitDetailsInterface = this.manager.getExistingRepositoryDetails(repositoryPath);
       if (max > 0) {
@@ -155,29 +148,29 @@ export class GitCommands {
 
   // load the repository details from the repositoryPath
   public async loadNoteDetails(repositoryPath: string, commitHash: string): Promise<RepositoryDetails[]> {
-    this.logger.debug(`addNotes(${repositoryPath}, ${commitHash})`);
+    this.logger.debug(`loadNoteDetails(${repositoryPath}, ${commitHash})`);
     this._setRepositoryPath(repositoryPath);
     this.statusBar.reset();
     const commitDetailsInterface = this.manager.getExistingRepositoryDetails(repositoryPath);
     const noteExist = this.manager.noteDetailsExists(repositoryPath, commitHash);
 
     if (!noteExist) {
-      const note = await this._getGitNotesList(commitHash);
       const details = this.manager.getExistingCommitDetails(repositoryPath, commitHash);
       if (details !== undefined) {
         this.logger.debug(`commit and note hashes found for commit ${commitHash} ... loading commit details`);
         if ((details.author && details.date && details.message) === undefined) {
-          const commitDetails = await this._getCommitDetails(commitHash);
+          const commitDetails = await this._getCommitDetails(details.commitHash);
           const updatedCommitDetails: Partial<CommitDetails> = {
             author: commitDetails[0].author,
             message: commitDetails[0].message,
-            note: (await this._getGitNoteMessage(note[0].commitHash)).toString(),
+            note: (await this._getGitNoteMessage(details.commitHash)).toString(),
             fileChanges: commitDetails[0].fileChanges
           };
           Object.assign(details, updatedCommitDetails);
         }
       } else {
         this.logger.debug(`no commit or note hashes details found for commit ${commitHash} ... loading full details`);
+        const note = await this._getGitNotesList(commitHash);
         const commitDetails = await this._getCommitDetails(commitHash);
         const details: CommitDetails = {
           noteHash: note[0].noteHash,
@@ -199,41 +192,66 @@ export class GitCommands {
     return this.manager.repositoryDetailsInterface;
   }
 
-  private _getGitNotesList(commitHash?: string): Promise<any[]> {
+  private async _getGitNotesList(commitHash?: string): Promise<any[]> {
     this.logger.trace("_getGetNotesList()");
-    return new Promise<any[]>(async(resolve, reject) => {
-      this.git.log(["--date=iso", "--format=%H %cd"], (err, commitLog: LogResult) => {
-        if (err) {
-          reject(err);
-        } else {
-          const cmdList = commitHash ? ['notes', 'list', commitHash]: ['notes', 'list'];
-          const commits: any[] = [];
-          this.git.raw(cmdList, (err, notesOutput) => {
-            commitLog.all.map((commitOutput) => {
-              const commitLines = commitOutput.hash.split(/\r?\n/);
-              const noteLines = notesOutput.split(/\r?\n/);
-              // TODO: Improve this logic.
-              noteLines.forEach((noteLine) => {
-                commitLines.forEach((commitLine) => {
-                  const [noteHash, noteCommitHash] = noteLine.split(' ');
-                  const checkCommittedHash = commitHash ? commitHash : noteCommitHash;
-                  const [commitLogHash, date, dateTime, dateUTC] = commitLine.split(' ');
-                  if (checkCommittedHash === commitLogHash && noteHash) {
-                    const commit = {
-                      commitHash: commitLogHash,
-                      noteHash: noteHash,
-                      date: new Date(`${date} ${dateTime} ${dateUTC}`),
-                    };
-                    commits.push(commit);
-                  }
-                });
-              });
-              resolve(commits);
-            });
+    try {
+      const [commitLog, notesOutput] = await Promise.all([
+        new Promise<LogResult>((resolve, reject) => {
+          this.git.log(["--date=iso", "--format=%H %cd"], (err, commitLog: LogResult) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(commitLog);
+            }
           });
+        }),
+        new Promise<string>((resolve, reject) => {
+          const cmdList = commitHash ? ['notes', 'list', commitHash] : ['notes', 'list'];
+          this.git.raw(cmdList, (err, notesOutput) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(notesOutput);
+            }
+          });
+        }),
+      ]);
+
+      const notes: any[] = [];
+      const noteLines = notesOutput.split(/\r?\n/);
+      const noteMap = new Map<string, string[]>();
+
+      noteLines.forEach((noteLine) => {
+        let [noteHash, noteCommitHash] = noteLine.split(' ');
+        const finalCommitHash = commitHash ? commitHash : noteCommitHash;
+        if (noteHash && (!commitHash || commitHash === finalCommitHash)) {
+          if (!noteMap.has(finalCommitHash)) {
+            noteMap.set(finalCommitHash, []);
+          }
+          noteMap.get(finalCommitHash)?.push(noteHash);
         }
       });
-    });
+
+      commitLog.all.map((commitOutput) => {
+        const commitLines = commitOutput.hash.split(/\r?\n/);
+        commitLines.forEach((commitLine) => {
+          const [commitLogHash, date, dateTime, dateUTC] = commitLine.split(' ');
+          const noteHashes = noteMap.get(commitLogHash) || [];
+
+          if (noteHashes.length > 0) {
+            const note = {
+              commitHash: commitLogHash,
+              noteHash: noteHashes,
+              date: new Date(`${date} ${dateTime} ${dateUTC}`),
+            };
+            notes.push(note);
+          }
+        });
+      });
+      return notes;
+    } catch (error) {
+      return Promise.reject(error);
+    }
   }
 
   /**
@@ -452,9 +470,10 @@ export class GitCommands {
         this.statusBar.update();
         const cmdList = force ? ['notes', subCmd, commitHash, '-m', message, '--force'] : ['notes', subCmd, commitHash, '-m', message];
         await this.git.raw(cmdList)
-        .then(() => {
-          this.manager.updateNoteMessage(commitHash, message, repositoryPath);
-        });
+          .then(() => {
+            this.manager.updateNoteMessage(commitHash, message, repositoryPath);
+          }
+        );
         await this.loadNoteDetails(repositoryPath, commitHash);
       } else {
         this.logger.error("Not a git repository (or any of the parent directories): .git ");

@@ -176,6 +176,7 @@ export function activate(context: vscode.ExtensionContext) {
       if (commitHash !== undefined && commitHashInput !== false) {
         const existingNote = manager.getGitNoteMessage(manager.getExistingRepositoryDetails(activeFileRepoPath), commitHash);
         if (existingNote !== undefined) {
+          logger.debug(`Existing note found for commit hash: ${commitHash}`);
           currentNote = existingNote;
           editNote = true;
         }
