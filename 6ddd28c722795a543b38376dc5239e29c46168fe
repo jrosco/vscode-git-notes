@@ -3,11 +3,12 @@ Release version 0.2.0
 <a href="https://github.com/jrosco/vscode-git-notes/compare/0.1.0...0.2.0">Changelog</a>
 
 Added
-    ⚡ Created a loader method for git notes to support things like, infinite scrolling in webview, caching etc <a href="https://github.com/jrosco/vscode-git-notes/pull/19>#19</a>
-    ⚡ Remove and Add committed notes from the CommitDetails[] interface class <a href="https://github.com/jrosco/vscode-git-notes/pull/18>#18</a>
-    💄 Improve Webview for new git notes loader() function <a href="https://github.com/jrosco/vscode-git-notes/pull/20>#20</a>
-    ⚡ RELATED: Remove the loop inside a loop in method _getGitNotesList() <a href="https://github.com/jrosco/vscode-git-notes/pull/23>#23</a>
-    🍻 Add settings for the git notes load limit <a href="https://github.com/jrosco/vscode-git-notes/pull/21>#21</a>
+    ⚡ Created a loader method for git notes to support things like, infinite scrolling in webview, caching etc <a href="https://github.com/jrosco/vscode-git-notes/pull/19">#19</a>
+    ⚡ Remove and Add committed notes from the CommitDetails[] interface class <a href="https://github.com/jrosco/vscode-git-notes/pull/18">#18</a>
+    💄 Improve Webview for new git notes loader() function <a href="https://github.com/jrosco/vscode-git-notes/pull/20">#20</a>
+    ⚡ RELATED: Remove the loop inside a loop in method _getGitNotesList() <a href="https://github.com/jrosco/vscode-git-notes/pull/23">#23</a>
+    🍻 Add settings for the git notes load limit <a href="https://github.com/jrosco/vscode-git-notes/pull/21">#21</a>
+
 Fixed
-    ♻️ Don't show files in webview if no file changes found <a href="https://github.com/jrosco/vscode-git-notes/pull/17>#17</a>
+    ♻️ Don't show files in webview if no file changes found <a href="https://github.com/jrosco/vscode-git-notes/pull/17">#17</a>
     🐛 Don't show the edit button if no note exist in the commit <a href="https://github.com/jrosco/vscode-git-notes/pull/24">#24</a>
