@@ -1,3 +1,12 @@
 Released version 0.1.0
 
 <a href="https://github.com/jrosco/vscode-git-notes/compare/0.0.1...0.1.0">Changelog</a>
+
+Added
+    ❇️ Develop interactive HTML buttons that utilize JavaScript to send messages to a Visual Studio Code function. Upon receiving the messages, the corresponding extension.[code] will be executed. (https://github.com/jrosco/vscode-git-notes/pull/12)
+    ❇️ Add confirmation message for note removal and pruning git repos (https://github.com/jrosco/vscode-git-notes/pull/15)
+    ❇️ Webview can now refresh on updates e.g removing a note message (https://github.com/jrosco/vscode-git-notes/pull/14)
+Fixed
+    🐛 When user hit ESC from InputBox when running extension.addGitNoteMessage the command tries to add a message/note instead of cancelling input (https://github.com/jrosco/vscode-git-notes/pull/11)
+Changed
+    🍻 Webview date arrangement / sorting (https://github.com/jrosco/vscode-git-notes/pull/9)
