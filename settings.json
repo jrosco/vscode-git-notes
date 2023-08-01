@@ -8,5 +8,11 @@
     "git-notes.confirmPushAndFetchCommands": true,
     "git-notes.confirmRemovalCommands": true,
     "git-notes.confirmPruneCommands": true,
-    "git-notes.gitNotesLoadLimit": 3
+    "git-notes.gitNotesLoadLimit": 3,
+    "git-notes.gitUrlSCMProvider": [
+        "github.com/{path1}/{path2}/commit/{commitId}",
+        "bitbucket.org/{path1}/{path2}/commits/{commitId}",
+        "gitlab.com/{path1}/{path2}/commit/{commitId}",
+        "git.launchpad.net/{path1}/commit/?id={commitId}"
+  ]
 }

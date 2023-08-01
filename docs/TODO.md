@@ -12,8 +12,8 @@ public get confirmPushAndFetchCommands(): boolean {
  }
 ```
 
-- [ ] Some links to open commits are different e.g github use `commit` and bitbucket use `commits` in the url linked to commit info
-  - [ ] Have a way to use different urls for different SCM provider like Bitbucket.
+- [x] Some links to open commits are different e.g github use `commit` and bitbucket use `commits` in the url linked to commit info
+  - [x] [#28](https://github.com/jrosco/vscode-git-notes/pull/28) Have a way to use different urls for different SCM provider like Bitbucket.
 - [ ] Check the `confirmPushAndFetchCommands` setting is working correctly.
 - [ ] Do proper `edit` and `append` git commands, currently to `edit` or `append` a note, I'm using `git notes add --force [commitSha]` (seems to be the same results)
 - [ ] Add a Collapse / Expand HTML tag to the WebView for notes.
