@@ -60,7 +60,7 @@ export class GitUtils {
         // handle path# placeholders
         const regexPaths = /{path\d+}/g;
         const pathMatch = gitSCMProvider.match(regexPaths);
-		let gitCommitUrl = gitSCMProvider;
+        let gitCommitUrl = gitSCMProvider;
         for (const path of pathMatch ?? []) {
           const index = placeholders.findIndex(
             (placeholder) => placeholder.placeholder === path
