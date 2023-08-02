@@ -10,36 +10,36 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 - [#28](https://github.com/jrosco/vscode-git-notes/pull/28) 🍺 Added URL placeholder setting to help with an issue where some SCMs have different commit URLs
 
-## [0.2.0]
+## [0.2.0] - 2023-08-01
 
 ### Added
 
-- ⚡ Created a loader method for git notes to support things like, infinite scrolling in webview, caching etc (<https://github.com/jrosco/vscode-git-notes/pull/19>)
-- ⚡ Remove and Add committed notes from the `CommitDetails[]` interface class (<https://github.com/jrosco/vscode-git-notes/pull/18>)
-- 💄 Improve Webview for new git notes `loader()` function (<https://github.com/jrosco/vscode-git-notes/pull/20>)
-  - ⚡ RELATED: Remove the loop inside a loop in method `_getGitNotesList()` (<https://github.com/jrosco/vscode-git-notes/pull/23>)
-- 🍻 Add settings for the git notes load limit (<https://github.com/jrosco/vscode-git-notes/pull/21>)
+- [#19](https://github.com/jrosco/vscode-git-notes/pull/19) ⚡ Created a loader method for git notes to support things like, infinite scrolling in webview, caching etc
+- [#18](https://github.com/jrosco/vscode-git-notes/pull/18) ⚡ Remove and Add committed notes from the `CommitDetails[]` interface class
+- [#20](https://github.com/jrosco/vscode-git-notes/pull/20) 💄 Improve Webview for new git notes `loader()` function
+  - [#23](https://github.com/jrosco/vscode-git-notes/pull/23) ⚡ RELATED: Remove the loop inside a loop in method `_getGitNotesList()`
+- [#21](https://github.com/jrosco/vscode-git-notes/pull/21) 🍻 Add settings for the git notes load limit
   
 ### Fixed
 
-- ♻️ Don't show files in webview if no file changes found (<https://github.com/jrosco/vscode-git-notes/pull/17>)
-- 🐛 Don't show the edit button if no note exist in the commit (<https://github.com/jrosco/vscode-git-notes/pull/24>)
+- [#17](https://github.com/jrosco/vscode-git-notes/pull/17) ♻️ Don't show files in webview if no file changes found
+- [#24](https://github.com/jrosco/vscode-git-notes/pull/24) 🐛 Don't show the edit button if no note exist in the commit
 
 ## [0.1.0] - 2023-07-27
 
 ### Added
 
-- ❇️ Develop interactive HTML buttons that utilize JavaScript to send messages to a Visual Studio Code function. Upon receiving the messages, the corresponding extension.[code] will be executed. (<https://github.com/jrosco/vscode-git-notes/pull/12>)
-- ❇️ Add confirmation message for note removal and pruning git repos (<https://github.com/jrosco/vscode-git-notes/pull/15>)
-- ❇️ Webview can now refresh on updates e.g removing a note message (<https://github.com/jrosco/vscode-git-notes/pull/14>)
+- [#12](https://github.com/jrosco/vscode-git-notes/pull/12) ❇️ Develop interactive HTML buttons that utilize JavaScript to send messages to a Visual Studio Code function. Upon receiving the messages, the corresponding extension.[code] will be executed
+- [#15](https://github.com/jrosco/vscode-git-notes/pull/15) ❇️ Add confirmation message for note removal and pruning git repos
+- [#14](https://github.com/jrosco/vscode-git-notes/pull/14) ❇️ Webview can now refresh on updates e.g removing a note message
 
 ### Fixed
 
-- 🐛 When user hit ESC from `InputBox` when running `extension.addGitNoteMessage` the command tries to add a message/note instead of cancelling input (<https://github.com/jrosco/vscode-git-notes/pull/11>)
+- [#11](https://github.com/jrosco/vscode-git-notes/pull/11) 🐛 When user hit ESC from `InputBox` when running `extension.addGitNoteMessage` the command tries to add a message/note instead of cancelling input
 
 ### Changed
 
-- 🍻 Webview date arrangement / sorting (<https://github.com/jrosco/vscode-git-notes/pull/9>)
+- [#9](https://github.com/jrosco/vscode-git-notes/pull/9) 🍻 Webview date arrangement / sorting
 
 ## Released
 
