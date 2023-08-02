@@ -1,6 +1,6 @@
 # TODO List
 
-- [ ] Have the `settings.ts` log the results found.
+- [x] Have the `settings.ts` log the results found.
 
 Example
 
@@ -14,7 +14,7 @@ public get confirmPushAndFetchCommands(): boolean {
 
 - [x] Some links to open commits are different e.g github use `commit` and bitbucket use `commits` in the url linked to commit info
   - [x] [#28](https://github.com/jrosco/vscode-git-notes/pull/28) Have a way to use different urls for different SCM provider like Bitbucket.
-- [ ] Check the `confirmPushAndFetchCommands` setting is working correctly.
+- [x] Check the `confirmPushAndFetchCommands` setting is working correctly.
 - [ ] Do proper `edit` and `append` git commands, currently to `edit` or `append` a note, I'm using `git notes add --force [commitSha]` (seems to be the same results)
 - [ ] Add a Collapse / Expand HTML tag to the WebView for notes.
 - [ ] Add some search functionality.
@@ -33,3 +33,6 @@ const gitOptions: SimpleGitOptions = {
   config: ['core.sshCommand=/usr/bin/ssh -i ~/.ssh/id_rsa_git_note_test'], // Change this to the path of your private SSH key
 };
 ```
+
+- [x] Remove parser code date from `_parseCommitDetail())`. Date is found with the `_getGitNotesList()` method now
+- [ ] Get authors email address and add to commit details interface
