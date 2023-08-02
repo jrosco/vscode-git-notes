@@ -635,7 +635,7 @@ export class GitCommands {
     this.logger.trace("_getGitUrl()");
     try {
       const result = await new Promise<string>((resolve, reject) => {
-        this.git.remote(['get-url', 'origin'], (err, result) => {
+        this.git.remote(["get-url", "origin"], (err, result) => {
           if (err) {
             reject("Error retrieving Git URL");
           } else {
@@ -645,10 +645,11 @@ export class GitCommands {
       });
 
       let gitUrl = result.trim();
-
+      const regex = /^(?:git:\/\/|git@|git\/\/\/)(.+)$/i;
       // Convert SSH URL to HTTPS URL if necessary
-      if (gitUrl.startsWith('git@')) {
-        gitUrl = gitUrl.replace(/:/, '/').replace(/.git$/, '').replace(/^git@/, 'https://');
+      if (gitUrl.match(regex)) {
+        gitUrl = gitUrl.replace(/:/, "/").replace(/.git$/, "");
+        gitUrl = gitUrl.replace(regex, "https://$1");
       }
 
       this.logger.info(`return ${gitUrl}`);
