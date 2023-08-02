@@ -5,7 +5,7 @@ import { GitNotesStatusBar } from '../ui/status';
 import { GitNotesSettings } from '../settings';
 import { LoggerService, LogLevel } from '../log/service';
 import { GitCommands } from '../git/cmd';
-
+import { GitUtils } from '../git/utils';
 export class GitNotesPanel {
   public static currentPanel: GitNotesPanel | undefined;
   private static readonly viewType = 'gitNotesPanel';
@@ -60,6 +60,7 @@ export class GitNotesPanel {
     panel.webview.onDidReceiveMessage(async (message) => {
       const cmd = new GitCommands();
       const settings = new GitNotesSettings();
+      const utils = new GitUtils();
       switch (message.command) {
         case 'repoOpen':
           await vscode.env.openExternal(vscode.Uri.parse(message.repositoryUrl));
@@ -81,7 +82,9 @@ export class GitNotesPanel {
             message.repositoryPath);
           break;
         case 'commitOpen':
-          await vscode.env.openExternal(vscode.Uri.parse(message.commitUrl));
+          const url = utils.convertGitUrlSCMProvider(message.commitUrl, message.commitHash);
+          console.log('commitOpen: ', url);
+          url !== undefined ? await vscode.env.openExternal(vscode.Uri.parse(url)): false;
           break;
         case 'commitEdit':
           await vscode.commands.executeCommand('extension.addOrEditGitNote',
@@ -222,7 +225,7 @@ export class GitNotesPanel {
         ${details.commitDetails.map(commit => `
         if (document.getElementById('open-${commit.commitHash}')) {
           document.getElementById('open-${commit.commitHash}').addEventListener('click', () => {
-            vscode.postMessage({ command: 'commitOpen', commitUrl: '${details.repositoryUrl}/commit/${commit.commitHash}' });
+            vscode.postMessage({ command: 'commitOpen', commitUrl: '${details.repositoryUrl}', commitHash: '${commit.commitHash}' });
           });
         }
         if (document.getElementById('edit-${commit.commitHash}')) {
