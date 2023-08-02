@@ -10,6 +10,10 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 - [#28](https://github.com/jrosco/vscode-git-notes/pull/28) 🍺 Added URL placeholder setting to help with an issue where some SCMs have different commit URLs
 
+### Changed
+
+- [#30](https://github.com/jrosco/vscode-git-notes/pull/30) 🔥 Remove parser code date from `_parseCommitDetail()`. Date is found with the `_getGitNotesList()` method now
+
 ## [0.2.0] - 2023-08-01
 
 ### Added

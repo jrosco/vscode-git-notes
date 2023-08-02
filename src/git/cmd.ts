@@ -419,18 +419,11 @@ export class GitCommands {
     );
     const author: string = authorLine ? authorLine.split(":")[1].trim() : "";
 
-    const dateLine: string | undefined = lines.find((line) =>
-      line.startsWith("Date:")
-    );
-    const date: string = dateLine ? dateLine.replace("Date:", "").trim() : "";
-    const dateObject = new Date(date);
-
     // Get file changes
     const fileChanges = await this._getCommitFileChanges(commitSHA);
 
     const commit = {
       author: author,
-      date: dateObject,
       message: message,
       fileChanges: fileChanges,
     };
