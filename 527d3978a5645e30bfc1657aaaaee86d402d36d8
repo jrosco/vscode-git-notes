@@ -1,7 +1,7 @@
 ## [0.2.1]
 
-<a href="">Chnagelog</a>
+<a href="https://github.com/jrosco/vscode-git-notes/compare/0.2.0...0.2.0-patch1">Changelog</a>
 
 ### Bug
 
-- 🐛 [#31](https://github.com/jrosco/vscode-git-notes/pull/31) There is an issue on windows with the way "//" are treated, it removes the "//" from path. This temp fix will replace the "//" with "/"
+- 🐛 <a href="https://github.com/jrosco/vscode-git-notes/pull/31">[#31]</a> There is an issue on windows with the way "//" are treated, it removes the "//" from path. This temp fix will replace the "//" with "/"
