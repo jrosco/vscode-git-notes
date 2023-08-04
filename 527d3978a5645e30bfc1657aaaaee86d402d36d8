@@ -1,5 +1,7 @@
 ## [0.2.1]
 
+<a href="">Chnagelog></a>
+
 ### Bug
 
 - 🐛 [#31](https://github.com/jrosco/vscode-git-notes/pull/31) There is an issue on windows with the way "//" are treated, it removes the "//" from path. This temp fix will replace the "//" with "/"
