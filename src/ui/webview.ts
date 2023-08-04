@@ -60,6 +60,8 @@ export class GitNotesPanel {
     panel.webview.onDidReceiveMessage(async (message) => {
       const cmd = new GitCommands();
       const settings = new GitNotesSettings();
+      const logger = LoggerService.getInstance(settings.logLevel);
+      logger.debug(`webview onDidReceiveMessage: ${message.command}, ${message.repositoryPath}`);
       switch (message.command) {
         case 'repoOpen':
           await vscode.env.openExternal(vscode.Uri.parse(message.repositoryUrl));
@@ -84,10 +86,12 @@ export class GitNotesPanel {
           await vscode.env.openExternal(vscode.Uri.parse(message.commitUrl));
           break;
         case 'commitEdit':
+          logger.debug(`webview commitEdit: ${message.commitHash}, ${message.repositoryPath}`);
           await vscode.commands.executeCommand('extension.addOrEditGitNote',
             message.commitHash, message.repositoryPath);
           break;
         case 'commitRemove':
+          logger.debug(`webview commitRemove: ${message.commitHash}, ${message.repositoryPath}`);
           await vscode.commands.executeCommand('extension.removeGitNote',
             message.commitHash, message.repositoryPath);
           break;
@@ -137,7 +141,7 @@ export class GitNotesPanel {
     this.logger.debug(`refreshWebViewContent(${repositoryPath}, ${repositoryDetails})`);
     if (this._panel && repositoryDetails !== undefined) {
       this.logger.debug(`refreshWebViewContent _panel: ${this._panel}`);
-      const webViewContent = this._getWebviewContent(this.repositoryPath, repositoryDetails);
+      const webViewContent = this._getWebviewContent(repositoryPath, repositoryDetails);
       this._panel.webview.html = webViewContent;
     }
   }
@@ -157,7 +161,7 @@ export class GitNotesPanel {
 
   private _getWebviewContent(repositoryPath: string | undefined, repositoryDetails: RepositoryDetails[]) {
     // Filter repositoryDetails based on exact match of repositoryPath
-    if (this.repositoryPath !== undefined) {
+    if (repositoryPath !== undefined) {
       const filteredRepositoryDetails = repositoryDetails.filter(details =>
         details.repositoryPath === repositoryPath
       );
@@ -197,27 +201,27 @@ export class GitNotesPanel {
         });
         document.getElementById('repoAdd').addEventListener('click', () => {
           // When the button is clicked, call the extension method to perform the task
-          vscode.postMessage({ command: 'repoAdd', repositoryPath: '${details.repositoryPath}', refresh: true });
+          vscode.postMessage({ command: 'repoAdd', repositoryPath: '${details.repositoryPath?.replace(/\\/g, '\\\\')}', refresh: true });
         });
         document.getElementById('repoPrune').addEventListener('click', () => {
           // When the button is clicked, call the extension method to perform the task
-          vscode.postMessage({ command: 'repoPrune', repositoryPath: '${details.repositoryPath}'});
+          vscode.postMessage({ command: 'repoPrune', repositoryPath: '${details.repositoryPath?.replace(/\\/g, '\\\\')}'});
         });
         document.getElementById('repoPush').addEventListener('click', () => {
           // When the button is clicked, call the extension method to perform the task
-          vscode.postMessage({ command: 'repoPush', repositoryPath: '${details.repositoryPath}', refresh: true });
+          vscode.postMessage({ command: 'repoPush', repositoryPath: '${details.repositoryPath?.replace(/\\/g, '\\\\')}', refresh: true });
         });
         document.getElementById('repoFetch').addEventListener('click', () => {
           // When the button is clicked, call the extension method to perform the task
-          vscode.postMessage({ command: 'repoFetch', repositoryPath: '${details.repositoryPath}', refresh: true });
+          vscode.postMessage({ command: 'repoFetch', repositoryPath: '${details.repositoryPath?.replace(/\\/g, '\\\\')}', refresh: true });
         });
          document.getElementById('repoLoadMore').addEventListener('click', () => {
           // When the button is clicked, call the extension method to perform the task
-          vscode.postMessage({ command: 'repoLoadMore', repositoryPath: '${details.repositoryPath}', refresh: true });
+          vscode.postMessage({ command: 'repoLoadMore', repositoryPath: '${details.repositoryPath?.replace(/\\/g, '\\\\')}', refresh: true });
         });
          document.getElementById('repoClearCache').addEventListener('click', () => {
           // When the button is clicked, call the extension method to perform the task
-          vscode.postMessage({ command: 'repoClearCache', repositoryPath: '${details.repositoryPath}', refresh: true });
+          vscode.postMessage({ command: 'repoClearCache', repositoryPath: '${details.repositoryPath?.replace(/\\/g, '\\\\')}', refresh: true });
         });
         ${details.commitDetails.map(commit => `
         if (document.getElementById('open-${commit.commitHash}')) {
@@ -227,17 +231,17 @@ export class GitNotesPanel {
         }
         if (document.getElementById('edit-${commit.commitHash}')) {
           document.getElementById('edit-${commit.commitHash}').addEventListener('click', () => {
-            vscode.postMessage({ command: 'commitEdit', commitHash: '${commit.commitHash}', repositoryPath: '${details.repositoryPath}', refresh: true });
+            vscode.postMessage({ command: 'commitEdit', commitHash: '${commit.commitHash}', repositoryPath: '${details.repositoryPath?.replace(/\\/g, '\\\\')}', refresh: true });
           });
         }
         if (document.getElementById('remove-${commit.commitHash}')) {
           document.getElementById('remove-${commit.commitHash}').addEventListener('click', () => {
-            vscode.postMessage({ command: 'commitRemove', commitHash: '${commit.commitHash}', repositoryPath: '${details.repositoryPath}', refresh: true });
+            vscode.postMessage({ command: 'commitRemove', commitHash: '${commit.commitHash}', repositoryPath: '${details.repositoryPath?.replace(/\\/g, '\\\\')}', refresh: true });
           });
         }
         if (document.getElementById('load-${commit.commitHash}')) {
           document.getElementById('load-${commit.commitHash}').addEventListener('click', () => {
-            vscode.postMessage({ command: 'commitLoad', commitHash: '${commit.commitHash}', repositoryPath: '${details.repositoryPath}', refresh: true });
+            vscode.postMessage({ command: 'commitLoad', commitHash: '${commit.commitHash}', repositoryPath: '${details.repositoryPath?.replace(/\\/g, '\\\\')}', refresh: true });
           });
         }
         `).join('\n')}
