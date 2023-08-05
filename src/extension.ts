@@ -16,6 +16,7 @@ const manager = RepositoryManager.getInstance();
 const input = NotesInput.getInstance();
 const settings = new GitNotesSettings();
 const logger = LoggerService.getInstance(settings.logLevel);
+const editorTempFileName = "vscode-git-notes-autosave_msg.txt";
 
 export function activate(context: vscode.ExtensionContext) {
   logger.info("Your extension 'git-notes' has been activated.");
@@ -36,8 +37,9 @@ export function activate(context: vscode.ExtensionContext) {
   // Register the event listener for file open event
   vscode.workspace.onDidOpenTextDocument(async (document: vscode.TextDocument) => {
     if (document.uri.scheme === "file") {
-      notes.repositoryPath = manager.getGitRepositoryPath(document.uri);
-      if (settings.autoCheck) {
+      // If `autoCheck` is enabled and the file is not a Git Notes temp edit file
+      if (settings.autoCheck && !document.uri.path.endsWith(editorTempFileName)) {
+        notes.repositoryPath = manager.getGitRepositoryPath(document.uri);
         await notes.loader(notes.repositoryPath).then(() => {}).catch((error) => {
           logger.error(error);
         });
@@ -48,8 +50,9 @@ export function activate(context: vscode.ExtensionContext) {
   // Register the event listener for switching between file tabs
   vscode.window.onDidChangeActiveTextEditor(async (editor) => {
     if (editor && editor.document.uri.scheme) {
-      notes.repositoryPath = manager.getGitRepositoryPath(editor.document.uri);
-      if (settings.autoCheck) {
+      // If `autoCheck` is enabled and the file is not a Git Notes temp edit file
+      if (settings.autoCheck && !editor.document.uri.path.endsWith(editorTempFileName)) {
+        notes.repositoryPath = manager.getGitRepositoryPath(editor.document.uri);
         await notes.loader(notes.repositoryPath).then(() => {}).catch((error) => {
           logger.error(error);
         });
@@ -181,7 +184,7 @@ export function activate(context: vscode.ExtensionContext) {
           editNote = true;
         }
         const tempDir = os.tmpdir(); const filePrefix = commitHash ? commitHash : 'last_commit';
-        const tempFilePath = path.join(tempDir, filePrefix + '.vscode-git-notes-autosave_msg.txt');
+        const tempFilePath = path.join(tempDir, filePrefix + '.' + editorTempFileName);
         fs.writeFileSync(tempFilePath, `${currentNote}`);
         vscode.workspace.openTextDocument(tempFilePath).then((doc) => {
           vscode.window.showTextDocument(doc, { preview: true }).then((editor) => {
