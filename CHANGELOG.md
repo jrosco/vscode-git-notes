@@ -11,6 +11,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 ### Bug
 
 - 🐛 [#34](https://github.com/jrosco/vscode-git-notes/pull/34) Fixed issue with extension when temp edit file is opened or switched
+- 🐛 [#33](https://github.com/jrosco/vscode-git-notes/pull/33) There is an issue on windows with the way "//" are treated, it removes the "//" from path. This temp fix will replace the "//" with "/"
 
 ## [0.2.0]
 
