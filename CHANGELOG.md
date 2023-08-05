@@ -6,6 +6,12 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [Unreleased Changes]
 
+## [0.2.1]
+
+### Bug
+
+- 🐛 [#32](https://github.com/jrosco/vscode-git-notes/pull/32) Fixed issue with extension when temp edit file is opened or switched
+
 ## [0.2.0]
 
 ### Added
@@ -50,3 +56,4 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 [0.0.1]: https://github.com/jrosco/vscode-git-notes/compare/a9fdfb1...0.0.1
 [0.1.0]: https://github.com/jrosco/vscode-git-notes/compare/0.0.1...0.1.0
 [0.2.0]: https://github.com/jrosco/vscode-git-notes/compare/0.1.0...0.2.0
+[0.2.1]: https://github.com/jrosco/vscode-git-notes/compare/0.2.0...0.2.1-patches
