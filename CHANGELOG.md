@@ -6,6 +6,12 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [Unreleased Changes]
 
+## [0.2.1]
+
+### Bug
+
+- 🐛 [#33](https://github.com/jrosco/vscode-git-notes/pull/33) There is an issue on windows with the way "//" are treated, it removes the "//" from path. This temp fix will replace the "//" with "/"
+
 ## [0.2.0]
 
 ### Added
@@ -50,3 +56,4 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 [0.0.1]: https://github.com/jrosco/vscode-git-notes/compare/a9fdfb1...0.0.1
 [0.1.0]: https://github.com/jrosco/vscode-git-notes/compare/0.0.1...0.1.0
 [0.2.0]: https://github.com/jrosco/vscode-git-notes/compare/0.1.0...0.2.0
+[0.2.1]: https://github.com/jrosco/vscode-git-notes/compare/0.2.0...0.2.1-patches
