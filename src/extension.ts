@@ -190,14 +190,16 @@ export function activate(context: vscode.ExtensionContext) {
           vscode.window.showTextDocument(doc, { preview: true }).then((editor) => {
             // Define bufferContent outside of the callback functions
             let bufferContent = '';
+            let document: vscode.TextDocument;
             // Listen for changes in the document to extract the commit message
             const onDidChangeDisposable = vscode.workspace.onDidChangeTextDocument((event) => {
               let activeEditor = vscode.window.activeTextEditor;
               if (!activeEditor) {
                 return;
               }
-              const document = activeEditor.document;
-              bufferContent = document.getText();
+              document = activeEditor.document;
+              // Check if the document is the temporary git edit file and get the content buffer
+              document.uri.path.match(commitHash + '.' + editorTempFileName) ? bufferContent = document.getText(): '';
               // Perform any operations you need with the buffer content here
               document.save();
             });
