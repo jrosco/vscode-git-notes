@@ -79,6 +79,20 @@
           "type": "number",
           "default": 3,
           "description": "Number of Git Notes to load at a time."
+        },
+        "git-notes.gitUrlSCMProvider": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "github.com/{path1}/{path2}/commit/{commitId}",
+            "bitbucket.org/{path1}/{path2}/commits/{commitId}",
+            "gitlab.com/{path1}/{path2}/commit/{commitId}",
+            "git.launchpad.net/{path1}/commit/?id={commitId}"
+          ],
+          "description":
+              "List of SCM commit URLs with placeholders for dynamic path segments and commit IDs. Use {path1}, {path2}, {commitId} etc, as placeholders. You can also add your own custom URLs with appropriate placeholders. 'https://' is added automatically to the URLs."
         }
       }
     },
