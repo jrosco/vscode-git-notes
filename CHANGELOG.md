@@ -12,7 +12,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 - 🐛 [#34](https://github.com/jrosco/vscode-git-notes/pull/34) Fixed issue with extension when temp edit file is opened or switched
 - 🐛 [#33](https://github.com/jrosco/vscode-git-notes/pull/33) There is an issue on windows with the way "//" are treated, it removes the "//" from path. This temp fix will replace the "//" with "/"
-- 🐛 [#37](https://github.com/jrosco/vscode-git-notes/pull/37) Fixed issue when opening the temp notes edit file in tab, does dispose the event correctly
+- 🐛 [#37](https://github.com/jrosco/vscode-git-notes/pull/37) Fixed issue when opening the temp notes edit file in tab, does not dispose the event correctly
 
 ## [0.2.0]
 
