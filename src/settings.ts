@@ -79,8 +79,18 @@ export class GitNotesSettings {
 	}
 
 	public get gitNotesLoadLimit(): number {
-		this.logger.debug("gitNotesLoadLimit get sortDateNewestFirst called");
+		this.logger.debug("GitNotesSettings get gitNotesLoadLimit called");
 		return this._config.get('gitNotesLoadLimit', 3);
+	}
+
+	public get gitUrlSCMProvider(): string[] {
+		this.logger.debug("GitNotesSettings get gitUrlSCMProvider called");
+		return this._config.get("gitUrlSCMProvider", [
+      "github.com/{path1}/{path2}/commit/{commitId}",
+      "bitbucket.org/{path1}/{path2}/commits/{commitId}",
+      "gitlab.com/{path1}/{path2}/commit/{commitId}",
+      "git.launchpad.net/{path1}/commit/?id={commitId}",
+    ]);
 	}
 
 	public get onDidChangeConfig(): vscode.Event<vscode.ConfigurationChangeEvent> {
