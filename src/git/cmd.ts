@@ -641,8 +641,12 @@ export class GitCommands {
       const regex = /^(?:git:\/\/|git@|git\/\/\/)(.+)$/i;
       // Convert SSH URL to HTTPS URL if necessary
       if (gitUrl.match(regex)) {
+        this.logger.info(`ssh git url found: ${gitUrl}`);
         gitUrl = gitUrl.replace(/:/, "/").replace(/.git$/, "");
         gitUrl = gitUrl.replace(regex, "https://$1");
+      } else {
+        this.logger.info(`https git url found: ${gitUrl}`);
+        gitUrl = gitUrl.replace(/.git$/, " ");
       }
 
       this.logger.info(`return ${gitUrl}`);
