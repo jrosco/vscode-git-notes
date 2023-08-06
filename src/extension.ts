@@ -209,8 +209,6 @@ export function activate(context: vscode.ExtensionContext) {
               if (!editor) {
                 if (bufferContent !== '' && commitHash !== undefined) {
                   await notes.addGitNotes(bufferContent, commitHash, 'add', undefined, activeFileRepoPath, editNote);
-                  onDidChangeActiveDisposable.dispose();
-                  onDidChangeDisposable.dispose();
                 }
                 // You can perform any cleanup or handling here
                 fs.unlink(tempFilePath, (error) => {
@@ -222,6 +220,9 @@ export function activate(context: vscode.ExtensionContext) {
                   if (error) {
                     logger.debug(`Error removing the file: ${error}`);
                   }
+                  // Dispose the event listeners
+                  onDidChangeActiveDisposable.dispose();
+                  onDidChangeDisposable.dispose();
                 });
                 return;
               }
