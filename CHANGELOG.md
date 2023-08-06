@@ -6,13 +6,21 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [Unreleased Changes]
 
-### Fix
+## [0.2.1] - 2023-08-06
+
+### Added
 
 - [#28](https://github.com/jrosco/vscode-git-notes/pull/28) 🍺 Added URL placeholder setting to help with an issue where some SCMs have different commit URLs
 
-### Changed
+### Bug
 
-- [#30](https://github.com/jrosco/vscode-git-notes/pull/30) 🔥 Remove parser code date from `_parseCommitDetail()`. Date is found with the `_getGitNotesList()` method now
+- [#34](https://github.com/jrosco/vscode-git-notes/pull/34) 🐛 Fixed issue with extension when temp edit file is opened or switched
+- [#33](https://github.com/jrosco/vscode-git-notes/pull/33) 🐛 There is an issue on windows with the way "//" are treated, it removes the "//" from path. This temp fix will replace the "//" with "/"
+- [#37](https://github.com/jrosco/vscode-git-notes/pull/37) 🐛 Fixed issue when opening the temp notes edit file in tab, does not dispose the event correctly
+
+### Removed
+
+- [#30](https://github.com/jrosco/vscode-git-notes/pull/30) 🔥Remove parser code date from `_parseCommitDetail()`. Date is found with the `_getGitNotesList()` method now
 
 ## [0.2.0] - 2023-08-01
 
@@ -58,3 +66,4 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 [0.0.1]: https://github.com/jrosco/vscode-git-notes/compare/a9fdfb1...0.0.1
 [0.1.0]: https://github.com/jrosco/vscode-git-notes/compare/0.0.1...0.1.0
 [0.2.0]: https://github.com/jrosco/vscode-git-notes/compare/0.1.0...0.2.0
+[0.2.1]: https://github.com/jrosco/vscode-git-notes/compare/0.2.0...0.2.1

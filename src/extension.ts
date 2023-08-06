@@ -16,6 +16,7 @@ const manager = RepositoryManager.getInstance();
 const input = NotesInput.getInstance();
 const settings = new GitNotesSettings();
 const logger = LoggerService.getInstance(settings.logLevel);
+const editorTempFileName = "vscode-git-notes-autosave_msg.txt";
 
 export function activate(context: vscode.ExtensionContext) {
   logger.info("Your extension 'git-notes' has been activated.");
@@ -36,8 +37,9 @@ export function activate(context: vscode.ExtensionContext) {
   // Register the event listener for file open event
   vscode.workspace.onDidOpenTextDocument(async (document: vscode.TextDocument) => {
     if (document.uri.scheme === "file") {
-      notes.repositoryPath = manager.getGitRepositoryPath(document.uri);
-      if (settings.autoCheck) {
+      // If `autoCheck` is enabled and the file is not a Git Notes temp edit file
+      if (settings.autoCheck && !document.uri.path.endsWith(editorTempFileName)) {
+        notes.repositoryPath = manager.getGitRepositoryPath(document.uri);
         await notes.loader(notes.repositoryPath).then(() => {}).catch((error) => {
           logger.error(error);
         });
@@ -48,8 +50,9 @@ export function activate(context: vscode.ExtensionContext) {
   // Register the event listener for switching between file tabs
   vscode.window.onDidChangeActiveTextEditor(async (editor) => {
     if (editor && editor.document.uri.scheme) {
-      notes.repositoryPath = manager.getGitRepositoryPath(editor.document.uri);
-      if (settings.autoCheck) {
+      // If `autoCheck` is enabled and the file is not a Git Notes temp edit file
+      if (settings.autoCheck && !editor.document.uri.path.endsWith(editorTempFileName)) {
+        notes.repositoryPath = manager.getGitRepositoryPath(editor.document.uri);
         await notes.loader(notes.repositoryPath).then(() => {}).catch((error) => {
           logger.error(error);
         });
@@ -181,20 +184,22 @@ export function activate(context: vscode.ExtensionContext) {
           editNote = true;
         }
         const tempDir = os.tmpdir(); const filePrefix = commitHash ? commitHash : 'last_commit';
-        const tempFilePath = path.join(tempDir, filePrefix + '.vscode-git-notes-autosave_msg.txt');
+        const tempFilePath = path.join(tempDir, filePrefix + '.' + editorTempFileName);
         fs.writeFileSync(tempFilePath, `${currentNote}`);
         vscode.workspace.openTextDocument(tempFilePath).then((doc) => {
           vscode.window.showTextDocument(doc, { preview: true }).then((editor) => {
             // Define bufferContent outside of the callback functions
             let bufferContent = '';
+            let document: vscode.TextDocument;
             // Listen for changes in the document to extract the commit message
             const onDidChangeDisposable = vscode.workspace.onDidChangeTextDocument((event) => {
               let activeEditor = vscode.window.activeTextEditor;
               if (!activeEditor) {
                 return;
               }
-              const document = activeEditor.document;
-              bufferContent = document.getText();
+              document = activeEditor.document;
+              // Check if the document is the temporary git edit file and get the content buffer
+              document.uri.path.match(commitHash + '.' + editorTempFileName) ? bufferContent = document.getText(): '';
               // Perform any operations you need with the buffer content here
               document.save();
             });
@@ -204,8 +209,6 @@ export function activate(context: vscode.ExtensionContext) {
               if (!editor) {
                 if (bufferContent !== '' && commitHash !== undefined) {
                   await notes.addGitNotes(bufferContent, commitHash, 'add', undefined, activeFileRepoPath, editNote);
-                  onDidChangeActiveDisposable.dispose();
-                  onDidChangeDisposable.dispose();
                 }
                 // You can perform any cleanup or handling here
                 fs.unlink(tempFilePath, (error) => {
@@ -217,6 +220,9 @@ export function activate(context: vscode.ExtensionContext) {
                   if (error) {
                     logger.debug(`Error removing the file: ${error}`);
                   }
+                  // Dispose the event listeners
+                  onDidChangeActiveDisposable.dispose();
+                  onDidChangeDisposable.dispose();
                 });
                 return;
               }
