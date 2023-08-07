@@ -5,7 +5,6 @@ import * as path from 'path';
 
 import { GitNotesPanel } from './ui/webview';
 import { NotesInput } from './ui/input';
-import { EditWindow } from "./ui/edit";
 
 import { GitCommands } from './git/cmd';
 import { RepositoryManager } from './interface';
@@ -167,19 +166,6 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
-  // Register the command for appending git notes.
-  let appendGitNotesDisposable = vscode.commands.registerCommand('extension.appendGitNotes',
-    async () => {
-    logger.info("extension.appendGitNotes command called");
-    if (notes.repositoryPath !== undefined) {
-      const editWindow = new EditWindow('1234567890');
-      const message = await editWindow.showEditWindow();
-      console.log(`Message returned: ${message}`);
-      // await vscode.commands.executeCommand(
-      //   "extension.addOrEditGitNote", undefined, notes.repositoryPath, true);
-    }
-  });
-
   // Register the command opening a editor for adding git notes to commits
   let gitAddNoteMessageDisposable = vscode.commands.registerCommand('extension.addOrEditGitNote',
     async (cmdCommitHash?, cmdRepositoryPath?) => {
@@ -256,7 +242,6 @@ export function activate(context: vscode.ExtensionContext) {
     runWebviewDisposable,
     removeGitNoteDisposable,
     pruneGitNotesDisposable,
-    appendGitNotesDisposable,
     gitAddNoteMessageDisposable
   );
 }
