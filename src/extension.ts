@@ -173,7 +173,7 @@ export function activate(context: vscode.ExtensionContext) {
     logger.info("extension.appendGitNotes command called");
     if (notes.repositoryPath !== undefined) {
       const editWindow = new EditWindow('1234567890');
-      const message = editWindow.showEditWindow();
+      const message = await editWindow.showEditWindow();
       console.log(`Message returned: ${message}`);
       // await vscode.commands.executeCommand(
       //   "extension.addOrEditGitNote", undefined, notes.repositoryPath, true);
