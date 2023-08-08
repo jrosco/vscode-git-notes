@@ -63,9 +63,13 @@ export class GitCommands {
     return this.repositoryPath;
   }
 
+  /**
+  * This function is deprecated. Use CacheManager() instead.
+  * @deprecated Since version 0.2.2. Will be removed in version 1.0.0.
+  */
   // load the repository details from the repositoryPath when extension is activated
   public async loader(repositoryPath: string, showMax?: number): Promise<RepositoryDetails[]> {
-    this.logger.debug(`loader(${repositoryPath})`);
+    this.logger.debug(`DEPRECATED: loader(${repositoryPath})`);
     this.statusBar.reset();
     this.setRepositoryPath(repositoryPath);
     const commitDetailsInterface: CommitDetails[] = [];
@@ -74,7 +78,7 @@ export class GitCommands {
     let max = showMax || 0;
 
     if (existing === undefined) {
-      this.logger.debug(`no details found for ${repositoryPath} ... loading`);
+      this.logger.debug(`DEPRECATED: no details found for ${repositoryPath} ... loading`);
       const notes = await this.getGitNotesList();
       for (const note of notes) {
         if (counter < max) {
@@ -105,18 +109,18 @@ export class GitCommands {
       const repositoryUrl = await this.getGitUrl();
       this.manager.updateRepositoryDetails(repositoryPath, repositoryUrl, commitDetailsInterface);
     } else {
-      this.logger.debug(`details found for ${repositoryPath} ... loading next ${max} notes`);
+      this.logger.debug(`DEPRECATED: details found for ${repositoryPath} ... loading next ${max} notes`);
       const commitDetailsInterface = this.manager.getExistingRepositoryDetails(repositoryPath);
       if (max > 0) {
         for (const note of existing) {
-          this.logger.debug(`searching existing notes: ${note}`);
+          this.logger.debug(`DEPRECATED: searching existing notes: ${note}`);
           if (counter < max) {
             const noteExist = this.manager.noteDetailsExists(repositoryPath, note.commitHash);
             if (!noteExist) {
-              this.logger.debug(`note message not found for commit ${note.commitHash} ... loading`);
+              this.logger.debug(`DEPRECATED: note message not found for commit ${note.commitHash} ... loading`);
               const details = this.manager.getExistingCommitDetails(repositoryPath, note.commitHash);
               if (details !== undefined) {
-                this.logger.debug(`commit and note hashes found for commit ${note.commitHash} ... loading commit details`);
+                this.logger.debug(`DEPRECATED: commit and note hashes found for commit ${note.commitHash} ... loading commit details`);
                 if ((details.author && details.date && details.message) === undefined) {
                   const commitDetails = await this.getCommitDetails(note.commitHash);
                   const updatedCommitDetails: Partial<CommitDetails> = {
@@ -146,9 +150,13 @@ export class GitCommands {
     return this.manager.repositoryDetailsInterface;
   }
 
+  /**
+  * This function is deprecated. Use CacheManager() instead.
+  * @deprecated Since version 0.2.2. Will be removed in version 1.0.0.
+  */
   // load the repository details from the repositoryPath
   public async loadNoteDetails(repositoryPath: string, commitHash: string): Promise<RepositoryDetails[]> {
-    this.logger.debug(`loadNoteDetails(${repositoryPath}, ${commitHash})`);
+    this.logger.debug(`DEPRECATED: loadNoteDetails(${repositoryPath}, ${commitHash})`);
     this.setRepositoryPath(repositoryPath);
     this.statusBar.reset();
     const commitDetailsInterface = this.manager.getExistingRepositoryDetails(repositoryPath);
@@ -157,7 +165,7 @@ export class GitCommands {
     if (!noteExist) {
       const details = this.manager.getExistingCommitDetails(repositoryPath, commitHash);
       if (details !== undefined) {
-        this.logger.debug(`commit and note hashes found for commit ${commitHash} ... loading commit details`);
+        this.logger.debug(`DEPRECATED: commit and note hashes found for commit ${commitHash} ... loading commit details`);
         if ((details.author && details.date && details.message) === undefined) {
           const commitDetails = await this.getCommitDetails(details.commitHash);
           const updatedCommitDetails: Partial<CommitDetails> = {
@@ -169,7 +177,7 @@ export class GitCommands {
           Object.assign(details, updatedCommitDetails);
         }
       } else {
-        this.logger.debug(`no commit or note hashes details found for commit ${commitHash} ... loading full details`);
+        this.logger.debug(`DEPRECATED: no commit or note hashes details found for commit ${commitHash} ... loading full details`);
         const note = await this.getGitNotesList(commitHash);
         const commitDetails = await this.getCommitDetails(commitHash);
         const details: CommitDetails = {
@@ -193,7 +201,7 @@ export class GitCommands {
   }
 
   public async getGitNotesList(commitHash?: string): Promise<any[]> {
-    this.logger.trace("_getGetNotesList()");
+    this.logger.trace("getGitNotesList()");
     try {
       const [commitLog, notesOutput] = await Promise.all([
         new Promise<LogResult>((resolve, reject) => {
