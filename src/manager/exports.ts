@@ -1,2 +1,7 @@
 export { CacheManager } from "./cache";
-export { RepositoryManager } from "./manager";
+export {
+  RepositoryManager,
+  RepositoryDetails,
+  CommitDetails,
+  FileChanges,
+} from "./manager";
