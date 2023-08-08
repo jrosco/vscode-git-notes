@@ -1,15 +1,17 @@
 import { RepositoryManager } from "./manager";
 import { GitCommands } from "../git/cmd";
-
+import { GitNotesStatusBar } from "../ui/status";
 import { RepositoryDetails, CommitDetails } from "./manager";
 
 export class CacheManager extends RepositoryManager {
   private static cacheManager: CacheManager;
   private cmd: GitCommands;
+  private statusBar: GitNotesStatusBar;
 
   constructor() {
     super(); // Call the constructor of the parent class
     this.cmd = new GitCommands();
+    this.statusBar = GitNotesStatusBar.getInstance();
   }
 
   public static getInstance(): CacheManager {
@@ -25,7 +27,7 @@ export class CacheManager extends RepositoryManager {
     showMax?: number
   ): Promise<RepositoryDetails[]> {
     this.logger.debug(`load(${repositoryPath})`);
-    // this.statusBar.reset();
+    this.statusBar.reset();
     this.cmd.setRepositoryPath(repositoryPath);
     const commitDetailsInterface: CommitDetails[] = [];
     const existing = this.getExistingRepositoryDetails(repositoryPath);
@@ -131,9 +133,9 @@ export class CacheManager extends RepositoryManager {
         );
       }
     }
-    // this.statusBar.notesCount = this.getExistingRepositoryDetails(repositoryPath)?.length || 0;
-    // this.statusBar.repositoryPath = repositoryPath;
-    // this.statusBar.update();
+    this.statusBar.notesCount = this.getExistingRepositoryDetails(repositoryPath)?.length || 0;
+    this.statusBar.repositoryPath = repositoryPath;
+    this.statusBar.update();
     return this.repositoryDetailsInterface;
   }
 
@@ -144,19 +146,13 @@ export class CacheManager extends RepositoryManager {
   ): Promise<RepositoryDetails[]> {
     this.logger.debug(`loadNoteDetails(${repositoryPath}, ${commitHash})`);
     this.cmd.setRepositoryPath(repositoryPath);
-    // this.statusBar.reset();
+    this.statusBar.reset();
     const commitDetailsInterface =
       this.getExistingRepositoryDetails(repositoryPath);
-    const noteExist = this.noteDetailsExists(
-      repositoryPath,
-      commitHash
-    );
+    const noteExist = this.noteDetailsExists(repositoryPath, commitHash);
 
     if (!noteExist) {
-      const details = this.getExistingCommitDetails(
-        repositoryPath,
-        commitHash
-      );
+      const details = this.getExistingCommitDetails(repositoryPath, commitHash);
       if (details !== undefined) {
         this.logger.debug(
           `commit and note hashes found for commit ${commitHash} ... loading commit details`
@@ -187,7 +183,9 @@ export class CacheManager extends RepositoryManager {
           date: note[0].date,
           author: commitDetails[0].author,
           message: commitDetails[0].message,
-          note: (await this.cmd.getGitNoteMessage(note[0].commitHash)).toString(),
+          note: (
+            await this.cmd.getGitNoteMessage(note[0].commitHash)
+          ).toString(),
           fileChanges: commitDetails[0].fileChanges,
         };
         commitDetailsInterface
