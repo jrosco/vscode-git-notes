@@ -15,6 +15,7 @@ export class AppendNote extends GitCommandsInstance {
   }
 
   public async command(parameter: AppendNoteParameters): Promise<void> {
+    // TODO: remove this check, only need to set repository with parameter interface
     if (!this.repositoryPath) {
       this.setRepositoryPath(parameter.repositoryPath);
     }
