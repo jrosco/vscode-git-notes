@@ -194,7 +194,6 @@ export function activate(context: vscode.ExtensionContext) {
         const commitHash = commitHashInput
           ? commitHashInput.replace(/\s/g, "")
           : await notes.getLatestCommit(undefined, activeFileRepoPath);
-        console.log(commitHashInput);
         if (commitHashInput === false) {
           return;
         }
