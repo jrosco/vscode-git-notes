@@ -4,23 +4,27 @@ export enum LogLevel {
   info,
   warn,
   error,
+  deprecated,
 }
 
 export class LoggerService {
   public logLevel: LogLevel;
-	private static instance: LoggerService;
+  private static instance: LoggerService;
 
   constructor(logLevel: LogLevel = LogLevel.info) {
     this.logLevel = logLevel;
     // debug simple-git
     if (this.logLevel === LogLevel.trace) {
-      const debug = require('debug');
-      debug.enable('simple-git:task:*');
+      const debug = require("debug");
+      debug.enable("simple-git:task:*");
     }
   }
 
   public static getInstance(logLevel?: LogLevel): LoggerService {
-    this.instance?.logMessage(LogLevel.info, `LoggerService.getInstance(${logLevel})`);
+    this.instance?.logMessage(
+      LogLevel.info,
+      `LoggerService.getInstance(${logLevel})`
+    );
     if (!LoggerService.instance) {
       LoggerService.instance = new LoggerService(logLevel);
     }
@@ -29,9 +33,18 @@ export class LoggerService {
 
   private logMessage(level: LogLevel, message: string): void {
     if (level >= this.logLevel) {
-      const logLevelNames = ['TRACE', 'DEBUG', 'INFO', 'WARN', 'ERROR'];
+      const logLevelNames = [
+        "TRACE",
+        "DEBUG",
+        "INFO",
+        "WARN",
+        "ERROR",
+        "DEPRECATED",
+      ];
       const logLevelName = logLevelNames[level];
-      console.log(`[${new Date().toISOString()} git-notes [${logLevelName}] ${message}`);
+      console.log(
+        `[${new Date().toISOString()} git-notes [${logLevelName}] ${message}`
+      );
     }
   }
 
@@ -53,5 +66,9 @@ export class LoggerService {
 
   public error(message: string): void {
     this.logMessage(LogLevel.error, message);
+  }
+
+  public deprecated(message: string): void {
+    this.logMessage(LogLevel.deprecated, message);
   }
 }
