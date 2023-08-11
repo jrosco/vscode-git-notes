@@ -55,7 +55,7 @@ export class RepositoryManager {
   }
 
   public getExistingRepositoryDetails(repositoryPath: string | undefined) {
-    this.logger.debug(`getExistingRepositoryDetails(${repositoryPath})`);
+    this.logger.deprecated(`getExistingRepositoryDetails(${repositoryPath})`);
     const repository = this.repositoryDetailsInterface.find(
       repo => repo.repositoryPath?.trim() === repositoryPath?.trim()
     );
@@ -63,12 +63,12 @@ export class RepositoryManager {
   }
 
   public getFileChangeFile(commitDetails: CommitDetails[], commitHash: string): string | undefined {
-    this.logger.debug(`getFileChangeFile(${commitHash})`);
+    this.logger.deprecated(`getFileChangeFile(${commitHash})`);
     const commit = commitDetails.find(commit => commit.commitHash === commitHash);
     if (commit) {
       const fileChange = commit.fileChanges ? commit.fileChanges[0]: undefined; // Assuming you want the first file change
       if (fileChange) {
-        this.logger.debug(`getFileChangeFile(${commitHash}) = ${fileChange.file}`);
+        this.logger.deprecated(`getFileChangeFile(${commitHash}) = ${fileChange.file}`);
         return fileChange.file;
       }
     }
@@ -76,40 +76,40 @@ export class RepositoryManager {
   }
 
   public getExistingCommitDetails(repositoryPath: string, commitHash: string): CommitDetails | undefined {
-    this.logger.debug(`getExistingCommitDetails(${repositoryPath}, ${commitHash})`);
+    this.logger.deprecated(`getExistingCommitDetails(${repositoryPath}, ${commitHash})`);
     const commitDetails = this.getExistingRepositoryDetails(repositoryPath);
     const commit = commitDetails?.find(commit => commit.commitHash === commitHash);
     if (commit) {
-      this.logger.debug(`getExistingCommitDetails(${commitHash}) found ${commit}`);
+      this.logger.deprecated(`getExistingCommitDetails(${commitHash}) found ${commit}`);
       return commit;
     } else {
-      this.logger.debug(`getExistingCommitDetails(${commitHash}) returned false`);
+      this.logger.deprecated(`getExistingCommitDetails(${commitHash}) returned false`);
       return undefined; // Return false if commit is not found
     }
   }
 
   public noteDetailsExists(repositoryPath: string, commitHash: string): boolean {
-    this.logger.debug(`noteExists(${commitHash})`);
+    this.logger.deprecated(`noteExists(${commitHash})`);
     const commitDetails = this.getExistingRepositoryDetails(repositoryPath);
     const commit = commitDetails?.find(commit => commit.commitHash === commitHash);
     if (commit) {
       const note = commit.note;
       if (note) {
-        this.logger.debug(`A note was found for commit ${commitHash}`);
+        this.logger.deprecated(`A note was found for commit ${commitHash}`);
         return true;
       }
     }
-    this.logger.debug(`noteExists(${commitHash}) = false`);
+    this.logger.deprecated(`noteExists(${commitHash}) = false`);
     return false; // Return false if commit or note is not found
   }
 
   public getGitNoteMessage(commitDetails?: CommitDetails[], commitHash?: string): string | undefined {
-    this.logger.debug(`getGitNoteMessage(${commitHash})`);
+    this.logger.deprecated(`getGitNoteMessage(${commitHash})`);
     const commit = commitDetails?.find(commit => commit.commitHash === commitHash);
     if (commit) {
       const note = commit.note;
       if (note) {
-        this.logger.debug(`getGitNoteMessage(${commitHash}) = ${note}`);
+        this.logger.deprecated(`getGitNoteMessage(${commitHash}) = ${note}`);
         return note;
       }
     }
@@ -117,7 +117,7 @@ export class RepositoryManager {
   }
 
   public updateRepositoryDetails(repositoryPath: string | undefined, repositoryUrl: string, notes: CommitDetails[]): void {
-    this.logger.debug(`updateRepositoryDetails(${repositoryPath}, ${repositoryUrl}, notes found ${notes.length})`);
+    this.logger.deprecated(`updateRepositoryDetails(${repositoryPath}, ${repositoryUrl}, notes found ${notes.length})`);
     const index = this.repositoryDetailsInterface.findIndex(
       repo => repo.repositoryPath === repositoryPath
     );
@@ -139,23 +139,23 @@ export class RepositoryManager {
   }
 
   public async updateNoteMessage(commitHashToUpdate: string, newNote: string, repositoryPath?: string | undefined) {
-    this.logger.debug(`updateNoteMessage(${commitHashToUpdate}, ${newNote})`);
+    this.logger.deprecated(`updateNoteMessage(${commitHashToUpdate}, ${newNote})`);
     const repoDetails = this.repositoryDetailsInterface.find(
       repo => repo.repositoryPath === repositoryPath
       );
     if (repoDetails) {
       const index = repoDetails.commitDetails.findIndex(commit => commit.commitHash === commitHashToUpdate);
       if (index !== -1) {
-        this.logger.debug(`Note updated successfully for commit with hash ${commitHashToUpdate}`);
+        this.logger.deprecated(`Note updated successfully for commit with hash ${commitHashToUpdate}`);
         repoDetails.commitDetails[index].note = newNote;
       } else {
-        this.logger.debug(`Commit with hash ${commitHashToUpdate} not found. Note update failed.`);
+        this.logger.deprecated(`Commit with hash ${commitHashToUpdate} not found. Note update failed.`);
       }
     }
   }
 
   public async clearRepositoryDetails(document?: vscode.Uri | undefined, repositoryPath?: string | undefined): Promise<void> {
-    this.logger.debug(`clearRepositoryDetails(${document}, ${repositoryPath})`);
+    this.logger.deprecated(`clearRepositoryDetails(${document}, ${repositoryPath})`);
     repositoryPath = this.getGitRepositoryPath(document, repositoryPath);
     const index = this.repositoryDetailsInterface.findIndex(
       repo => repo.repositoryPath === repositoryPath
@@ -167,7 +167,7 @@ export class RepositoryManager {
   }
 
   public async removeCommitByHash(commitHashToRemove: string, repositoryPath?: string | undefined) {
-    this.logger.debug(`removeCommitByHash(${commitHashToRemove})`);
+    this.logger.deprecated(`removeCommitByHash(${commitHashToRemove})`);
     const index = this.repositoryDetailsInterface.findIndex(
       repo => repo.repositoryPath === repositoryPath
     );
@@ -180,7 +180,7 @@ export class RepositoryManager {
   }
 
   public getGitRepositoryPath(fileUri?: vscode.Uri | undefined, repositoryPath?: string | undefined): string {
-    this.logger.debug(`getGitRepositoryPath(${fileUri}, ${repositoryPath})`);
+    this.logger.deprecated(`getGitRepositoryPath(${fileUri}, ${repositoryPath})`);
     let workspaceFolder;
     if (fileUri !== undefined) {
       workspaceFolder = vscode.workspace.getWorkspaceFolder(fileUri);

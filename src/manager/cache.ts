@@ -1,7 +1,7 @@
 import { RepositoryManager } from "./manager";
 import { GitCommands } from "../git/cmd";
 import { GitNotesStatusBar } from "../ui/status";
-import { RepositoryDetails, CommitDetails } from "./manager";
+import { RepositoryDetails, CommitDetails } from "./exports";
 
 export class CacheManager extends RepositoryManager {
   private static cacheManager: CacheManager;

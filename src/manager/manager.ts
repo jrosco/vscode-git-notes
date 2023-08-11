@@ -59,6 +59,7 @@ export class RepositoryManager {
     const repository = this.repositoryDetailsInterface.find(
       (repo) => repo.repositoryPath?.trim() === repositoryPath?.trim()
     );
+    this.logger.debug(`return repository: ${repository}`);
     return repository ? repository.commitDetails : undefined;
   }
 
@@ -141,6 +142,7 @@ export class RepositoryManager {
         return note;
       }
     }
+    this.logger.debug(`getGitNoteMessage(${commitHash}) = undefined`);
     return undefined; // Return undefined if commit or note is not found
   }
 
@@ -162,9 +164,11 @@ export class RepositoryManager {
       notes.sort((a, b) => b.date.getTime() - a.date.getTime());
     }
     if (index !== -1) {
+      this.logger.debug(`update existing updateRepositoryDetails(${repositoryPath})`);
       this.repositoryDetailsInterface[index].commitDetails = notes;
       this.repositoryDetailsInterface[index].repositoryUrl = repositoryUrl;
     } else {
+      this.logger.debug(`push new updateRepositoryDetails(${repositoryPath})`);
       this.repositoryDetailsInterface.push({
         repositoryPath: repositoryPath,
         repositoryUrl: repositoryUrl,
