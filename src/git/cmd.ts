@@ -38,6 +38,10 @@ export class GitCommands {
     this.logger.deprecated(`GitCommands constructor: ${Object.getOwnPropertyNames(this)}`);
   }
 
+  /**
+  * This function is deprecated. Use GitCommandsInstance() subclasses instead.
+  * @deprecated Since version 0.2.2. Will be removed in version 1.0.0.
+  */
   public setRepositoryPath(repositoryPath: string): void {
     this.logger.deprecated(`setRepositoryPath(${repositoryPath})`);
     this.repositoryPath = repositoryPath;
@@ -200,6 +204,10 @@ export class GitCommands {
     return this.manager.repositoryDetailsInterface;
   }
 
+  /**
+  * This function is deprecated. Use GitUtils() instead.
+  * @deprecated Since version 0.2.2. Will be removed in version 1.0.0.
+  */
   public async getGitNotesList(commitHash?: string): Promise<any[]> {
     this.logger.deprecated("getGitNotesList()");
     try {
@@ -316,6 +324,10 @@ export class GitCommands {
     });
   }
 
+  /**
+  * This function is deprecated. Use GitUtils() instead.
+  * @deprecated Since version 0.2.2. Will be removed in version 1.0.0.
+  */
   public getGitNoteMessage(commitHash: string): Promise<string> {
     this.logger.deprecated(`getGitNoteMessage(${commitHash})`);
     return new Promise<string>(async (resolve, reject) => {
@@ -333,6 +345,10 @@ export class GitCommands {
     });
   }
 
+  /**
+  * This function is deprecated. Use GitUtils() instead.
+  * @deprecated Since version 0.2.2. Will be removed in version 1.0.0.
+  */
   public getCommitDetails(commitSHA: string): Promise<any[]> {
     this.logger.deprecated(`getCommitDetails(${commitSHA})`);
     return new Promise<any[]>(async (resolve, reject) => {
@@ -349,6 +365,10 @@ export class GitCommands {
     });
   }
 
+  /**
+  * This function is deprecated. Use GitUtils() instead.
+  * @deprecated Since version 0.2.2. Will be removed in version 1.0.0.
+  */
   private _getCommitFileChanges(commitSHA: string): Promise<any[]> {
     this.logger.deprecated(`_getCommitFileChanges(${commitSHA})`);
     return new Promise<any[]>(async (resolve, reject) => {
@@ -365,6 +385,10 @@ export class GitCommands {
     });
   }
 
+  /**
+  * This function is deprecated. Use GitUtils() instead.
+  * @deprecated Since version 0.2.2. Will be removed in version 1.0.0.
+  */
   private async _parseFileDetails(gitOutput: string, repositoryPath: string) {
     this.logger.deprecated(`_parseFileDetails(${gitOutput}, ${repositoryPath})`);
     const lines = gitOutput.split('\n').slice(1);
@@ -409,6 +433,10 @@ export class GitCommands {
     return fileChanges;
   }
 
+  /**
+  * This function is deprecated. Use GitUtils() instead.
+  * @deprecated Since version 0.2.2. Will be removed in version 1.0.0.
+  */
   private async _parseCommitDetails(commitDetails: string, commitSHA: string) {
     this.logger.deprecated(`_parseCommitDetails(${commitDetails}, ${commitSHA})`);
     const commits: any[] = [];
@@ -442,6 +470,10 @@ export class GitCommands {
     return commits;
   }
 
+  /**
+  * This function is deprecated. Use GitUtils() instead.
+  * @deprecated Since version 0.2.2. Will be removed in version 1.0.0.
+  */
   public async getLatestCommit(fileUri?: vscode.Uri, repositoryPath?: string): Promise<string | undefined> {
     this.logger.deprecated(`getLatestCommit(${fileUri}, ${repositoryPath})`);
     repositoryPath = this.manager.getGitRepositoryPath(fileUri, repositoryPath);
@@ -632,6 +664,10 @@ export class GitCommands {
     }
   }
 
+  /**
+  * This function is deprecated. Use GitUtils() instead.
+  * @deprecated Since version 0.2.2. Will be removed in version 1.0.0.
+  */
   public async getGitUrl(): Promise<string> {
     this.logger.deprecated("getGitUrl()");
     try {

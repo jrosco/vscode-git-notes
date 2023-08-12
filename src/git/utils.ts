@@ -90,6 +90,7 @@ export class GitUtils extends GitCommandsInstance {
   public get getGitUrlSCMProvider() {
     return this.gitUrlSCMProvider;
   }
+
   public async getLatestCommit(fileUri?: vscode.Uri, repositoryPath?: string): Promise<string | undefined> {
     this.logger.debug(`getLatestCommit(${fileUri}, ${repositoryPath})`);
     repositoryPath = this.manager.getGitRepositoryPath(fileUri, repositoryPath);
@@ -324,7 +325,6 @@ export class GitUtils extends GitCommandsInstance {
         renamed: renamed,
         };
       });
-
     return fileChanges;
   }
 }
