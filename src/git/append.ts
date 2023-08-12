@@ -15,12 +15,9 @@ export class AppendNote extends GitCommandsInstance {
   }
 
   public async command(parameter: AppendNoteParameters): Promise<void> {
-    // TODO: remove this check, only need to set repository with parameter interface
-    if (!this.repositoryPath) {
-      this.setRepositoryPath(parameter.repositoryPath);
-    }
-    const existingNote = this.manager.getGitNoteMessage(
-      this.manager.getExistingRepositoryDetails(this.repositoryPath),
+    this.setRepositoryPath(parameter.repositoryPath);
+    const existingNote = this.cache.getGitNoteMessage(
+      this.cache.getExistingRepositoryDetails(this.repositoryPath),
       parameter.commitHash
     );
     const cmdList = [
@@ -34,7 +31,7 @@ export class AppendNote extends GitCommandsInstance {
       .raw(cmdList)
       .then(async () => {
         const fullNote = `${existingNote}\n\n${parameter.message}`;
-        await this.manager.updateNoteMessage(
+        await this.cache.updateNoteMessage(
           parameter.commitHash,
           fullNote,
           parameter.repositoryPath

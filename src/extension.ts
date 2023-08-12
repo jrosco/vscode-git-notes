@@ -226,7 +226,7 @@ export function activate(context: vscode.ExtensionContext) {
       logger.info("extension.appendGitNotes command called");
       const activeFileRepoPath = cmdRepositoryPath
         ? cmdRepositoryPath
-        : append.repositoryPath;
+        : git.repositoryPath;
       if (activeFileRepoPath !== undefined) {
         cmdCommitHash
           ? undefined
@@ -240,7 +240,7 @@ export function activate(context: vscode.ExtensionContext) {
           : await input.showInputBox();
         const commitHash = commitHashInput
           ? commitHashInput.replace(/\s/g, "")
-          : await notes.getLatestCommit(undefined, activeFileRepoPath);
+          : await gitUtils.getLatestCommit(undefined, activeFileRepoPath);
         if (commitHashInput === false) {
           return;
         }
