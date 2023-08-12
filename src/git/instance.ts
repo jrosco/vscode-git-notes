@@ -1,7 +1,7 @@
 import simpleGit, { SimpleGit, SimpleGitOptions } from 'simple-git';
 import { LoggerService } from '../log/service';
 import { GitNotesSettings } from '../settings';
-import { RepositoryManager } from "../interface";
+import { RepositoryManager } from "../manager/manager";
 
 export class GitCommandsInstance {
   public repositoryPath: string;
