@@ -35,11 +35,11 @@ export class GitCommands {
     this.repositoryPath = "";
     this.input = NotesInput.getInstance();
 
-    this.logger.debug(`GitCommands constructor: ${Object.getOwnPropertyNames(this)}`);
+    this.logger.deprecated(`GitCommands constructor: ${Object.getOwnPropertyNames(this)}`);
   }
 
   public setRepositoryPath(repositoryPath: string): void {
-    this.logger.trace(`setRepositoryPath(${repositoryPath})`);
+    this.logger.deprecated(`setRepositoryPath(${repositoryPath})`);
     this.repositoryPath = repositoryPath;
 
     const gitOptions: SimpleGitOptions = {
@@ -52,14 +52,14 @@ export class GitCommands {
 
     try {
       this.git = simpleGit(gitOptions);
-      this.logger.debug(`this.git: ${Object.getOwnPropertyNames(this.git)}`);
+      this.logger.deprecated(`this.git: ${Object.getOwnPropertyNames(this.git)}`);
     } catch (error) {
-      this.logger.error(`error setting repositoryPath: ${error}`);
+      this.logger.deprecated(`error setting repositoryPath: ${error}`);
     }
   }
 
   public getRepositoryPath() {
-    this.logger.debug(`getRepositoryPath() return: ${this.repositoryPath}`);
+    this.logger.deprecated(`getRepositoryPath() return: ${this.repositoryPath}`);
     return this.repositoryPath;
   }
 
@@ -201,7 +201,7 @@ export class GitCommands {
   }
 
   public async getGitNotesList(commitHash?: string): Promise<any[]> {
-    this.logger.trace("getGitNotesList()");
+    this.logger.deprecated("getGitNotesList()");
     try {
       const [commitLog, notesOutput] = await Promise.all([
         new Promise<LogResult>((resolve, reject) => {
@@ -267,7 +267,7 @@ export class GitCommands {
   * @deprecated Since version 0.2.0. Will be removed in version 1.0.0.
   */
   private _getGitNotes(commitHash?: string): Promise<any[]> {
-    this.logger.trace("_getGitNotes()");
+    this.logger.deprecated("_getGitNotes()");
     return new Promise<any[]>(async(resolve, reject) => {
       const cmdList = commitHash ? ["notes", `--ref=${this.settings.localNoteRef}`, "list", commitHash]: ["notes", `--ref=${this.settings.localNoteRef}`, "list"];
       this.git.raw(cmdList, (err, result) => {
@@ -287,7 +287,7 @@ export class GitCommands {
   * @deprecated Since version 0.2.0. Will be removed in version 1.0.0.
   */
   private _parseGitNotes(notesOutput: string): Promise<any[]> {
-    this.logger.trace(`_parseGitNotes(${notesOutput})`);
+    this.logger.deprecated(`_parseGitNotes(${notesOutput})`);
     return new Promise<any[]>(async (resolve, reject) => {
       try {
         // Parse the output and extract relevant information
@@ -317,7 +317,7 @@ export class GitCommands {
   }
 
   public getGitNoteMessage(commitHash: string): Promise<string> {
-    this.logger.trace(`getGitNoteMessage(${commitHash})`);
+    this.logger.deprecated(`getGitNoteMessage(${commitHash})`);
     return new Promise<string>(async (resolve, reject) => {
       this.git.raw(
         ["notes", `--ref=${this.settings.localNoteRef}`, "show", commitHash],
@@ -334,7 +334,7 @@ export class GitCommands {
   }
 
   public getCommitDetails(commitSHA: string): Promise<any[]> {
-    this.logger.trace(`getCommitDetails(${commitSHA})`);
+    this.logger.deprecated(`getCommitDetails(${commitSHA})`);
     return new Promise<any[]>(async (resolve, reject) => {
       this.git.show(['--stat', commitSHA])
         .then(commitDetails => {
@@ -350,7 +350,7 @@ export class GitCommands {
   }
 
   private _getCommitFileChanges(commitSHA: string): Promise<any[]> {
-    this.logger.trace(`_getCommitFileChanges(${commitSHA})`);
+    this.logger.deprecated(`_getCommitFileChanges(${commitSHA})`);
     return new Promise<any[]>(async (resolve, reject) => {
       this.git.show(["--numstat", "--oneline", commitSHA])
         .then(commitFilesDetails => {
@@ -366,7 +366,7 @@ export class GitCommands {
   }
 
   private async _parseFileDetails(gitOutput: string, repositoryPath: string) {
-    this.logger.trace(`_parseFileDetails(${gitOutput}, ${repositoryPath})`);
+    this.logger.deprecated(`_parseFileDetails(${gitOutput}, ${repositoryPath})`);
     const lines = gitOutput.split('\n').slice(1);
     // if last line is empty, remove it
     if (lines[-1] === undefined || lines[-1] === "") {
@@ -410,7 +410,7 @@ export class GitCommands {
   }
 
   private async _parseCommitDetails(commitDetails: string, commitSHA: string) {
-    this.logger.trace(`_parseCommitDetails(${commitDetails}, ${commitSHA})`);
+    this.logger.deprecated(`_parseCommitDetails(${commitDetails}, ${commitSHA})`);
     const commits: any[] = [];
 
     const lines: string[] = commitDetails.split("\n");
@@ -438,21 +438,21 @@ export class GitCommands {
 
     commits.push(commit);
 
-    this.logger.info(`return ${commits}`);
+    this.logger.deprecated(`return ${commits}`);
     return commits;
   }
 
   public async getLatestCommit(fileUri?: vscode.Uri, repositoryPath?: string): Promise<string | undefined> {
-    this.logger.debug(`getLatestCommit(${fileUri}, ${repositoryPath})`);
+    this.logger.deprecated(`getLatestCommit(${fileUri}, ${repositoryPath})`);
     repositoryPath = this.manager.getGitRepositoryPath(fileUri, repositoryPath);
     this.setRepositoryPath(repositoryPath);
     if (repositoryPath !== undefined) {
       try {
         const commitId = await this.git.log({ n: 1 });
-        this.logger.debug(`getLatestCommit found ${commitId.latest?.hash}`);
+        this.logger.deprecated(`getLatestCommit found ${commitId.latest?.hash}`);
         return commitId.latest?.hash;
       } catch (error) {
-        this.logger.error(`error getting latest commit: ${error}`);
+        this.logger.deprecated(`error getting latest commit: ${error}`);
       }
     }
     return undefined;
@@ -461,7 +461,7 @@ export class GitCommands {
   public async addGitNotes(message: string, commitHash: string, subCmd: string = 'add', fileUri?: vscode.Uri, repositoryPath?: string,
     force?: boolean, append?: boolean): Promise<void> {
 
-    this.logger.debug(`addGitNotes(${message}, ${commitHash}, ${fileUri}, ${repositoryPath})`);
+    this.logger.deprecated(`addGitNotes(${message}, ${commitHash}, ${fileUri}, ${repositoryPath})`);
     repositoryPath = this.manager.getGitRepositoryPath(fileUri, repositoryPath);
     this.setRepositoryPath(repositoryPath);
     this.statusBar.reset();
@@ -477,11 +477,11 @@ export class GitCommands {
         );
         await this.loadNoteDetails(repositoryPath, commitHash);
       } else {
-        this.logger.error("Not a git repository (or any of the parent directories): .git ");
+        this.logger.deprecated("Not a git repository (or any of the parent directories): .git ");
         this.statusBar.showInformationMessage("Git Notes: Not a git repository (or any of the parent directories): .git");
       }
     } catch (error) {
-      this.logger.error('An error occurred while adding Git note:'+ error);
+      this.logger.deprecated('An error occurred while adding Git note:'+ error);
       this.statusBar.showErrorMessage(`Git Notes: An error occurred while adding Git note: ${error}`);
       const messageItem: vscode.MessageItem[] = [{title: "Append"}, {title: "Force overwrite"}, {title: "Cancel"}];
       const selected = await this.input.showInputWindowMessage("Failed to Add Git Note", messageItem, true, true);
@@ -497,7 +497,7 @@ export class GitCommands {
   }
 
   public async fetchGitNotes(fileUri?: vscode.Uri, repositoryPath?: string, force?: boolean): Promise<void> {
-    this.logger.debug(`fetchGitNotes(${fileUri}, ${repositoryPath})`);
+    this.logger.deprecated(`fetchGitNotes(${fileUri}, ${repositoryPath})`);
     repositoryPath = this.manager.getGitRepositoryPath(fileUri, repositoryPath);
     this.setRepositoryPath(repositoryPath);
     this.statusBar.reset();
@@ -516,14 +516,14 @@ export class GitCommands {
         if (confirm?.title === title || !this.settings.confirmPushAndFetchCommands) {
           await this.git.fetch(cmdList)
           .then((message) => {
-            this.logger.debug(`message: ${message.raw}`);
+            this.logger.deprecated(`message: ${message.raw}`);
             this.statusBar.showInformationMessage("Git Notes: Fetched");
             this.manager.clearRepositoryDetails(undefined, repositoryPath);
           });
         }
         await this.loader(repositoryPath, this.settings.gitNotesLoadLimit);
       } else {
-        this.logger.debug("Not a git repository (or any of the parent directories): .git ");
+        this.logger.deprecated("Not a git repository (or any of the parent directories): .git ");
         this.statusBar.showInformationMessage("Git Notes: Not a git repository (or any of the parent directories): .git");
       }
     } catch (error) {
@@ -543,7 +543,7 @@ export class GitCommands {
   }
 
   public async pushGitNotes(fileUri?: vscode.Uri, repositoryPath?: string, force?: boolean): Promise<void> {
-    this.logger.debug(`pushGitNotes(${fileUri}, ${repositoryPath})`);
+    this.logger.deprecated(`pushGitNotes(${fileUri}, ${repositoryPath})`);
     repositoryPath = this.manager.getGitRepositoryPath(fileUri, repositoryPath);
     this.setRepositoryPath(this.repositoryPath);
     this.statusBar.reset();
@@ -568,11 +568,11 @@ export class GitCommands {
         }
         await this.loader(repositoryPath);
       } else {
-        this.logger.debug("Not a git repository (or any of the parent directories): .git");
+        this.logger.deprecated("Not a git repository (or any of the parent directories): .git");
         this.statusBar.showInformationMessage("Git Notes: Not a git repository (or any of the parent directories): .git");
       }
     } catch (error) {
-      this.logger.error(`An error occurred while pushing Git notes: ${error}`);
+      this.logger.deprecated(`An error occurred while pushing Git notes: ${error}`);
       this.statusBar.showErrorMessage(`Git Notes: An error occurred while pushing Git notes: ${error}`);
       const messageItem: vscode.MessageItem[] = [{ title: "Fetch notes" }, {title: "Force push"}, {title: "Cancel"}];
       const selected = await this.input.showInputWindowMessage("Failed to push Git Notes", messageItem, true, true);
@@ -588,7 +588,7 @@ export class GitCommands {
   }
 
   public async removeGitNote(commitHash: string, fileUri?: vscode.Uri, repositoryPath?: string, prune?: boolean): Promise<void> {
-    this.logger.debug(`removeGitNote(${commitHash}, ${fileUri}, ${repositoryPath}, ${prune})`);
+    this.logger.deprecated(`removeGitNote(${commitHash}, ${fileUri}, ${repositoryPath}, ${prune})`);
     repositoryPath = this.manager.getGitRepositoryPath(fileUri, repositoryPath);
     this.setRepositoryPath(repositoryPath);
     this.statusBar.reset();
@@ -597,7 +597,7 @@ export class GitCommands {
         this.statusBar.message = "Removing ...";
         this.statusBar.update();
         const cmdList = prune ? ['notes', 'prune'] : ['notes', 'remove', commitHash];
-        this.logger.debug(`cmdList: ${cmdList} for ${repositoryPath}`);
+        this.logger.deprecated(`cmdList: ${cmdList} for ${repositoryPath}`);
         let confirm = undefined;
         const title = prune ? "Confirm Prune" : "Confirm Note Removal";
         const messageItemTitle = prune ? `Prune Directory ${repositoryPath}` : `Note Commit Removal: ${commitHash}`;
@@ -615,11 +615,11 @@ export class GitCommands {
           await this.loader(repositoryPath);
         }
       } else {
-        this.logger.debug("Not a git repository (or any of the parent directories): .git");
+        this.logger.deprecated("Not a git repository (or any of the parent directories): .git");
         this.statusBar.showInformationMessage("Git Notes: Not a git repository (or any of the parent directories): .git");
       }
     } catch (error) {
-      this.logger.error(`An error occurred while pushing Git notes: ${error}`);
+      this.logger.deprecated(`An error occurred while pushing Git notes: ${error}`);
       this.statusBar.showErrorMessage(`Git Notes: An error occurred while pushing Git notes: ${error}`);
       const messageItem: vscode.MessageItem[] = [ { title: "Prune notes" }, {title: "Cancel"} ];
       const selected = await this.input.showInputWindowMessage("Failed to remove Git note", messageItem, true, true);
@@ -633,7 +633,7 @@ export class GitCommands {
   }
 
   public async getGitUrl(): Promise<string> {
-    this.logger.trace("getGitUrl()");
+    this.logger.deprecated("getGitUrl()");
     try {
       const result = await new Promise<string>((resolve, reject) => {
         this.git.remote(["get-url", "origin"], (err, result) => {
@@ -649,18 +649,18 @@ export class GitCommands {
       const regex = /^(?:git:\/\/|git@|git\/\/\/)(.+)$/i;
       // Convert SSH URL to HTTPS URL if necessary
       if (gitUrl.match(regex)) {
-        this.logger.info(`ssh git url found: ${gitUrl}`);
+        this.logger.deprecated(`ssh git url found: ${gitUrl}`);
         gitUrl = gitUrl.replace(/:/, "/").replace(/.git$/, "");
         gitUrl = gitUrl.replace(regex, "https://$1");
       } else {
-        this.logger.info(`https git url found: ${gitUrl}`);
+        this.logger.deprecated(`https git url found: ${gitUrl}`);
         gitUrl = gitUrl.replace(/.git$/, "");
       }
 
-      this.logger.info(`return ${gitUrl}`);
+      this.logger.deprecated(`return ${gitUrl}`);
       return gitUrl;
     } catch (error) {
-      this.logger.error(`Failed to retrieve Git URL:', ${error}`);
+      this.logger.deprecated(`Failed to retrieve Git URL:', ${error}`);
       return "";
     }
   }
