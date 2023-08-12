@@ -7,15 +7,21 @@ import { GitNotesPanel } from './ui/webview';
 import { NotesInput } from './ui/input';
 
 import { GitCommands } from './git/cmd';
+import { AppendNote, AppendNoteParameters } from "./git/exports";
 import { RepositoryManager } from './interface';
 import { LoggerService, LogLevel } from './log/service';
 import { GitNotesSettings } from './settings';
+import { EditWindow } from './ui/edit';
+import { GitNotesStatusBar } from './ui/status';
 
+const append = new AppendNote();
 const notes = new GitCommands();
 const manager = RepositoryManager.getInstance();
 const input = NotesInput.getInstance();
 const settings = new GitNotesSettings();
 const logger = LoggerService.getInstance(settings.logLevel);
+const statusBar = GitNotesStatusBar.getInstance();
+
 const editorTempFileName = "vscode-git-notes-autosave_msg.txt";
 
 export function activate(context: vscode.ExtensionContext) {
@@ -166,6 +172,64 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
+  // Register the command for appending git notes.
+  let appendGitNotesDisposable = vscode.commands.registerCommand(
+    "extension.appendGitNotes",
+    async (cmdRepositoryPath?, cmdCommitHash?) => {
+      logger.info("extension.appendGitNotes command called");
+      const activeFileRepoPath = cmdRepositoryPath
+        ? cmdRepositoryPath
+        : notes.repositoryPath;
+      if (activeFileRepoPath !== undefined) {
+        cmdCommitHash
+          ? undefined
+          : input.setup(
+              "Append a Git Note",
+              "Enter the Commit hash or leave blank to apply to last commit ....",
+              false
+            );
+        const commitHashInput = cmdCommitHash
+          ? cmdCommitHash
+          : await input.showInputBox();
+        const commitHash = commitHashInput
+          ? commitHashInput.replace(/\s/g, "")
+          : await notes.getLatestCommit(undefined, activeFileRepoPath);
+        console.log(commitHashInput);
+        if (commitHashInput === false) {
+          return;
+        }
+        const editWindow = new EditWindow(commitHash);
+        await editWindow.showEditWindow().then(async (message) => {
+          const appendParameter: AppendNoteParameters = {
+            repositoryPath: activeFileRepoPath,
+            commitHash: commitHash,
+            message: message,
+          };
+          await append.command(appendParameter).then(() => {
+            refreshWebView(appendParameter.repositoryPath);
+          }).catch((error) => {
+            statusBar.showErrorMessage(
+              `Git Notes: An error occurred while appending Git note: ${error}`
+            );
+          });
+        });
+      }
+    }
+  );
+
+  // Refresh the webview after a git note has been updated
+  function refreshWebView(repositoryPath: string) {
+    if (GitNotesPanel.currentPanel) {
+      logger.debug(
+        `Sending [refresh] command [repositoryPath:${repositoryPath}] to webview`
+      );
+      GitNotesPanel.currentPanel.postMessage({
+        command: "refresh",
+        repositoryPath: repositoryPath,
+      });
+    }
+  }
+
   // Register the command opening a editor for adding git notes to commits
   let gitAddNoteMessageDisposable = vscode.commands.registerCommand('extension.addOrEditGitNote',
     async (cmdCommitHash?, cmdRepositoryPath?) => {
@@ -242,6 +306,7 @@ export function activate(context: vscode.ExtensionContext) {
     runWebviewDisposable,
     removeGitNoteDisposable,
     pruneGitNotesDisposable,
+    appendGitNotesDisposable,
     gitAddNoteMessageDisposable
   );
 }

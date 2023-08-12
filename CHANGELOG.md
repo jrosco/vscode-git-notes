@@ -9,6 +9,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 ### Added
 
 - [#42](https://github.com/jrosco/vscode-git-notes/pull/42) ❇️ Added a new edit window class for git notes editor
+- [#43](https://github.com/jrosco/vscode-git-notes/pull/43) ❇️ Add `append`` command and refactor some code to support this new command
 - [#45](https://github.com/jrosco/vscode-git-notes/pull/45) 🔊 Add `deprecated` log service for deprecated classes and methods
 
 ## [0.2.1] - 2023-08-07
