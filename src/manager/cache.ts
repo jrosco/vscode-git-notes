@@ -1,16 +1,16 @@
 import { RepositoryManager } from "./manager";
-import { GitCommands } from "../git/cmd";
 import { GitNotesStatusBar } from "../ui/status";
 import { RepositoryDetails, CommitDetails } from "./exports";
+import { GitUtils } from "../git/exports";
 
 export class CacheManager extends RepositoryManager {
   private static cacheManager: CacheManager;
-  private cmd: GitCommands;
   private statusBar: GitNotesStatusBar;
+  private gitUtils: GitUtils;
 
   constructor() {
     super(); // Call the constructor of the parent class
-    this.cmd = new GitCommands();
+    this.gitUtils = new GitUtils();
     this.statusBar = GitNotesStatusBar.getInstance();
   }
 
@@ -28,7 +28,7 @@ export class CacheManager extends RepositoryManager {
   ): Promise<RepositoryDetails[]> {
     this.logger.debug(`load(${repositoryPath})`);
     this.statusBar.reset();
-    this.cmd.setRepositoryPath(repositoryPath);
+    this.gitUtils.setRepositoryPath(repositoryPath);
     const commitDetailsInterface: CommitDetails[] = [];
     const existing = this.getExistingRepositoryDetails(repositoryPath);
     let counter = 0;
@@ -36,11 +36,11 @@ export class CacheManager extends RepositoryManager {
 
     if (existing === undefined) {
       this.logger.debug(`no details found for ${repositoryPath} ... loading`);
-      const notes = await this.cmd.getGitNotesList();
+      const notes = await this.gitUtils.getGitNotesList();
       for (const note of notes) {
         if (counter < max) {
           // load commit details based off the max number of notes to show
-          const commitDetails = await this.cmd.getCommitDetails(
+          const commitDetails = await this.gitUtils.getCommitDetails(
             note.commitHash
           );
           const detail: CommitDetails = {
@@ -50,7 +50,7 @@ export class CacheManager extends RepositoryManager {
             author: commitDetails[0].author,
             message: commitDetails[0].message,
             note: (
-              await this.cmd.getGitNoteMessage(note.commitHash)
+              await this.gitUtils.getGitNoteMessage(note.commitHash)
             ).toString(),
             fileChanges: commitDetails[0].fileChanges,
           };
@@ -67,7 +67,7 @@ export class CacheManager extends RepositoryManager {
           commitDetailsInterface.push(detail);
         }
       }
-      const repositoryUrl = await this.cmd.getGitUrl();
+      const repositoryUrl = await this.gitUtils.getGitUrl();
       this.updateRepositoryDetails(
         repositoryPath,
         repositoryUrl,
@@ -103,14 +103,14 @@ export class CacheManager extends RepositoryManager {
                   (details.author && details.date && details.message) ===
                   undefined
                 ) {
-                  const commitDetails = await this.cmd.getCommitDetails(
+                  const commitDetails = await this.gitUtils.getCommitDetails(
                     note.commitHash
                   );
                   const updatedCommitDetails: Partial<CommitDetails> = {
                     author: commitDetails[0].author,
                     message: commitDetails[0].message,
                     note: (
-                      await this.cmd.getGitNoteMessage(note.commitHash)
+                      await this.gitUtils.getGitNoteMessage(note.commitHash)
                     ).toString(),
                     fileChanges: commitDetails[0].fileChanges,
                   };
@@ -125,7 +125,7 @@ export class CacheManager extends RepositoryManager {
         }
       }
       if (commitDetailsInterface) {
-        const repositoryUrl = await this.cmd.getGitUrl();
+        const repositoryUrl = await this.gitUtils.getGitUrl();
         this.updateRepositoryDetails(
           repositoryPath,
           repositoryUrl,
@@ -145,7 +145,7 @@ export class CacheManager extends RepositoryManager {
     commitHash: string
   ): Promise<RepositoryDetails[]> {
     this.logger.debug(`loadNoteDetails(${repositoryPath}, ${commitHash})`);
-    this.cmd.setRepositoryPath(repositoryPath);
+    this.gitUtils.setRepositoryPath(repositoryPath);
     this.statusBar.reset();
     const commitDetailsInterface =
       this.getExistingRepositoryDetails(repositoryPath);
@@ -158,14 +158,14 @@ export class CacheManager extends RepositoryManager {
           `commit and note hashes found for commit ${commitHash} ... loading commit details`
         );
         if ((details.author && details.date && details.message) === undefined) {
-          const commitDetails = await this.cmd.getCommitDetails(
+          const commitDetails = await this.gitUtils.getCommitDetails(
             details.commitHash
           );
           const updatedCommitDetails: Partial<CommitDetails> = {
             author: commitDetails[0].author,
             message: commitDetails[0].message,
             note: (
-              await this.cmd.getGitNoteMessage(details.commitHash)
+              await this.gitUtils.getGitNoteMessage(details.commitHash)
             ).toString(),
             fileChanges: commitDetails[0].fileChanges,
           };
@@ -175,8 +175,8 @@ export class CacheManager extends RepositoryManager {
         this.logger.debug(
           `no commit or note hashes details found for commit ${commitHash} ... loading full details`
         );
-        const note = await this.cmd.getGitNotesList(commitHash);
-        const commitDetails = await this.cmd.getCommitDetails(commitHash);
+        const note = await this.gitUtils.getGitNotesList(commitHash);
+        const commitDetails = await this.gitUtils.getCommitDetails(commitHash);
         const details: CommitDetails = {
           noteHash: note[0].noteHash,
           commitHash: note[0].commitHash,
@@ -184,7 +184,7 @@ export class CacheManager extends RepositoryManager {
           author: commitDetails[0].author,
           message: commitDetails[0].message,
           note: (
-            await this.cmd.getGitNoteMessage(note[0].commitHash)
+            await this.gitUtils.getGitNoteMessage(note[0].commitHash)
           ).toString(),
           fileChanges: commitDetails[0].fileChanges,
         };
@@ -194,7 +194,7 @@ export class CacheManager extends RepositoryManager {
       }
 
       if (commitDetailsInterface) {
-        const repositoryUrl = await this.cmd.getGitUrl();
+        const repositoryUrl = await this.gitUtils.getGitUrl();
         this.updateRepositoryDetails(
           repositoryPath,
           repositoryUrl,
