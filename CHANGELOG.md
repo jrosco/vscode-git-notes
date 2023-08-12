@@ -15,7 +15,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 ### Changed
 
 - [#44](https://github.com/jrosco/vscode-git-notes/pull/44) ❇️ Moved old git `interface` class to new git manager classes
-
+- [#46](https://github.com/jrosco/vscode-git-notes/pull/46) ♻️ Moved misc git commands to git utils class
 
 ## [0.2.1] - 2023-08-07
 
