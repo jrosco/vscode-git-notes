@@ -43,7 +43,7 @@ export class LoggerService {
       ];
       const logLevelName = logLevelNames[level];
       console.log(
-        `[${new Date().toISOString()} git-notes [${logLevelName}] ${message}`
+        `[${new Date().toISOString()}] git-notes [${logLevelName}] ${message}`
       );
     }
   }
