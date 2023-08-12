@@ -1,20 +1,31 @@
-import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
+import * as vscode from 'vscode';
 
-import { GitNotesPanel } from './ui/webview';
-import { NotesInput } from './ui/input';
-
-import { GitCommands } from './git/cmd';
-import { AppendNote, AppendNoteParameters } from "./git/exports";
-import { RepositoryManager } from './interface';
-import { LoggerService, LogLevel } from './log/service';
-import { GitNotesSettings } from './settings';
+import {
+  Git,
+  AppendNote,
+  AppendNoteParameters,
+  EditNote,
+  EditNoteParameters,
+  GitUtils,
+} from "./git/exports";
+import { CacheManager} from "./manager/exports";
 import { EditWindow } from './ui/edit';
+import { GitCommands } from './git/cmd';
+import { GitNotesPanel } from './ui/webview';
+import { GitNotesSettings } from './settings';
 import { GitNotesStatusBar } from './ui/status';
+import { LoggerService, LogLevel } from './log/service';
+import { NotesInput } from './ui/input';
+import { RepositoryManager } from './interface';
 
+const git = new Git();
 const append = new AppendNote();
+const edit = new EditNote();
+const gitUtils = new GitUtils();
+const cache = CacheManager.getInstance();
 const notes = new GitCommands();
 const manager = RepositoryManager.getInstance();
 const input = NotesInput.getInstance();
@@ -22,67 +33,103 @@ const settings = new GitNotesSettings();
 const logger = LoggerService.getInstance(settings.logLevel);
 const statusBar = GitNotesStatusBar.getInstance();
 
-const editorTempFileName = "vscode-git-notes-autosave_msg.txt";
+const tempFileSuffixPath = settings.tempFileSuffixPath;
 
 export function activate(context: vscode.ExtensionContext) {
   logger.info("Your extension 'git-notes' has been activated.");
 
   // Get the URIs of open files when Visual Studio Code first opens
   // Iterate through the currently open files
-  vscode.workspace.textDocuments.forEach(async (document: vscode.TextDocument) => {
-    if (document.uri.scheme === "file") {
-      notes.repositoryPath = manager.getGitRepositoryPath(document.uri);
-      if (settings.autoCheck) {
-        await notes.loader(notes.repositoryPath).then(() => {}).catch((error) => {
-          logger.error(error);
-        });
+  vscode.workspace.textDocuments.forEach(
+    async (document: vscode.TextDocument) => {
+      if (document.uri.scheme === "file") {
+        git.repositoryPath = cache.getGitRepositoryPath(document.uri);
+        if (settings.autoCheck) {
+          await cache
+            .load(git.repositoryPath)
+            .then(() => {})
+            .catch((error) => {
+              logger.error(error);
+            });
+        }
       }
     }
-  });
+  );
 
   // Register the event listener for file open event
-  vscode.workspace.onDidOpenTextDocument(async (document: vscode.TextDocument) => {
-    if (document.uri.scheme === "file") {
-      // If `autoCheck` is enabled and the file is not a Git Notes temp edit file
-      if (settings.autoCheck && !document.uri.path.endsWith(editorTempFileName)) {
-        notes.repositoryPath = manager.getGitRepositoryPath(document.uri);
-        await notes.loader(notes.repositoryPath).then(() => {}).catch((error) => {
-          logger.error(error);
-        });
+  vscode.workspace.onDidOpenTextDocument(
+    async (document: vscode.TextDocument) => {
+      if (document.uri.scheme === "file") {
+        // If `autoCheck` is enabled and the file is not a Git Notes temp edit file
+        if (
+          settings.autoCheck &&
+          !document.uri.path.endsWith(tempFileSuffixPath)
+        ) {
+          git.repositoryPath = cache.getGitRepositoryPath(document.uri);
+          await cache
+            .load(git.repositoryPath)
+            .then(() => {})
+            .catch((error) => {
+              logger.error(error);
+            });
+        }
       }
     }
-  });
+  );
 
   // Register the event listener for switching between file tabs
   vscode.window.onDidChangeActiveTextEditor(async (editor) => {
     if (editor && editor.document.uri.scheme) {
       // If `autoCheck` is enabled and the file is not a Git Notes temp edit file
-      if (settings.autoCheck && !editor.document.uri.path.endsWith(editorTempFileName)) {
-        notes.repositoryPath = manager.getGitRepositoryPath(editor.document.uri);
-        await notes.loader(notes.repositoryPath).then(() => {}).catch((error) => {
-          logger.error(error);
-        });
+      if (
+        settings.autoCheck &&
+        !editor.document.uri.path.endsWith(tempFileSuffixPath)
+      ) {
+        git.repositoryPath = cache.getGitRepositoryPath(
+          editor.document.uri
+        );
+        await cache
+          .load(git.repositoryPath)
+          .then(() => {})
+          .catch((error) => {
+            logger.error(error);
+          });
       }
     }
   });
 
   // Register the command for manual Git notes check. Can take optional parameter `cmdRepositoryPath`
-  let gitCheckNotesDisposable = vscode.commands.registerCommand("extension.checkGitNotes",
+  let gitCheckNotesDisposable = vscode.commands.registerCommand(
+    "extension.checkGitNotes",
     async (cmdRepositoryPath?, cmdClearRepoCache?: boolean) => {
       logger.info("extension.checkGitNotes command called");
       const activeEditor = vscode.window.activeTextEditor;
-      notes.repositoryPath = cmdRepositoryPath ? cmdRepositoryPath: notes.repositoryPath;
-      if (notes.repositoryPath !== undefined) {
-        cmdClearRepoCache ? await manager.clearRepositoryDetails(undefined, notes.repositoryPath) : false;
-        await notes.loader(notes.repositoryPath).then(() => {}).catch((error) => {
-          logger.error(error);
-        });
+      git.repositoryPath = cmdRepositoryPath
+        ? cmdRepositoryPath
+        : cache.getGitRepositoryPath(activeEditor?.document.uri);
+      if (git.repositoryPath !== undefined) {
+        cmdClearRepoCache
+          ? await cache.clearRepositoryDetails(undefined, git.repositoryPath)
+          : false;
+        await cache
+          .load(git.repositoryPath)
+          .then(() => {})
+          .catch((error) => {
+            logger.error(error);
+          });
       } else if (activeEditor) {
-        notes.repositoryPath = manager.getGitRepositoryPath(activeEditor.document.uri);
-        cmdClearRepoCache ? await manager.clearRepositoryDetails(activeEditor.document.uri) : false;
-        await notes.loader(notes.repositoryPath).then(() => {}).catch((error) => {
-          logger.error(error);
-        });
+        const repositoryPath = cache.getGitRepositoryPath(
+          activeEditor.document.uri
+        );
+        cmdClearRepoCache
+          ? await cache.clearRepositoryDetails(activeEditor.document.uri)
+          : false;
+        await cache
+          .load(repositoryPath)
+          .then(() => {})
+          .catch((error) => {
+            logger.error(error);
+          });
       }
     }
   );
@@ -122,8 +169,8 @@ export function activate(context: vscode.ExtensionContext) {
       logger.info("extension.runWebview command called");
       const activeEditor = vscode.window.activeTextEditor;
       if (activeEditor !== undefined) {
-        notes.repositoryPath = manager.getGitRepositoryPath(activeEditor.document.uri);
-        await notes.loader(notes.repositoryPath, settings.gitNotesLoadLimit).then((repositoryDetails) => {
+        git.repositoryPath = cache.getGitRepositoryPath(activeEditor.document.uri);
+        await cache.load(git.repositoryPath, settings.gitNotesLoadLimit).then((repositoryDetails) => {
           GitNotesPanel.createOrShow(activeEditor.document.uri, repositoryDetails);
         }).catch((error) => {
           logger.error(error);
@@ -179,7 +226,7 @@ export function activate(context: vscode.ExtensionContext) {
       logger.info("extension.appendGitNotes command called");
       const activeFileRepoPath = cmdRepositoryPath
         ? cmdRepositoryPath
-        : notes.repositoryPath;
+        : append.repositoryPath;
       if (activeFileRepoPath !== undefined) {
         cmdCommitHash
           ? undefined
@@ -204,11 +251,20 @@ export function activate(context: vscode.ExtensionContext) {
             commitHash: commitHash,
             message: message,
           };
-          await append.command(appendParameter).then(() => {
-            refreshWebView(appendParameter.repositoryPath);
-          }).catch((error) => {
-            statusBar.showErrorMessage(
-              `Git Notes: An error occurred while appending Git note: ${error}`
+          await append
+            .command(appendParameter)
+            .then(() => {
+              refreshWebView(appendParameter.repositoryPath);
+            })
+            .catch((error) => {
+              statusBar.showErrorMessage(
+                `Git Notes: An error occurred while appending Git note: ${error}`
+              );
+            });
+        });
+      }
+    }
+  );
             );
           });
         });
@@ -247,7 +303,7 @@ export function activate(context: vscode.ExtensionContext) {
           editNote = true;
         }
         const tempDir = os.tmpdir(); const filePrefix = commitHash ? commitHash : 'last_commit';
-        const tempFilePath = path.join(tempDir, filePrefix + '.' + editorTempFileName);
+        const tempFilePath = path.join(tempDir, filePrefix + '.' + tempFileSuffixPath);
         fs.writeFileSync(tempFilePath, `${currentNote}`);
         vscode.workspace.openTextDocument(tempFilePath).then((doc) => {
           vscode.window.showTextDocument(doc, { preview: true }).then((editor) => {
@@ -262,7 +318,7 @@ export function activate(context: vscode.ExtensionContext) {
               }
               document = activeEditor.document;
               // Check if the document is the temporary git edit file and get the content buffer
-              document.uri.path.match(commitHash + '.' + editorTempFileName) ? bufferContent = document.getText(): '';
+              document.uri.path.match(commitHash + '.' + tempFileSuffixPath) ? bufferContent = document.getText(): '';
               // Perform any operations you need with the buffer content here
               document.save();
             });
