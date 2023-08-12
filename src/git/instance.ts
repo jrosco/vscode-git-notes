@@ -21,7 +21,7 @@ export class GitCommandsInstance {
       `GitCommands constructor: ${Object.getOwnPropertyNames(this)}`
     );
   }
-
+  
   public setRepositoryPath(repositoryPath: string): void {
     this.logger.debug(`setRepositoryPath(${repositoryPath})`);
     this.repositoryPath = repositoryPath;

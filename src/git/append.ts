@@ -16,8 +16,13 @@ export class AppendNote extends GitCommandsInstance {
 
   public async command(parameter: AppendNoteParameters): Promise<void> {
     this.setRepositoryPath(parameter.repositoryPath);
+    // load details and wait before checking for existing notes
+    await this.cache.loadNoteDetails(
+      parameter.repositoryPath,
+      parameter.commitHash
+    );
     const existingNote = this.cache.getGitNoteMessage(
-      this.cache.getExistingRepositoryDetails(this.repositoryPath),
+      this.cache.getExistingRepositoryDetails(parameter.repositoryPath),
       parameter.commitHash
     );
     const cmdList = [
@@ -35,10 +40,6 @@ export class AppendNote extends GitCommandsInstance {
           parameter.commitHash,
           fullNote,
           parameter.repositoryPath
-        );
-        await this.cache.loadNoteDetails(
-          parameter.repositoryPath,
-          parameter.commitHash
         );
       })
       .catch((error) => {
