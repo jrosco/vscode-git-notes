@@ -7,6 +7,8 @@ import {
   Git,
   AppendNote,
   AppendNoteParameters,
+  EditNote,
+  EditNoteParameters,
   GitUtils,
 } from "./git/exports";
 import { CacheManager} from "./manager/exports";
@@ -20,6 +22,7 @@ import { NotesInput } from './ui/input';
 import { RepositoryManager } from './interface';
 
 const git = new Git();
+const edit = new EditNote();
 const append = new AppendNote();
 const gitUtils = new GitUtils();
 const cache = CacheManager.getInstance();
@@ -216,6 +219,65 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
+  // Register the command for editing git notes.
+  let editGitNotesDisposable = vscode.commands.registerCommand(
+    "extension.editGitNotes",
+    async (cmdRepositoryPath?, cmdCommitHash?) => {
+      logger.info("extension.editGitNotes command called");
+      const activeFileRepoPath = cmdRepositoryPath
+        ? cmdRepositoryPath
+        : git.repositoryPath;
+      if (activeFileRepoPath !== undefined) {
+        cmdCommitHash
+          ? undefined
+          : input.setup(
+              "Edit a Git Note",
+              "Enter the Commit hash or leave blank to apply to last commit ....",
+              false
+            );
+        const commitHashInput = cmdCommitHash
+          ? cmdCommitHash
+          : await input.showInputBox();
+        const commitHash = commitHashInput
+          ? commitHashInput.replace(/\s/g, "")
+          : await gitUtils.getLatestCommit(undefined, activeFileRepoPath);
+        if (commitHashInput === false) {
+          return;
+        }
+        let existingNote;
+        // load details and wait before checking for existing notes
+        await cache.loadNoteDetails(activeFileRepoPath, commitHash).then(() => {
+          existingNote = cache.getGitNoteMessage(
+            cache.getExistingRepositoryDetails(activeFileRepoPath),
+            commitHash
+          );
+        }).catch((error) => {
+          logger.error(`loading details error: ${error}`);
+        });
+        const editWindow = new EditWindow(commitHash, existingNote);
+        await editWindow.showEditWindow().then(async (message) => {
+          const editParameter: EditNoteParameters = {
+            repositoryPath: activeFileRepoPath,
+            commitHash: commitHash,
+            message: message,
+          };
+          editParameter.message !== ""
+            ? await edit
+                .command(editParameter)
+                .then(() => {
+                  refreshWebView(editParameter.repositoryPath);
+                })
+                .catch((error) => {
+                  statusBar.showErrorMessage(
+                    `Git Notes: An error occurred while editing Git note: ${error}`
+                  );
+                })
+            : false;
+        });
+      }
+    }
+  );
+
   // Register the command for appending git notes.
   let appendGitNotesDisposable = vscode.commands.registerCommand(
     "extension.appendGitNotes",
@@ -339,6 +401,7 @@ export function activate(context: vscode.ExtensionContext) {
     runWebviewDisposable,
     removeGitNoteDisposable,
     pruneGitNotesDisposable,
+    editGitNotesDisposable,
     appendGitNotesDisposable,
     gitAddNoteMessageDisposable
   );
