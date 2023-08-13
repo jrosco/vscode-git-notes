@@ -12,6 +12,8 @@ import {
   EditNote,
   EditNoteParameters,
   GitUtils,
+  RemoveNote,
+  RemoveNoteParameters
 } from "./git/exports";
 import { CacheManager} from "./manager/exports";
 import { EditWindow } from './ui/edit';
@@ -26,6 +28,7 @@ import { RepositoryManager } from './interface';
 const git = new Git();
 const add = new AddNote();
 const edit = new EditNote();
+const remove = new RemoveNote();
 const append = new AppendNote();
 const gitUtils = new GitUtils();
 const cache = CacheManager.getInstance();
@@ -183,23 +186,39 @@ export function activate(context: vscode.ExtensionContext) {
   );
 
   // Register the command for removing git notes on commits.
-  // Can take optional parameters `cmdCommitHash` and `cmdRepositoryPath` passing these to the function will
-  // bypass the input prompt and use the passed values instead.
-  let removeGitNoteDisposable = vscode.commands.registerCommand('extension.removeGitNote',
+  // Can take optional parameters `cmdCommitHash` and `cmdRepositoryPath`
+  // passing these to the function will bypass the input prompt and use the
+  // passed values instead.
+  let removeGitNoteDisposable = vscode.commands.registerCommand(
+    "extension.removeGitNote",
     async (cmdCommitHash?, cmdRepositoryPath?) => {
       logger.info("extension.removeGitNote command called");
       const activeEditor = vscode.window.activeTextEditor;
-      const repositoryPath = cmdRepositoryPath ? cmdRepositoryPath: notes.repositoryPath;
+      const repositoryPath = cmdRepositoryPath
+        ? cmdRepositoryPath
+        : git.repositoryPath;
       if (activeEditor !== undefined || repositoryPath !== undefined) {
-        cmdCommitHash ? undefined: input.setup('Remove a Git Note', 'Enter the Commit hash of the note to remove....', false);
-        const commitHashInput = cmdCommitHash ? cmdCommitHash: await input.showInputBox();
-        const commitHash = commitHashInput ? commitHashInput.replace(/\s/g, '') : undefined;
-        if (commitHash !== undefined) {
-          if (repositoryPath !== undefined) {
-            await notes.removeGitNote(commitHash, undefined, repositoryPath);
-          } else if (activeEditor) {
-            await notes.removeGitNote(commitHash, activeEditor.document.uri);
-          }
+        cmdCommitHash
+          ? undefined
+          : input.setup(
+              "Remove a Git Note",
+              "Enter the Commit hash of the note to remove....",
+              false
+            );
+        const commitHashInput = cmdCommitHash
+          ? cmdCommitHash
+          : await input.showInputBox();
+        const commitHash = commitHashInput
+          ? commitHashInput.replace(/\s/g, "")
+          : undefined;
+        const removeParameter: RemoveNoteParameters = {
+          repositoryPath: repositoryPath
+            ? repositoryPath
+            : activeEditor?.document.uri,
+          commitHash: commitHash,
+        };
+        if (commitHash !== undefined && commitHashInput !== '') {
+          await remove.command(removeParameter);
         }
       }
     }
