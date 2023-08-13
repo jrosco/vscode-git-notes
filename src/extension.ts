@@ -7,8 +7,6 @@ import {
   Git,
   AppendNote,
   AppendNoteParameters,
-  EditNote,
-  EditNoteParameters,
   GitUtils,
 } from "./git/exports";
 import { CacheManager} from "./manager/exports";
@@ -23,7 +21,6 @@ import { RepositoryManager } from './interface';
 
 const git = new Git();
 const append = new AppendNote();
-const edit = new EditNote();
 const gitUtils = new GitUtils();
 const cache = CacheManager.getInstance();
 const notes = new GitCommands();
@@ -261,12 +258,6 @@ export function activate(context: vscode.ExtensionContext) {
                 `Git Notes: An error occurred while appending Git note: ${error}`
               );
             });
-        });
-      }
-    }
-  );
-            );
-          });
         });
       }
     }
