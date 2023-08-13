@@ -5,6 +5,8 @@ import * as vscode from 'vscode';
 
 import {
   Git,
+  AddNote,
+  AddNoteParameters,
   AppendNote,
   AppendNoteParameters,
   EditNote,
@@ -22,6 +24,7 @@ import { NotesInput } from './ui/input';
 import { RepositoryManager } from './interface';
 
 const git = new Git();
+const add = new AddNote();
 const edit = new EditNote();
 const append = new AppendNote();
 const gitUtils = new GitUtils();
@@ -219,6 +222,53 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
+  // Register the command for adding git notes.
+  let addGitNotesDisposable = vscode.commands.registerCommand(
+    "extension.addGitNotes",
+    async (cmdRepositoryPath?, cmdCommitHash?) => {
+      logger.info("extension.addGitNotes command called");
+      const activeFileRepoPath = cmdRepositoryPath
+        ? cmdRepositoryPath
+        : git.repositoryPath;
+      if (activeFileRepoPath !== undefined) {
+        cmdCommitHash
+          ? undefined
+          : input.setup(
+              "Add a Git Note",
+              "Enter the Commit hash or leave blank to apply to last commit ....",
+              false
+            );
+        const commitHashInput = cmdCommitHash
+          ? cmdCommitHash
+          : await input.showInputBox();
+        const commitHash = commitHashInput
+          ? commitHashInput.replace(/\s/g, "")
+          : await gitUtils.getLatestCommit(undefined, activeFileRepoPath);
+        if (commitHashInput === false) {
+          return;
+        }
+        const editWindow = new EditWindow(commitHash);
+        await editWindow.showEditWindow().then(async (message) => {
+          const addParameter: AddNoteParameters = {
+            repositoryPath: activeFileRepoPath,
+            commitHash: commitHash,
+            message: message,
+          };
+          addParameter.message !== '' ? await add
+            .command(addParameter)
+            .then(() => {
+              refreshWebView(addParameter.repositoryPath);
+            })
+            .catch((error) => {
+              statusBar.showErrorMessage(
+                `Git Notes: An error occurred while adding Git note: ${error}`
+              );
+            }): false;
+        });
+      }
+    }
+  );
+
   // Register the command for editing git notes.
   let editGitNotesDisposable = vscode.commands.registerCommand(
     "extension.editGitNotes",
@@ -401,6 +451,7 @@ export function activate(context: vscode.ExtensionContext) {
     runWebviewDisposable,
     removeGitNoteDisposable,
     pruneGitNotesDisposable,
+    addGitNotesDisposable,
     editGitNotesDisposable,
     appendGitNotesDisposable,
     gitAddNoteMessageDisposable
