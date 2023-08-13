@@ -31,6 +31,33 @@ export class LoggerService {
     return LoggerService.instance;
   }
 
+  // decorator to log method calls
+  // usage: @LoggerService(this)
+  static logMethod(message?: string) {
+    return function (
+      target: any,
+      propertyKey: string,
+      descriptor: PropertyDescriptor
+    ) {
+      const originalMethod = descriptor.value;
+
+      descriptor.value = function (...args: any[]) {
+        const methodName = propertyKey;
+        if (LoggerService.instance.logLevel === LogLevel.trace) {
+          console.info(
+            `[${new Date().toISOString()}] git-notes [METHOD] ${methodName}`
+          );
+          console.info(message);
+          console.debug(args);
+        }
+
+        return originalMethod.apply(this, args);
+      };
+
+      return descriptor;
+    };
+  }
+
   private logMessage(level: LogLevel, message: string): void {
     if (level >= this.logLevel) {
       const logLevelNames = [
