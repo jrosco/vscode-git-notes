@@ -226,17 +226,23 @@ export function activate(context: vscode.ExtensionContext) {
 
   // Register the command for pruning git notes from stale commits.
   // Can take optional parameter `cmdRepositoryPath`
-  let pruneGitNotesDisposable = vscode.commands.registerCommand('extension.pruneGitNotes',
-      async (cmdRepositoryPath?) => {
+  let pruneGitNotesDisposable = vscode.commands.registerCommand(
+    'extension.pruneGitNotes',
+    async (cmdRepositoryPath?) => {
       logger.info("extension.pruneGitNotes command called");
-      notes.repositoryPath = cmdRepositoryPath ? cmdRepositoryPath: notes.repositoryPath;
+      const repositoryPath = cmdRepositoryPath
+        ? cmdRepositoryPath
+        : git.repositoryPath;
       const activeEditor = vscode.window.activeTextEditor;
-      if (activeEditor !== undefined || notes.repositoryPath !== undefined) {
-        if (notes.repositoryPath !== undefined) {
-          await notes.removeGitNote("", undefined, notes.repositoryPath, true);
-        } else if (activeEditor) {
-          await notes.removeGitNote("", activeEditor.document.uri, notes.repositoryPath, true);
-        }
+      const removeParameter: RemoveNoteParameters = {
+        repositoryPath: repositoryPath
+          ? repositoryPath
+          : activeEditor?.document.uri,
+        commitHash: '',
+        prune: true,
+      };
+      if (removeParameter.repositoryPath) {
+        await remove.command(removeParameter);
       }
     }
   );
