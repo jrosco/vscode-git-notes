@@ -217,8 +217,12 @@ export function activate(context: vscode.ExtensionContext) {
             : activeEditor?.document.uri,
           commitHash: commitHash,
         };
-        if (commitHash !== undefined) {
-          await remove.command(removeParameter);
+        if (removeParameter.commitHash !== undefined) {
+          await remove
+            .command(removeParameter)
+            .then(() => {
+              refreshWebView(removeParameter.repositoryPath);
+          });
         }
       }
     }
@@ -242,7 +246,9 @@ export function activate(context: vscode.ExtensionContext) {
         prune: true,
       };
       if (removeParameter.repositoryPath) {
-        await remove.command(removeParameter);
+        await remove.command(removeParameter).then(() => {
+          refreshWebView(removeParameter.repositoryPath);
+        });
       }
     }
   );
