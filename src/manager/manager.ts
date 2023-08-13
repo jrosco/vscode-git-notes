@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import * as fs from "fs";
 
-import { LoggerService, LogLevel } from "../log/service";
+import { LoggerService } from "../log/service";
 import { GitNotesSettings } from "../settings";
 
 export interface RepositoryDetails {
