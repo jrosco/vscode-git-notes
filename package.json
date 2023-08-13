@@ -122,12 +122,16 @@
         "title": "Git Note: Prune Notes"
       },
       {
+        "command": "extension.addGitNotes",
+        "title": "Git Note: Add Notes"
+      },
+      {
         "command": "extension.appendGitNotes",
         "title": "Git Note: Append Notes"
       },
       {
-        "command": "extension.addOrEditGitNote",
-        "title": "Git Note: Add/Edit Notes"
+        "command": "extension.editGitNotes",
+        "title": "Git Note: Edit Notes"
       }
     ]
   },
