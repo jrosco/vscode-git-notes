@@ -23,7 +23,7 @@ export class EditWindow {
     this.logger.debug(`_createTemporaryFile()`);
     const tempDir = os.tmpdir();
     const tempFilePrefix = this.commitHash ? this.commitHash : "last_commit";
-    const tempFileSuffix: string = ".vscode-git-notes-autosave_msg.txt";
+    const tempFileSuffix = this.settings.tempFileSuffixPath;
     const tempFilePath = path.join(tempDir, tempFilePrefix + tempFileSuffix);
 
     await fs.writeFile(tempFilePath, this.existingMessage);
@@ -94,9 +94,6 @@ export class EditWindow {
     this.logger.debug(
       `showEditWindow() using doc: ${doc.uri.path} editor: ${editor.document.uri.path}`
     );
-    editor.edit((edit) => {
-      edit.insert(new vscode.Position(0, 0), this.existingMessage);
-    });
 
     const bufferContent = await this._handleTextChanges(doc);
 

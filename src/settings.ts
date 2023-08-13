@@ -106,6 +106,9 @@ export class GitNotesSettings {
 		return theme.includes('Dark');
 	}
 
+	public get tempFileSuffixPath(): string {
+        return '.vscode-git-notes-autosave_msg.txt';
+    }
 	// Optionally, you can create a method to apply the settings when needed
 	// public applySettings(): void {
 	//     // Apply your settings logic here

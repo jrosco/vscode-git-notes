@@ -47,6 +47,10 @@ export class RepositoryManager {
     this.logger = LoggerService.getInstance(this.settings.logLevel);
   }
 
+  /**
+  * This function is deprecated. Use RepositoryManager() instead.
+  * @deprecated Since version 0.2.2. Will be removed in version 1.0.0.
+  */
   public static getInstance(): RepositoryManager {
     if (!RepositoryManager.instance) {
       RepositoryManager.instance = new RepositoryManager();
@@ -54,6 +58,10 @@ export class RepositoryManager {
     return RepositoryManager.instance;
   }
 
+  /**
+  * This function is deprecated. Use RepositoryManager() instead.
+  * @deprecated Since version 0.2.2. Will be removed in version 1.0.0.
+  */
   public getExistingRepositoryDetails(repositoryPath: string | undefined) {
     this.logger.deprecated(`getExistingRepositoryDetails(${repositoryPath})`);
     const repository = this.repositoryDetailsInterface.find(
@@ -62,6 +70,10 @@ export class RepositoryManager {
     return repository ? repository.commitDetails : undefined;
   }
 
+  /**
+  * This function is deprecated. Use RepositoryManager() instead.
+  * @deprecated Since version 0.2.2. Will be removed in version 1.0.0.
+  */
   public getFileChangeFile(commitDetails: CommitDetails[], commitHash: string): string | undefined {
     this.logger.deprecated(`getFileChangeFile(${commitHash})`);
     const commit = commitDetails.find(commit => commit.commitHash === commitHash);
@@ -75,6 +87,10 @@ export class RepositoryManager {
     return undefined; // Return undefined if commit or file change is not found
   }
 
+  /**
+  * This function is deprecated. Use RepositoryManager() instead.
+  * @deprecated Since version 0.2.2. Will be removed in version 1.0.0.
+  */
   public getExistingCommitDetails(repositoryPath: string, commitHash: string): CommitDetails | undefined {
     this.logger.deprecated(`getExistingCommitDetails(${repositoryPath}, ${commitHash})`);
     const commitDetails = this.getExistingRepositoryDetails(repositoryPath);
@@ -88,6 +104,10 @@ export class RepositoryManager {
     }
   }
 
+  /**
+  * This function is deprecated. Use RepositoryManager() instead.
+  * @deprecated Since version 0.2.2. Will be removed in version 1.0.0.
+  */
   public noteDetailsExists(repositoryPath: string, commitHash: string): boolean {
     this.logger.deprecated(`noteExists(${commitHash})`);
     const commitDetails = this.getExistingRepositoryDetails(repositoryPath);
@@ -103,6 +123,10 @@ export class RepositoryManager {
     return false; // Return false if commit or note is not found
   }
 
+  /**
+  * This function is deprecated. Use RepositoryManager() instead.
+  * @deprecated Since version 0.2.2. Will be removed in version 1.0.0.
+  */
   public getGitNoteMessage(commitDetails?: CommitDetails[], commitHash?: string): string | undefined {
     this.logger.deprecated(`getGitNoteMessage(${commitHash})`);
     const commit = commitDetails?.find(commit => commit.commitHash === commitHash);
@@ -116,6 +140,10 @@ export class RepositoryManager {
     return undefined; // Return undefined if commit or note is not found
   }
 
+  /**
+  * This function is deprecated. Use RepositoryManager() instead.
+  * @deprecated Since version 0.2.2. Will be removed in version 1.0.0.
+  */
   public updateRepositoryDetails(repositoryPath: string | undefined, repositoryUrl: string, notes: CommitDetails[]): void {
     this.logger.deprecated(`updateRepositoryDetails(${repositoryPath}, ${repositoryUrl}, notes found ${notes.length})`);
     const index = this.repositoryDetailsInterface.findIndex(
@@ -138,6 +166,10 @@ export class RepositoryManager {
     }
   }
 
+  /**
+  * This function is deprecated. Use RepositoryManager() instead.
+  * @deprecated Since version 0.2.2. Will be removed in version 1.0.0.
+  */
   public async updateNoteMessage(commitHashToUpdate: string, newNote: string, repositoryPath?: string | undefined) {
     this.logger.deprecated(`updateNoteMessage(${commitHashToUpdate}, ${newNote})`);
     const repoDetails = this.repositoryDetailsInterface.find(
@@ -154,6 +186,10 @@ export class RepositoryManager {
     }
   }
 
+  /**
+  * This function is deprecated. Use RepositoryManager() instead.
+  * @deprecated Since version 0.2.2. Will be removed in version 1.0.0.
+  */
   public async clearRepositoryDetails(document?: vscode.Uri | undefined, repositoryPath?: string | undefined): Promise<void> {
     this.logger.deprecated(`clearRepositoryDetails(${document}, ${repositoryPath})`);
     repositoryPath = this.getGitRepositoryPath(document, repositoryPath);
@@ -179,6 +215,10 @@ export class RepositoryManager {
     }
   }
 
+  /**
+  * This function is deprecated. Use RepositoryManager() instead.
+  * @deprecated Since version 0.2.2. Will be removed in version 1.0.0.
+  */
   public getGitRepositoryPath(fileUri?: vscode.Uri | undefined, repositoryPath?: string | undefined): string {
     this.logger.deprecated(`getGitRepositoryPath(${fileUri}, ${repositoryPath})`);
     let workspaceFolder;
@@ -205,8 +245,12 @@ export class RepositoryManager {
     return "";
   }
 
+  /**
+  * This function is deprecated. Use RepositoryManager() instead.
+  * @deprecated Since version 0.2.2. Will be removed in version 1.0.0.
+  */
   public getRepositoryDetailsInterface() {
-    this.logger.trace(`getRepositoryDetailsInterface(${this.repositoryDetailsInterface})`);
+    this.logger.deprecated(`getRepositoryDetailsInterface(${this.repositoryDetailsInterface})`);
     return this.repositoryDetailsInterface;
   }
 }
