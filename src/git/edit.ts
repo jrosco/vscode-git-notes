@@ -16,11 +16,6 @@ export class EditNote extends GitCommandsInstance {
 
   public async command(parameter: EditNoteParameters): Promise<void> {
     this.setRepositoryPath(parameter.repositoryPath);
-    // load details and wait before checking for existing notes
-    await this.cache.loadNoteDetails(
-      parameter.repositoryPath,
-      parameter.commitHash
-    );
     const cmdList = [
       "notes",
       "edit",
