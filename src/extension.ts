@@ -17,7 +17,7 @@ import { GitCommands } from './git/cmd';
 import { GitNotesPanel } from './ui/webview';
 import { GitNotesSettings } from './settings';
 import { GitNotesStatusBar } from './ui/status';
-import { LoggerService, LogLevel } from './log/service';
+import { LoggerService } from './log/service';
 import { NotesInput } from './ui/input';
 import { RepositoryManager } from './interface';
 
@@ -272,19 +272,6 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
-  // Refresh the webview after a git note has been updated
-  function refreshWebView(repositoryPath: string) {
-    if (GitNotesPanel.currentPanel) {
-      logger.debug(
-        `Sending [refresh] command [repositoryPath:${repositoryPath}] to webview`
-      );
-      GitNotesPanel.currentPanel.postMessage({
-        command: "refresh",
-        repositoryPath: repositoryPath,
-      });
-    }
-  }
-
   // Register the command opening a editor for adding git notes to commits
   let gitAddNoteMessageDisposable = vscode.commands.registerCommand('extension.addOrEditGitNote',
     async (cmdCommitHash?, cmdRepositoryPath?) => {
@@ -364,6 +351,19 @@ export function activate(context: vscode.ExtensionContext) {
     appendGitNotesDisposable,
     gitAddNoteMessageDisposable
   );
+
+  // Refresh the webview after a git note has been updated
+  function refreshWebView(repositoryPath: string) {
+    if (GitNotesPanel.currentPanel) {
+      logger.debug(
+        `Sending [refresh] command [repositoryPath:${repositoryPath}] to webview`
+      );
+      GitNotesPanel.currentPanel.postMessage({
+        command: "refresh",
+        repositoryPath: repositoryPath,
+      });
+    }
+  }
 }
 
 export function deactivate() {
