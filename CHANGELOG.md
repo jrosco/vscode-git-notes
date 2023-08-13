@@ -15,7 +15,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 ### Changed
 
 - [#44](https://github.com/jrosco/vscode-git-notes/pull/44) [#46](https://github.com/jrosco/vscode-git-notes/pull/46) [#47](https://github.com/jrosco/vscode-git-notes/pull/47) ♻️ Moved old git `interface` class to new git manager classes, misc git commands to git utils class and extension functions over to new git and manager classes
-- [#48](https://github.com/jrosco/vscode-git-notes/pull/48) ❇️ Updated Git notes `add` and `edit` commands
+- [#48](https://github.com/jrosco/vscode-git-notes/pull/48) [#49](https://github.com/jrosco/vscode-git-notes/pull/49) ♻️ Updated Git notes `add` and `edit` commands, moved remove and prune commands
 
 ## [0.2.1] - 2023-08-07
 
