@@ -1,9 +1,8 @@
-import * as vscode from 'vscode';
+import * as vscode from "vscode";
 
-import { LoggerService, LogLevel } from '../log/service';
-import { GitNotesSettings } from '../settings';
+import { LoggerService, LogLevel } from "../log/service";
+import { GitNotesSettings } from "../settings";
 export class GitNotesStatusBar {
-
   private static instance: GitNotesStatusBar;
   private statusBarItem: vscode.StatusBarItem | undefined;
   private logger: LoggerService;
@@ -14,7 +13,12 @@ export class GitNotesStatusBar {
   public repositoryPath;
   public command;
 
-  constructor(notesCount: number = 0, message?: string, repositoryPath?: string | undefined, command?: string) {
+  constructor(
+    notesCount: number = 0,
+    message?: string,
+    repositoryPath?: string | undefined,
+    command?: string
+  ) {
     this.notesCount = notesCount;
     this.message = message;
     this.repositoryPath = repositoryPath;
@@ -31,21 +35,31 @@ export class GitNotesStatusBar {
   }
 
   public update(): void {
-    this.logger.debug(`statusBar.update(${this.notesCount}, ${this.repositoryPath})`);
+    this.logger.debug(
+      `statusBar.update(${this.notesCount}, ${this.repositoryPath})`
+    );
     if (!this.statusBarItem) {
-      this.statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left);
+      this.statusBarItem = vscode.window.createStatusBarItem(
+        vscode.StatusBarAlignment.Left
+      );
     }
     if (this.notesCount > 0 && this.command === undefined) {
       if (this.settings.enableNotificationsWhenNotesFound) {
-        vscode.window.showInformationMessage(`Git Notes: Found in ${this.repositoryPath}.`);
+        vscode.window.showInformationMessage(
+          `Git Notes: Found in ${this.repositoryPath}.`
+        );
       }
       this.statusBarItem.text = `Git Notes: ${this.notesCount}`;
-      this.statusBarItem.command = this.command ? this.command: "extension.runWebview";
+      this.statusBarItem.command = this.command
+        ? this.command
+        : "extension.runWebview";
       this.statusBarItem.show();
     } else if (this.message !== undefined) {
-        this.statusBarItem.text = `Git Notes: ${this.message}`;
-        this.statusBarItem.command = this.command ? this.command: "extension.runWebview";
-        this.statusBarItem.show();
+      this.statusBarItem.text = `Git Notes: ${this.message}`;
+      this.statusBarItem.command = this.command
+        ? this.command
+        : "extension.runWebview";
+      this.statusBarItem.show();
     } else {
       this.statusBarItem?.hide();
     }
@@ -60,7 +74,10 @@ export class GitNotesStatusBar {
   }
 
   // TODO: Need to prove this works
-  public async showTimedInformationMessage(message: string, duration: number): Promise<void> {
+  public async showTimedInformationMessage(
+    message: string,
+    duration: number
+  ): Promise<void> {
     if (this.settings.enableNotifications) {
       const promise = vscode.window.showInformationMessage(message);
       setTimeout(async () => {
@@ -81,5 +98,4 @@ export class GitNotesStatusBar {
   public showErrorMessage(message: string) {
     vscode.window.showErrorMessage(message);
   }
-
 }

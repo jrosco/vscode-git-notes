@@ -1,6 +1,6 @@
-import * as vscode from 'vscode';
-import { LogResult } from 'simple-git';
-import * as fs from 'fs';
+import * as vscode from "vscode";
+import { LogResult } from "simple-git";
+import * as fs from "fs";
 
 import { GitCommandsInstance } from "./instance";
 import { LoggerService } from "../log/service";
@@ -91,7 +91,10 @@ export class GitUtils extends GitCommandsInstance {
     return this.gitUrlSCMProvider;
   }
 
-  public async getLatestCommit(fileUri?: vscode.Uri, repositoryPath?: string): Promise<string | undefined> {
+  public async getLatestCommit(
+    fileUri?: vscode.Uri,
+    repositoryPath?: string
+  ): Promise<string | undefined> {
     this.logger.debug(`getLatestCommit(${fileUri}, ${repositoryPath})`);
     repositoryPath = this.manager.getGitRepositoryPath(fileUri, repositoryPath);
     this.setRepositoryPath(repositoryPath);
@@ -105,7 +108,7 @@ export class GitUtils extends GitCommandsInstance {
       }
     }
     return undefined;
-  };
+  }
 
   public async getGitUrl(): Promise<string> {
     this.logger.debug("getGitUrl()");
@@ -146,16 +149,21 @@ export class GitUtils extends GitCommandsInstance {
     try {
       const [commitLog, notesOutput] = await Promise.all([
         new Promise<LogResult>((resolve, reject) => {
-          this.git.log(["--date=iso", "--format=%H %cd"], (err, commitLog: LogResult) => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(commitLog);
+          this.git.log(
+            ["--date=iso", "--format=%H %cd"],
+            (err, commitLog: LogResult) => {
+              if (err) {
+                reject(err);
+              } else {
+                resolve(commitLog);
+              }
             }
-          });
+          );
         }),
         new Promise<string>((resolve, reject) => {
-          const cmdList = commitHash ? ['notes', 'list', commitHash] : ['notes', 'list'];
+          const cmdList = commitHash
+            ? ["notes", "list", commitHash]
+            : ["notes", "list"];
           this.git.raw(cmdList, (err, notesOutput) => {
             if (err) {
               reject(err);
@@ -171,7 +179,7 @@ export class GitUtils extends GitCommandsInstance {
       const noteMap = new Map<string, string[]>();
 
       noteLines.forEach((noteLine) => {
-        let [noteHash, noteCommitHash] = noteLine.split(' ');
+        let [noteHash, noteCommitHash] = noteLine.split(" ");
         const finalCommitHash = commitHash ? commitHash : noteCommitHash;
         if (noteHash && (!commitHash || commitHash === finalCommitHash)) {
           if (!noteMap.has(finalCommitHash)) {
@@ -184,7 +192,8 @@ export class GitUtils extends GitCommandsInstance {
       commitLog.all.map((commitOutput) => {
         const commitLines = commitOutput.hash.split(/\r?\n/);
         commitLines.forEach((commitLine) => {
-          const [commitLogHash, date, dateTime, dateUTC] = commitLine.split(' ');
+          const [commitLogHash, date, dateTime, dateUTC] =
+            commitLine.split(" ");
           const noteHashes = noteMap.get(commitLogHash) || [];
 
           if (noteHashes.length > 0) {
@@ -210,7 +219,8 @@ export class GitUtils extends GitCommandsInstance {
         ["notes", `--ref=${this.settings.localNoteRef}`, "show", commitHash],
         (error, result) => {
           if (error) {
-            const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+            const errorMessage =
+              error instanceof Error ? error.message : "Unknown error occurred";
             reject(new Error(`Error retrieving note details: ${errorMessage}`));
           } else {
             resolve(result);
@@ -223,13 +233,18 @@ export class GitUtils extends GitCommandsInstance {
   public getCommitDetails(commitSHA: string): Promise<any[]> {
     this.logger.debug(`getCommitDetails(${commitSHA})`);
     return new Promise<any[]>(async (resolve, reject) => {
-      this.git.show(['--stat', commitSHA])
-        .then(commitDetails => {
-          const parsedDetails = this._parseCommitDetails(commitDetails, commitSHA);
+      this.git
+        .show(["--stat", commitSHA])
+        .then((commitDetails) => {
+          const parsedDetails = this._parseCommitDetails(
+            commitDetails,
+            commitSHA
+          );
           resolve(parsedDetails);
         })
-        .catch(error => {
-          const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+        .catch((error) => {
+          const errorMessage =
+            error instanceof Error ? error.message : "Unknown error occurred";
           reject(new Error(`Error retrieving commit details: ${errorMessage}`));
           // this.statusBar.showErrorMessage(`Git Notes: Error retrieving commit details: ${errorMessage}`);
         });
@@ -272,13 +287,18 @@ export class GitUtils extends GitCommandsInstance {
   private _getCommitFileChanges(commitSHA: string): Promise<any[]> {
     this.logger.debug(`_getCommitFileChanges(${commitSHA})`);
     return new Promise<any[]>(async (resolve, reject) => {
-      this.git.show(["--numstat", "--oneline", commitSHA])
-        .then(commitFilesDetails => {
-          const parsedDetails = this._parseFileDetails(commitFilesDetails, this.repositoryPath);
+      this.git
+        .show(["--numstat", "--oneline", commitSHA])
+        .then((commitFilesDetails) => {
+          const parsedDetails = this._parseFileDetails(
+            commitFilesDetails,
+            this.repositoryPath
+          );
           resolve(parsedDetails);
         })
-        .catch(error => {
-          const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+        .catch((error) => {
+          const errorMessage =
+            error instanceof Error ? error.message : "Unknown error occurred";
           reject(new Error(`Error retrieving commit details: ${errorMessage}`));
           // this.statusBar.showErrorMessage(`Git Notes: Error retrieving commit details: ${errorMessage}`);
         });
@@ -287,14 +307,14 @@ export class GitUtils extends GitCommandsInstance {
 
   private async _parseFileDetails(gitOutput: string, repositoryPath: string) {
     this.logger.debug(`_parseFileDetails(${gitOutput}, ${repositoryPath})`);
-    const lines = gitOutput.split('\n').slice(1);
+    const lines = gitOutput.split("\n").slice(1);
     // if last line is empty, remove it
     if (lines[-1] === undefined || lines[-1] === "") {
       lines.pop();
     }
 
     const fileChanges: FileChanges[] = lines.map((line) => {
-      const [additions, deletions, file] = line.split('\t');
+      const [additions, deletions, file] = line.split("\t");
       const changes = Number(additions) + Number(deletions);
 
       let deleted = false;
@@ -306,10 +326,10 @@ export class GitUtils extends GitCommandsInstance {
         // file has been renamed
         if (file.includes("=>")) {
           renamed = true;
-        // check if file exists
-        } else if (fs.existsSync(repositoryPath+"/"+file)) {
+          // check if file exists
+        } else if (fs.existsSync(repositoryPath + "/" + file)) {
           added = true;
-        // file does not exist
+          // file does not exist
         } else {
           deleted = true;
         }
@@ -323,8 +343,8 @@ export class GitUtils extends GitCommandsInstance {
         deleted: deleted,
         added: added,
         renamed: renamed,
-        };
-      });
+      };
+    });
     return fileChanges;
   }
 }

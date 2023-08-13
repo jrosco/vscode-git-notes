@@ -3,7 +3,7 @@ import { CacheManager } from "../manager/exports";
 export interface RemoveNoteParameters {
   repositoryPath: string;
   commitHash: string;
-	prune?: boolean | false;
+  prune?: boolean | false;
 }
 
 export class RemoveNote extends GitCommandsInstance {
@@ -24,12 +24,10 @@ export class RemoveNote extends GitCommandsInstance {
       .then(async () => {
         !parameter.prune
           ? await this.cache.removeCommitByHash(
-            parameter.commitHash,
-            parameter.repositoryPath
-        )
-          : await this.cache.load(
-            parameter.repositoryPath
-        );
+              parameter.commitHash,
+              parameter.repositoryPath
+            )
+          : await this.cache.load(parameter.repositoryPath);
       })
       .catch((error) => {
         this.logger.error(`command error removing note: ${error}`);

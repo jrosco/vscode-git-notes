@@ -1,6 +1,6 @@
-import simpleGit, { SimpleGit, SimpleGitOptions } from 'simple-git';
-import { LoggerService } from '../log/service';
-import { GitNotesSettings } from '../settings';
+import simpleGit, { SimpleGit, SimpleGitOptions } from "simple-git";
+import { LoggerService } from "../log/service";
+import { GitNotesSettings } from "../settings";
 import { RepositoryManager } from "../manager/manager";
 
 export class GitCommandsInstance {
@@ -21,7 +21,7 @@ export class GitCommandsInstance {
       `GitCommands constructor: ${Object.getOwnPropertyNames(this)}`
     );
   }
-  
+
   public setRepositoryPath(repositoryPath: string): void {
     this.logger.debug(`setRepositoryPath(${repositoryPath})`);
     this.repositoryPath = repositoryPath;

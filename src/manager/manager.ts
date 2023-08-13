@@ -164,7 +164,9 @@ export class RepositoryManager {
       notes.sort((a, b) => b.date.getTime() - a.date.getTime());
     }
     if (index !== -1) {
-      this.logger.debug(`update existing updateRepositoryDetails(${repositoryPath})`);
+      this.logger.debug(
+        `update existing updateRepositoryDetails(${repositoryPath})`
+      );
       this.repositoryDetailsInterface[index].commitDetails = notes;
       this.repositoryDetailsInterface[index].repositoryUrl = repositoryUrl;
     } else {
