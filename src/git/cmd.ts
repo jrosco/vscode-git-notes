@@ -490,6 +490,10 @@ export class GitCommands {
     return undefined;
   };
 
+  /**
+  * This function is deprecated. Use AddNote() and EditNote() instead.
+  * @deprecated Since version 0.2.2. Will be removed in version 1.0.0.
+  */
   public async addGitNotes(message: string, commitHash: string, subCmd: string = 'add', fileUri?: vscode.Uri, repositoryPath?: string,
     force?: boolean, append?: boolean): Promise<void> {
 
