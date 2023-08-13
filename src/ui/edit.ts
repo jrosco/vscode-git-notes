@@ -3,7 +3,7 @@ import * as fs from "fs/promises"; // Using promises version of fs
 import * as os from "os";
 import * as path from "path";
 
-import { LoggerService, LogLevel } from "../log/service";
+import { LoggerService } from "../log/service";
 import { GitNotesSettings } from "../settings";
 
 export class EditWindow {

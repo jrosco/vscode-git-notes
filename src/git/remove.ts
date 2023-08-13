@@ -22,12 +22,13 @@ export class RemoveNote extends GitCommandsInstance {
     await this.git
       .raw(cmdList)
       .then(async () => {
-        await this.cache.removeCommitByHash(
-          parameter.commitHash,
-          parameter.repositoryPath
-        );
-        await this.cache.load(
-          parameter.repositoryPath
+        !parameter.prune
+          ? await this.cache.removeCommitByHash(
+            parameter.commitHash,
+            parameter.repositoryPath
+        )
+          : await this.cache.load(
+            parameter.repositoryPath
         );
       })
       .catch((error) => {

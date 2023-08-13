@@ -217,7 +217,7 @@ export function activate(context: vscode.ExtensionContext) {
             : activeEditor?.document.uri,
           commitHash: commitHash,
         };
-        if (commitHash !== undefined && commitHashInput !== '') {
+        if (commitHash !== undefined) {
           await remove.command(removeParameter);
         }
       }
