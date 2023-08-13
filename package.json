@@ -130,10 +130,6 @@
         "title": "Git Note: Append Notes"
       },
       {
-        "command": "extension.addOrEditGitNote",
-        "title": "Git Note: Add/Edit Notes"
-      },
-      {
         "command": "extension.editGitNotes",
         "title": "Git Note: Edit Notes"
       }
