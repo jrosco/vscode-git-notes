@@ -133,7 +133,8 @@ export class CacheManager extends RepositoryManager {
         );
       }
     }
-    this.statusBar.notesCount = this.getExistingRepositoryDetails(repositoryPath)?.length || 0;
+    this.statusBar.notesCount =
+      this.getExistingRepositoryDetails(repositoryPath)?.length || 0;
     this.statusBar.repositoryPath = repositoryPath;
     this.statusBar.update();
     return this.repositoryDetailsInterface;

@@ -21,7 +21,7 @@ export class EditNote extends GitCommandsInstance {
       "edit",
       "-m",
       parameter.message,
-      parameter.commitHash
+      parameter.commitHash,
     ];
     await this.git
       .raw(cmdList)

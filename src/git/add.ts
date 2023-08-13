@@ -26,8 +26,8 @@ export class AddNote extends GitCommandsInstance {
         await this.cache.loadNoteDetails(
           parameter.repositoryPath,
           parameter.commitHash
-          );
-        })
+        );
+      })
       .catch((error) => {
         this.logger.error(`command error adding note: ${error}`);
         throw new Error(`Add ${error}`);

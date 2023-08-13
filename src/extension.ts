@@ -1,7 +1,4 @@
-import * as fs from 'fs';
-import * as os from 'os';
-import * as path from 'path';
-import * as vscode from 'vscode';
+import * as vscode from "vscode";
 
 import {
   Git,
@@ -13,17 +10,16 @@ import {
   EditNoteParameters,
   GitUtils,
   RemoveNote,
-  RemoveNoteParameters
+  RemoveNoteParameters,
 } from "./git/exports";
-import { CacheManager} from "./manager/exports";
-import { EditWindow } from './ui/edit';
-import { GitCommands } from './git/cmd';
-import { GitNotesPanel } from './ui/webview';
-import { GitNotesSettings } from './settings';
-import { GitNotesStatusBar } from './ui/status';
-import { LoggerService } from './log/service';
-import { NotesInput } from './ui/input';
-import { RepositoryManager } from './interface';
+import { CacheManager } from "./manager/exports";
+import { EditWindow } from "./ui/edit";
+import { GitCommands } from "./git/cmd";
+import { GitNotesPanel } from "./ui/webview";
+import { GitNotesSettings } from "./settings";
+import { GitNotesStatusBar } from "./ui/status";
+import { LoggerService } from "./log/service";
+import { NotesInput } from "./ui/input";
 
 const git = new Git();
 const add = new AddNote();
@@ -33,7 +29,6 @@ const append = new AppendNote();
 const gitUtils = new GitUtils();
 const cache = CacheManager.getInstance();
 const notes = new GitCommands();
-const manager = RepositoryManager.getInstance();
 const input = NotesInput.getInstance();
 const settings = new GitNotesSettings();
 const logger = LoggerService.getInstance(settings.logLevel);
@@ -91,9 +86,7 @@ export function activate(context: vscode.ExtensionContext) {
         settings.autoCheck &&
         !editor.document.uri.path.endsWith(tempFileSuffixPath)
       ) {
-        git.repositoryPath = cache.getGitRepositoryPath(
-          editor.document.uri
-        );
+        git.repositoryPath = cache.getGitRepositoryPath(editor.document.uri);
         await cache
           .load(git.repositoryPath)
           .then(() => {})
@@ -141,28 +134,34 @@ export function activate(context: vscode.ExtensionContext) {
   );
 
   // Register the command for manual Fetch notes. Can take optional parameter `cmdRepositoryPath`
-  let gitFetchNoteRefDisposable = vscode.commands.registerCommand("extension.fetchGitNotes",
+  let gitFetchNoteRefDisposable = vscode.commands.registerCommand(
+    "extension.fetchGitNotes",
     async (cmdRepositoryPath?) => {
       logger.info("extension.fetchGitNotes command called");
       const activeEditor = vscode.window.activeTextEditor;
-      notes.repositoryPath = cmdRepositoryPath ? cmdRepositoryPath: notes.repositoryPath;
+      notes.repositoryPath = cmdRepositoryPath
+        ? cmdRepositoryPath
+        : notes.repositoryPath;
       if (notes.repositoryPath !== undefined) {
-        await notes.fetchGitNotes(undefined,notes.repositoryPath);
-       } else if (activeEditor) {
+        await notes.fetchGitNotes(undefined, notes.repositoryPath);
+      } else if (activeEditor) {
         await notes.fetchGitNotes(activeEditor.document.uri);
       }
     }
   );
 
   // Register the command for manual Push notes. Can take optional parameter `cmdRepositoryPath`
-  let gitPushNoteRefDisposable = vscode.commands.registerCommand("extension.pushGitNotes",
+  let gitPushNoteRefDisposable = vscode.commands.registerCommand(
+    "extension.pushGitNotes",
     async (cmdRepositoryPath?) => {
       logger.info("extension.pushGitNotes command called");
       const activeEditor = vscode.window.activeTextEditor;
-      notes.repositoryPath = cmdRepositoryPath ? cmdRepositoryPath: notes.repositoryPath;
+      notes.repositoryPath = cmdRepositoryPath
+        ? cmdRepositoryPath
+        : notes.repositoryPath;
       if (notes.repositoryPath !== undefined) {
-        await notes.pushGitNotes(undefined,notes.repositoryPath);
-       } else if (activeEditor) {
+        await notes.pushGitNotes(undefined, notes.repositoryPath);
+      } else if (activeEditor) {
         await notes.pushGitNotes(activeEditor.document.uri);
       }
     }
@@ -175,12 +174,20 @@ export function activate(context: vscode.ExtensionContext) {
       logger.info("extension.runWebview command called");
       const activeEditor = vscode.window.activeTextEditor;
       if (activeEditor !== undefined) {
-        git.repositoryPath = cache.getGitRepositoryPath(activeEditor.document.uri);
-        await cache.load(git.repositoryPath, settings.gitNotesLoadLimit).then((repositoryDetails) => {
-          GitNotesPanel.createOrShow(activeEditor.document.uri, repositoryDetails);
-        }).catch((error) => {
-          logger.error(error);
-        });
+        git.repositoryPath = cache.getGitRepositoryPath(
+          activeEditor.document.uri
+        );
+        await cache
+          .load(git.repositoryPath, settings.gitNotesLoadLimit)
+          .then((repositoryDetails) => {
+            GitNotesPanel.createOrShow(
+              activeEditor.document.uri,
+              repositoryDetails
+            );
+          })
+          .catch((error) => {
+            logger.error(error);
+          });
       }
     }
   );
@@ -218,10 +225,8 @@ export function activate(context: vscode.ExtensionContext) {
           commitHash: commitHash,
         };
         if (removeParameter.commitHash !== undefined) {
-          await remove
-            .command(removeParameter)
-            .then(() => {
-              refreshWebView(removeParameter.repositoryPath);
+          await remove.command(removeParameter).then(() => {
+            refreshWebView(removeParameter.repositoryPath);
           });
         }
       }
@@ -231,7 +236,7 @@ export function activate(context: vscode.ExtensionContext) {
   // Register the command for pruning git notes from stale commits.
   // Can take optional parameter `cmdRepositoryPath`
   let pruneGitNotesDisposable = vscode.commands.registerCommand(
-    'extension.pruneGitNotes',
+    "extension.pruneGitNotes",
     async (cmdRepositoryPath?) => {
       logger.info("extension.pruneGitNotes command called");
       const repositoryPath = cmdRepositoryPath
@@ -242,7 +247,7 @@ export function activate(context: vscode.ExtensionContext) {
         repositoryPath: repositoryPath
           ? repositoryPath
           : activeEditor?.document.uri,
-        commitHash: '',
+        commitHash: "",
         prune: true,
       };
       if (removeParameter.repositoryPath) {
@@ -285,16 +290,18 @@ export function activate(context: vscode.ExtensionContext) {
             commitHash: commitHash,
             message: message,
           };
-          addParameter.message !== '' ? await add
-            .command(addParameter)
-            .then(() => {
-              refreshWebView(addParameter.repositoryPath);
-            })
-            .catch((error) => {
-              statusBar.showErrorMessage(
-                `Git Notes: An error occurred while adding Git note: ${error}`
-              );
-            }): false;
+          addParameter.message !== ""
+            ? await add
+                .command(addParameter)
+                .then(() => {
+                  refreshWebView(addParameter.repositoryPath);
+                })
+                .catch((error) => {
+                  statusBar.showErrorMessage(
+                    `Git Notes: An error occurred while adding Git note: ${error}`
+                  );
+                })
+            : false;
         });
       }
     }
@@ -327,14 +334,17 @@ export function activate(context: vscode.ExtensionContext) {
         }
         let existingNote;
         // load details and wait before checking for existing notes
-        await cache.loadNoteDetails(activeFileRepoPath, commitHash).then(() => {
-          existingNote = cache.getGitNoteMessage(
-            cache.getExistingRepositoryDetails(activeFileRepoPath),
-            commitHash
-          );
-        }).catch((error) => {
-          logger.error(`loading details error: ${error}`);
-        });
+        await cache
+          .loadNoteDetails(activeFileRepoPath, commitHash)
+          .then(() => {
+            existingNote = cache.getGitNoteMessage(
+              cache.getExistingRepositoryDetails(activeFileRepoPath),
+              commitHash
+            );
+          })
+          .catch((error) => {
+            logger.error(`loading details error: ${error}`);
+          });
         const editWindow = new EditWindow(commitHash, existingNote);
         await editWindow.showEditWindow().then(async (message) => {
           const editParameter: EditNoteParameters = {
@@ -406,7 +416,8 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
-  context.subscriptions.push(gitCheckNotesDisposable,
+  context.subscriptions.push(
+    gitCheckNotesDisposable,
     gitFetchNoteRefDisposable,
     gitPushNoteRefDisposable,
     runWebviewDisposable,
@@ -414,7 +425,7 @@ export function activate(context: vscode.ExtensionContext) {
     pruneGitNotesDisposable,
     addGitNotesDisposable,
     editGitNotesDisposable,
-    appendGitNotesDisposable,
+    appendGitNotesDisposable
   );
 
   // Refresh the webview after a git note has been updated

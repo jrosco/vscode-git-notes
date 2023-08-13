@@ -1,10 +1,10 @@
-import * as vscode from 'vscode';
+import * as vscode from "vscode";
 
 export class NotesOutputChannel {
   private outputChannel: vscode.OutputChannel;
 
   constructor() {
-    this.outputChannel = vscode.window.createOutputChannel('Git Notes');
+    this.outputChannel = vscode.window.createOutputChannel("Git Notes");
   }
 
   public log(message: string): void {
