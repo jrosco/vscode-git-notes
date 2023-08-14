@@ -133,12 +133,12 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
-  // Register the command for manual Fetch notes. Can take optional parameter `cmdRepositoryPath`
+  // Register the command for manual Fetch notes. Can take optional parameter
+  // `cmdRepositoryPath` and `force` to force the fetch
   let gitFetchNoteRefDisposable = vscode.commands.registerCommand(
     "extension.fetchGitNotes",
     async (cmdRepositoryPath?, force?) => {
       logger.info("extension.fetchGitNotes command called");
-      statusBar.reset();
       const activeEditor = vscode.window.activeTextEditor;
       const repositoryPath = cmdRepositoryPath
         ? cmdRepositoryPath
@@ -152,7 +152,7 @@ export function activate(context: vscode.ExtensionContext) {
       if (fetchParameter.repositoryPath !== undefined) {
         statusBar.message = "Fetching ...";
         statusBar.update();
-        let confirm = undefined;
+        let confirm;
         const title = fetchParameter.force
           ? "Confirm Fetch Force"
           : "Fetch Notes";
@@ -187,26 +187,31 @@ export function activate(context: vscode.ExtensionContext) {
                 true
               );
               if (selected?.title === "Push notes") {
-                await push.command(fetchParameter);
+                await vscode.commands.executeCommand(
+                  "extension.pushGitNotes",
+                  fetchParameter.repositoryPath
+                );
               } else if (selected?.title === "Force fetch") {
                 await vscode.commands.executeCommand(
                   "extension.fetchGitNotes",
                   fetchParameter.repositoryPath,
                   true
                 );
-              } else {
-                statusBar.notesCount =
-                  cache.getExistingRepositoryDetails(repositoryPath)?.length ||
-                  0;
-                statusBar.update();
               }
+            })
+            .finally(() => {
+              statusBar.notesCount =
+                cache.getExistingRepositoryDetails(repositoryPath)?.length || 0;
+              statusBar.update();
+              refreshWebView(fetchParameter.repositoryPath);
             });
         }
       }
     }
   );
 
-  // Register the command for manual Push notes. Can take optional parameter `cmdRepositoryPath`
+  // Register the command for manual Push notes. Can take optional parameter
+  // `cmdRepositoryPath` and `force` to force the push
   let gitPushNoteRefDisposable = vscode.commands.registerCommand(
     "extension.pushGitNotes",
     async (cmdRepositoryPath?, force?) => {
@@ -225,7 +230,7 @@ export function activate(context: vscode.ExtensionContext) {
       if (pushParameter.repositoryPath !== undefined) {
         statusBar.message = "Pushing ...";
         statusBar.update();
-        let confirm = undefined;
+        let confirm;
         const title = pushParameter.force ? "Confirm Push Force" : "Push Notes";
         if (settings.confirmPushAndFetchCommands) {
           const messageItem: vscode.MessageItem[] = [
@@ -240,7 +245,7 @@ export function activate(context: vscode.ExtensionContext) {
           );
         }
         if (confirm?.title === title || !settings.confirmPushAndFetchCommands) {
-          await fetch
+          await push
             .command(pushParameter)
             .then(() => {
               statusBar.showInformationMessage("Git Notes: Pushed");
@@ -248,7 +253,7 @@ export function activate(context: vscode.ExtensionContext) {
             .catch(async () => {
               const messageItem: vscode.MessageItem[] = [
                 { title: "Fetch notes" },
-                { title: "Push fetch" },
+                { title: "Force push" },
                 { title: "Cancel" },
               ];
               const selected = await input.showInputWindowMessage(
@@ -258,19 +263,23 @@ export function activate(context: vscode.ExtensionContext) {
                 true
               );
               if (selected?.title === "Fetch notes") {
-                await fetch.command(pushParameter);
+                await vscode.commands.executeCommand(
+                  "extension.fetchGitNotes",
+                  pushParameter.repositoryPath
+                );
               } else if (selected?.title === "Force push") {
                 await vscode.commands.executeCommand(
                   "extension.pushGitNotes",
                   pushParameter.repositoryPath,
                   true
                 );
-              } else {
-                statusBar.notesCount =
-                  cache.getExistingRepositoryDetails(repositoryPath)?.length ||
-                  0;
-                statusBar.update();
               }
+            })
+            .finally(() => {
+              statusBar.notesCount =
+                cache.getExistingRepositoryDetails(repositoryPath)?.length || 0;
+              statusBar.update();
+              refreshWebView(pushParameter.repositoryPath);
             });
         }
       }
