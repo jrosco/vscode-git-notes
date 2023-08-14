@@ -505,6 +505,10 @@ export function activate(context: vscode.ExtensionContext) {
             };
             addParameter.message !== ""
               ? await add.command(addParameter).then(() => {
+                  statusBar.showInformationMessage(
+                    `Git Notes: Added note for commit ${commitHash} \nPath: ${activeFileRepoPath}`
+                  );
+                }).finally(() => {
                   refreshWebView(addParameter.repositoryPath);
                 })
               : false;
