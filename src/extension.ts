@@ -175,7 +175,6 @@ export function activate(context: vscode.ExtensionContext) {
           );
         }
         if (confirm?.title === title || !settings.confirmPushAndFetchCommands) {
-          console.log(confirm);
           await fetch
             .command(fetchParameter)
             .then(() => {
@@ -427,15 +426,12 @@ export function activate(context: vscode.ExtensionContext) {
   // Register the command for adding git notes.
   let addGitNotesDisposable = vscode.commands.registerCommand(
     "extension.addGitNotes",
-    async (cmdRepositoryPath?, cmdCommitHash?) => {
+    async (cmdRepositoryPath?, cmdCommitHash?, force?) => {
       logger.info("extension.addGitNotes command called");
       const activeFileRepoPath = cmdRepositoryPath
         ? cmdRepositoryPath
         : git.repositoryPath;
-      statusBar.reset();
       if (activeFileRepoPath !== undefined) {
-        statusBar.message = "Adding Message ...";
-        statusBar.update();
         cmdCommitHash
           ? undefined
           : input.setup(
@@ -446,38 +442,71 @@ export function activate(context: vscode.ExtensionContext) {
         const commitHashInput = cmdCommitHash
           ? cmdCommitHash
           : await input.showInputBox();
+        statusBar.message = "Adding Message ...";
+        statusBar.update();
         const commitHash = commitHashInput
           ? commitHashInput.replace(/\s/g, "")
           : await gitUtils.getLatestCommit(undefined, activeFileRepoPath);
         if (commitHashInput === false) {
           return;
         }
-        const editWindow = new EditWindow(commitHash);
-        await editWindow.showEditWindow().then(async (message) => {
-          const addParameter: AddNoteParameters = {
-            repositoryPath: activeFileRepoPath,
-            commitHash: commitHash,
-            message: message,
-          };
-          addParameter.message !== ""
-            ? await add
-                .command(addParameter)
-                .then(() => {
-                  statusBar.notesCount =
-                    cache.getExistingRepositoryDetails(
-                      addParameter.repositoryPath
-                    )?.length || 0;
-                  statusBar.update();
+        const check = cache.getExistingCommitDetails(
+          activeFileRepoPath,
+          commitHash
+        );
+        if (check?.commitHash && !force) {
+          const messageItem: vscode.MessageItem[] = [
+            { title: "Append" },
+            { title: "Edit" },
+            { title: "Overwrite" },
+            { title: "Cancel" },
+          ];
+          const selected = await input.showInputWindowMessage(
+            "Git Note Already Exists",
+            messageItem,
+            true,
+            false
+          );
+          if (selected?.title === "Append") {
+            await vscode.commands.executeCommand(
+              "extension.appendGitNotes",
+              activeFileRepoPath,
+              commitHash
+            );
+          } else if (selected?.title === "Overwrite") {
+            await vscode.commands.executeCommand(
+              "extension.addGitNotes",
+              activeFileRepoPath,
+              commitHash,
+              true
+            );
+          } else if (selected?.title === "Edit") {
+            await vscode.commands.executeCommand(
+              "extension.editGitNotes",
+              activeFileRepoPath,
+              commitHash
+            );
+          }
+        } else {
+          const editWindow = new EditWindow(commitHash);
+          await editWindow.showEditWindow().then(async (message) => {
+            const addParameter: AddNoteParameters = {
+              repositoryPath: activeFileRepoPath,
+              commitHash: commitHash,
+              message: message,
+              force: force ? force : false,
+            };
+            addParameter.message !== ""
+              ? await add.command(addParameter).then(() => {
                   refreshWebView(addParameter.repositoryPath);
                 })
-                .catch((error) => {
-                  statusBar.showErrorMessage(
-                    `Git Notes: An error occurred while adding Git note: ${error}`
-                  );
-                })
-            : false;
-        });
+              : false;
+          });
+        }
       }
+      statusBar.notesCount =
+        cache.getExistingRepositoryDetails(activeFileRepoPath)?.length || 0;
+      statusBar.update();
     }
   );
 
@@ -551,21 +580,21 @@ export function activate(context: vscode.ExtensionContext) {
       const activeFileRepoPath = cmdRepositoryPath
         ? cmdRepositoryPath
         : git.repositoryPath;
+      let commitHash = "";
+      let inputCommitHash;
+      if (cmdCommitHash === undefined) {
+        input.setup(
+          "Append a Git Note",
+          "Enter the Commit hash or leave blank to apply to last commit ....",
+          false
+        );
+        inputCommitHash =
+          (await input.showInputBox()) ||
+          (await gitUtils.getLatestCommit(undefined, activeFileRepoPath));
+      }
       if (activeFileRepoPath !== undefined) {
-        cmdCommitHash
-          ? undefined
-          : input.setup(
-              "Append a Git Note",
-              "Enter the Commit hash or leave blank to apply to last commit ....",
-              false
-            );
-        const commitHashInput = cmdCommitHash
-          ? cmdCommitHash
-          : await input.showInputBox();
-        const commitHash = commitHashInput
-          ? commitHashInput.replace(/\s/g, "")
-          : await gitUtils.getLatestCommit(undefined, activeFileRepoPath);
-        if (commitHashInput === false) {
+        commitHash = cmdCommitHash ? cmdCommitHash : inputCommitHash;
+        if (!commitHash) {
           return;
         }
         const editWindow = new EditWindow(commitHash);
@@ -604,6 +633,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   // Refresh the webview after a git note has been updated
   function refreshWebView(repositoryPath: string) {
+    logger.debug(`refreshWebView called [repositoryPath:${repositoryPath}]`);
     if (GitNotesPanel.currentPanel) {
       logger.debug(
         `Sending [refresh] command [repositoryPath:${repositoryPath}] to webview`
