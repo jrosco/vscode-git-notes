@@ -413,15 +413,18 @@ export function activate(context: vscode.ExtensionContext) {
           );
         }
         if (confirm?.title === title || !settings.confirmPushAndFetchCommands) {
-          await remove.command(removeParameter).then(() => {
-          }).finally(() => {
-            statusBar.showInformationMessage(`Git Notes: Pruned notes`);
-            statusBar.notesCount =
-              cache.getExistingRepositoryDetails(removeParameter.repositoryPath)
-                ?.length || 0;
-            statusBar.update();
-            refreshWebView(removeParameter.repositoryPath);
-          });
+          await remove
+            .command(removeParameter)
+            .then(() => {})
+            .finally(() => {
+              statusBar.showInformationMessage(`Git Notes: Pruned notes`);
+              statusBar.notesCount =
+                cache.getExistingRepositoryDetails(
+                  removeParameter.repositoryPath
+                )?.length || 0;
+              statusBar.update();
+              refreshWebView(removeParameter.repositoryPath);
+            });
         }
       }
     }
@@ -563,12 +566,22 @@ export function activate(context: vscode.ExtensionContext) {
             ? await edit
                 .command(editParameter)
                 .then(() => {
-                  refreshWebView(editParameter.repositoryPath);
+                  statusBar.showInformationMessage(
+                    `Git Notes: Edited note for commit ${commitHash} \nPath: ${activeFileRepoPath}`
+                  );
                 })
                 .catch((error) => {
                   statusBar.showErrorMessage(
                     `Git Notes: An error occurred while editing Git note: ${error}`
                   );
+                })
+                .finally(() => {
+                  statusBar.notesCount =
+                    cache.getExistingRepositoryDetails(
+                      editParameter.repositoryPath
+                    )?.length || 0;
+                  statusBar.update();
+                  refreshWebView(editParameter.repositoryPath);
                 })
             : false;
         });
@@ -611,12 +624,22 @@ export function activate(context: vscode.ExtensionContext) {
           await append
             .command(appendParameter)
             .then(() => {
-              refreshWebView(appendParameter.repositoryPath);
+              statusBar.showInformationMessage(
+                `Git Notes: Appended note for commit ${commitHash} \nPath: ${activeFileRepoPath}`
+              );
             })
             .catch((error) => {
               statusBar.showErrorMessage(
                 `Git Notes: An error occurred while appending Git note: ${error}`
               );
+            })
+            .finally(() => {
+              statusBar.notesCount =
+                cache.getExistingRepositoryDetails(
+                  appendParameter.repositoryPath
+                )?.length || 0;
+              statusBar.update();
+              refreshWebView(appendParameter.repositoryPath);
             });
         });
       }
