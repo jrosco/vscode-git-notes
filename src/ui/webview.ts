@@ -144,8 +144,7 @@ export class GitNotesPanel {
         case "repoClearCache":
           await vscode.commands.executeCommand(
             "extension.checkGitNotes",
-            message.repositoryPath,
-            true
+            message.repositoryPath
           );
           break;
         case "commitLoad":

@@ -129,7 +129,7 @@ export function activate(context: vscode.ExtensionContext) {
   // Register the command for manual Git notes check. Can take optional parameter `cmdRepositoryPath`
   let gitCheckNotesDisposable = vscode.commands.registerCommand(
     "extension.checkGitNotes",
-    async (cmdRepositoryPath?, cmdClearRepoCache?: boolean) => {
+    async (cmdRepositoryPath?) => {
       logger.info("extension.checkGitNotes command called");
       const activeEditor = vscode.window.activeTextEditor;
       const repositoryPath = cmdRepositoryPath
