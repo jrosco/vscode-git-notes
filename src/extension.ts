@@ -626,26 +626,28 @@ export function activate(context: vscode.ExtensionContext) {
             commitHash: commitHash,
             message: message,
           };
-          await append
-            .command(appendParameter)
-            .then(() => {
-              statusBar.showInformationMessage(
-                `Git Notes: Appended note for commit ${commitHash} \nPath: ${activeFileRepoPath}`
-              );
-            })
-            .catch((error) => {
-              statusBar.showErrorMessage(
-                `Git Notes: An error occurred while appending Git note: ${error}`
-              );
-            })
-            .finally(() => {
-              statusBar.notesCount =
-                cache.getExistingRepositoryDetails(
-                  appendParameter.repositoryPath
-                )?.length || 0;
-              statusBar.update();
-              refreshWebView(appendParameter.repositoryPath);
-            });
+          appendParameter.message !== ""
+            ? await append
+                .command(appendParameter)
+                .then(() => {
+                  statusBar.showInformationMessage(
+                    `Git Notes: Appended note for commit ${commitHash} \nPath: ${activeFileRepoPath}`
+                  );
+                })
+                .catch((error) => {
+                  statusBar.showErrorMessage(
+                    `Git Notes: An error occurred while appending Git note: ${error}`
+                  );
+                })
+                .finally(() => {
+                  statusBar.notesCount =
+                    cache.getExistingRepositoryDetails(
+                      appendParameter.repositoryPath
+                    )?.length || 0;
+                  statusBar.update();
+                  refreshWebView(appendParameter.repositoryPath);
+                })
+            : false;
         });
       }
     }
