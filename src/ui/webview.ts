@@ -1,18 +1,17 @@
 import * as vscode from "vscode";
 
-import { RepositoryManager, RepositoryDetails } from "../interface";
+import { CacheManager, RepositoryManager, RepositoryDetails } from "../manager/exports";
 import { GitNotesStatusBar } from "../ui/status";
 import { GitNotesSettings } from "../settings";
-import { LoggerService, LogLevel } from "../log/service";
-import { GitCommands } from "../git/cmd";
-import { GitUtils } from "../git/utils";
+import { LoggerService } from "../log/service";
+import { GitUtils } from "../git/exports";
 export class GitNotesPanel {
   public static currentPanel: GitNotesPanel | undefined;
   private static readonly viewType = "gitNotesPanel";
 
   private statusBar: GitNotesStatusBar;
 
-  private manager: RepositoryManager;
+  private cache: CacheManager;
   private repositoryPath: string | undefined;
 
   private readonly _panel: vscode.WebviewPanel;
@@ -30,12 +29,12 @@ export class GitNotesPanel {
     this._document = document;
     this.settings = new GitNotesSettings();
     this.logger = LoggerService.getInstance(this.settings.logLevel);
-    this.manager = RepositoryManager.getInstance();
+    this.cache = CacheManager.getInstance();
     this.statusBar = GitNotesStatusBar.getInstance();
-    repositoryDetails = this.manager.getRepositoryDetailsInterface();
+    repositoryDetails = this.cache.getRepositoryDetailsInterface();
 
     // Set up the webview panel
-    this.repositoryPath = this.manager.getGitRepositoryPath(document);
+    this.repositoryPath = this.cache.getGitRepositoryPath(document);
     this._panel.webview.html = this._getWebviewContent(
       this.repositoryPath,
       repositoryDetails
@@ -69,7 +68,7 @@ export class GitNotesPanel {
 
     // Handle messages from the Webview
     panel.webview.onDidReceiveMessage(async (message) => {
-      const cmd = new GitCommands();
+      const cache = CacheManager.getInstance();
       const settings = new GitNotesSettings();
       const logger = LoggerService.getInstance(settings.logLevel);
       logger.debug(
@@ -84,9 +83,9 @@ export class GitNotesPanel {
           break;
         case "repoAdd":
           await vscode.commands.executeCommand(
-            "extension.addOrEditGitNote",
-            undefined,
-            message.repositoryPath
+            "extension.addGitNotes",
+            message.repositoryPath,
+            undefined
           );
           break;
         case "repoPrune":
@@ -119,12 +118,12 @@ export class GitNotesPanel {
           break;
         case "commitEdit":
           logger.debug(
-            `webview commitEdit: ${message.commitHash}, ${message.repositoryPath}`
+            `webview commitEdit: ${message.repositoryPath}, ${message.commitHash}`
           );
           await vscode.commands.executeCommand(
-            "extension.addOrEditGitNote",
-            message.commitHash,
-            message.repositoryPath
+            "extension.editGitNotes",
+            message.repositoryPath,
+            message.commitHash
           );
           break;
         case "commitRemove":
@@ -138,7 +137,9 @@ export class GitNotesPanel {
           );
           break;
         case "repoLoadMore":
-          await cmd.loader(message.repositoryPath, settings.gitNotesLoadLimit);
+          await cache.load(
+            message.repositoryPath,
+          );
           break;
         case "repoClearCache":
           await vscode.commands.executeCommand(
@@ -148,7 +149,10 @@ export class GitNotesPanel {
           );
           break;
         case "commitLoad":
-          await cmd.loadNoteDetails(message.repositoryPath, message.commitHash);
+          await cache.loadNoteDetails(
+            message.repositoryPath,
+            message.commitHash
+          );
         case "refresh":
           break;
         default:
@@ -191,7 +195,7 @@ export class GitNotesPanel {
 
   public refreshWebViewContent(repositoryPath: string) {
     // Your logic to update the WebView content here
-    const repositoryDetails = this.manager.getRepositoryDetailsInterface();
+    const repositoryDetails = this.cache.getRepositoryDetailsInterface();
     this.logger.debug(
       `refreshWebViewContent(${repositoryPath}, ${repositoryDetails})`
     );
@@ -207,9 +211,7 @@ export class GitNotesPanel {
 
   public dispose() {
     GitNotesPanel.currentPanel = undefined;
-
     this._panel.dispose();
-
     while (this._disposables.length) {
       const disposable = this._disposables.pop();
       if (disposable) {
@@ -389,7 +391,7 @@ export class GitNotesPanel {
           <button id="repoLoadMore">Load More (${
             this.settings.gitNotesLoadLimit
           })</button>
-          <button id="repoClearCache">Clear Cache</button></p>
+          <button id="repoClearCache">Refresh</button></p>
         </header>
         </div>
         ${details.commitDetails

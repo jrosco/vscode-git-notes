@@ -34,10 +34,9 @@ export class RepositoryManager {
   public repositoryDetailsInterface: RepositoryDetails[];
   public commitDetailsInterface?: CommitDetails[];
   public fileChangeInterface?: FileChanges[];
-
+  public settings: GitNotesSettings;
   public logger: LoggerService;
   private static repositoryManager: RepositoryManager;
-  private settings: GitNotesSettings;
 
   constructor() {
     this.repositoryDetailsInterface = [];
