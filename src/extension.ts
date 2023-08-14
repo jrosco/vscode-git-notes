@@ -346,14 +346,13 @@ export function activate(context: vscode.ExtensionContext) {
           statusBar.message = "Removing ...";
           statusBar.update();
           const title = "Confirm Note Removal";
-          const messageItemTitle = `Note Commit Removal: ${commitHash}`;
           const messageItem: vscode.MessageItem[] = [
             { title: title },
             { title: "Cancel" },
           ];
           if (settings.confirmRemovalCommands) {
             confirm = await input.showInputWindowMessage(
-              `${messageItemTitle}`,
+              `Note Commit Removal: ${commitHash}`,
               messageItem,
               true,
               false
@@ -399,14 +398,13 @@ export function activate(context: vscode.ExtensionContext) {
         statusBar.message = "Pruning ...";
         statusBar.update();
         const title = "Confirm Prune";
-        const messageItemTitle = `Prune Directory ${repositoryPath}`;
         if (settings.confirmPruneCommands) {
           const messageItem: vscode.MessageItem[] = [
             { title: "Confirm Prune" },
             { title: "Cancel" },
           ];
           confirm = await input.showInputWindowMessage(
-            `${messageItemTitle}`,
+            `Prune Directory ${repositoryPath}`,
             messageItem,
             true,
             false
