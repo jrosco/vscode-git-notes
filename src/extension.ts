@@ -619,6 +619,7 @@ export function activate(context: vscode.ExtensionContext) {
         if (!commitHash) {
           return;
         }
+        commitHash = commitHash.replace(/\s/g, "");
         const editWindow = new EditWindow(commitHash);
         await editWindow.showEditWindow().then(async (message) => {
           const appendParameter: AppendNoteParameters = {
