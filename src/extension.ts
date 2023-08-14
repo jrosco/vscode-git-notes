@@ -142,8 +142,9 @@ export function activate(context: vscode.ExtensionContext) {
   // Register the command for manual Fetch notes. Can take optional parameter `cmdRepositoryPath`
   let gitFetchNoteRefDisposable = vscode.commands.registerCommand(
     "extension.fetchGitNotes",
-    async (cmdRepositoryPath?) => {
+    async (cmdRepositoryPath?, force?) => {
       logger.info("extension.fetchGitNotes command called");
+      statusBar.reset();
       const activeEditor = vscode.window.activeTextEditor;
       const repositoryPath = cmdRepositoryPath
         ? cmdRepositoryPath
@@ -152,10 +153,62 @@ export function activate(context: vscode.ExtensionContext) {
         repositoryPath: repositoryPath
           ? repositoryPath
           : activeEditor?.document.uri,
-        force: false,
+        force: force ? force : false,
       };
       if (fetchParameter.repositoryPath !== undefined) {
-        await fetch.command(fetchParameter);
+        statusBar.message = "Fetching ...";
+        statusBar.update();
+        let confirm = undefined;
+        const title = fetchParameter.force
+          ? "Confirm Fetch Force"
+          : "Fetch Notes";
+        if (settings.confirmPushAndFetchCommands) {
+          const messageItem: vscode.MessageItem[] = [
+            { title: title },
+            { title: "Cancel" },
+          ];
+          confirm = await input.showInputWindowMessage(
+            `Directory: ${repositoryPath}`,
+            messageItem,
+            true,
+            false
+          );
+        }
+        if (confirm?.title === title || !settings.confirmPushAndFetchCommands) {
+          console.log(confirm);
+          await fetch
+            .command(fetchParameter)
+            .then(() => {
+              statusBar.showInformationMessage("Git Notes: Fetched");
+            })
+            .catch(async () => {
+              const messageItem: vscode.MessageItem[] = [
+                { title: "Push notes" },
+                { title: "Force fetch" },
+                { title: "Cancel" },
+              ];
+              const selected = await input.showInputWindowMessage(
+                "Failed to fetch Git Notes",
+                messageItem,
+                true,
+                true
+              );
+              if (selected?.title === "Push notes") {
+                await push.command(fetchParameter);
+              } else if (selected?.title === "Force fetch") {
+                await vscode.commands.executeCommand(
+                  "extension.fetchGitNotes",
+                  fetchParameter.repositoryPath,
+                  true
+                );
+              } else {
+                statusBar.notesCount =
+                  cache.getExistingRepositoryDetails(repositoryPath)?.length ||
+                  0;
+                statusBar.update();
+              }
+            });
+        }
       }
     }
   );
@@ -163,8 +216,9 @@ export function activate(context: vscode.ExtensionContext) {
   // Register the command for manual Push notes. Can take optional parameter `cmdRepositoryPath`
   let gitPushNoteRefDisposable = vscode.commands.registerCommand(
     "extension.pushGitNotes",
-    async (cmdRepositoryPath?) => {
+    async (cmdRepositoryPath?, force?) => {
       logger.info("extension.pushGitNotes command called");
+      statusBar.reset();
       const activeEditor = vscode.window.activeTextEditor;
       const repositoryPath = cmdRepositoryPath
         ? cmdRepositoryPath
@@ -173,10 +227,59 @@ export function activate(context: vscode.ExtensionContext) {
         repositoryPath: repositoryPath
           ? repositoryPath
           : activeEditor?.document.uri,
-        force: false,
+        force: force ? force : false,
       };
       if (pushParameter.repositoryPath !== undefined) {
-        await push.command(pushParameter);
+        statusBar.message = "Pushing ...";
+        statusBar.update();
+        let confirm = undefined;
+        const title = pushParameter.force ? "Confirm Push Force" : "Push Notes";
+        if (settings.confirmPushAndFetchCommands) {
+          const messageItem: vscode.MessageItem[] = [
+            { title: title },
+            { title: "Cancel" },
+          ];
+          confirm = await input.showInputWindowMessage(
+            `Directory: ${repositoryPath}`,
+            messageItem,
+            true,
+            false
+          );
+        }
+        if (confirm?.title === title || !settings.confirmPushAndFetchCommands) {
+          await fetch
+            .command(pushParameter)
+            .then(() => {
+              statusBar.showInformationMessage("Git Notes: Pushed");
+            })
+            .catch(async () => {
+              const messageItem: vscode.MessageItem[] = [
+                { title: "Fetch notes" },
+                { title: "Push fetch" },
+                { title: "Cancel" },
+              ];
+              const selected = await input.showInputWindowMessage(
+                "Failed to push Git Notes",
+                messageItem,
+                true,
+                true
+              );
+              if (selected?.title === "Fetch notes") {
+                await fetch.command(pushParameter);
+              } else if (selected?.title === "Force push") {
+                await vscode.commands.executeCommand(
+                  "extension.pushGitNotes",
+                  pushParameter.repositoryPath,
+                  true
+                );
+              } else {
+                statusBar.notesCount =
+                  cache.getExistingRepositoryDetails(repositoryPath)?.length ||
+                  0;
+                statusBar.update();
+              }
+            });
+        }
       }
     }
   );
@@ -239,9 +342,36 @@ export function activate(context: vscode.ExtensionContext) {
           commitHash: commitHash,
         };
         if (removeParameter.commitHash !== undefined) {
-          await remove.command(removeParameter).then(() => {
-            refreshWebView(removeParameter.repositoryPath);
-          });
+          let confirm = undefined;
+          statusBar.message = "Removing ...";
+          statusBar.update();
+          const title = "Confirm Note Removal";
+          const messageItemTitle = `Note Commit Removal: ${commitHash}`;
+          const messageItem: vscode.MessageItem[] = [
+            { title: title },
+            { title: "Cancel" },
+          ];
+          if (settings.confirmRemovalCommands) {
+            confirm = await input.showInputWindowMessage(
+              `${messageItemTitle}`,
+              messageItem,
+              true,
+              false
+            );
+          }
+          if (confirm?.title === title || !settings.confirmRemovalCommands) {
+            await remove.command(removeParameter).then(() => {
+              statusBar.showInformationMessage(
+                `Git Notes: Removed note for commit ${commitHash} \nPath: ${repositoryPath}`
+              );
+              statusBar.notesCount =
+                cache.getExistingRepositoryDetails(
+                  removeParameter.repositoryPath
+                )?.length || 0;
+              statusBar.update();
+              refreshWebView(removeParameter.repositoryPath);
+            });
+          }
         }
       }
     }
@@ -265,9 +395,33 @@ export function activate(context: vscode.ExtensionContext) {
         prune: true,
       };
       if (removeParameter.repositoryPath) {
-        await remove.command(removeParameter).then(() => {
-          refreshWebView(removeParameter.repositoryPath);
-        });
+        let confirm = undefined;
+        statusBar.message = "Pruning ...";
+        statusBar.update();
+        const title = "Confirm Prune";
+        const messageItemTitle = `Prune Directory ${repositoryPath}`;
+        if (settings.confirmPruneCommands) {
+          const messageItem: vscode.MessageItem[] = [
+            { title: "Confirm Prune" },
+            { title: "Cancel" },
+          ];
+          confirm = await input.showInputWindowMessage(
+            `${messageItemTitle}`,
+            messageItem,
+            true,
+            false
+          );
+        }
+        if (confirm?.title === title || !settings.confirmPushAndFetchCommands) {
+          await remove.command(removeParameter).then(() => {
+            statusBar.showInformationMessage(`Git Notes: Pruned notes`);
+            statusBar.notesCount =
+              cache.getExistingRepositoryDetails(removeParameter.repositoryPath)
+                ?.length || 0;
+            statusBar.update();
+            refreshWebView(removeParameter.repositoryPath);
+          });
+        }
       }
     }
   );
@@ -280,7 +434,10 @@ export function activate(context: vscode.ExtensionContext) {
       const activeFileRepoPath = cmdRepositoryPath
         ? cmdRepositoryPath
         : git.repositoryPath;
+      statusBar.reset();
       if (activeFileRepoPath !== undefined) {
+        statusBar.message = "Adding Message ...";
+        statusBar.update();
         cmdCommitHash
           ? undefined
           : input.setup(
@@ -308,6 +465,11 @@ export function activate(context: vscode.ExtensionContext) {
             ? await add
                 .command(addParameter)
                 .then(() => {
+                  statusBar.notesCount =
+                    cache.getExistingRepositoryDetails(
+                      addParameter.repositoryPath
+                    )?.length || 0;
+                  statusBar.update();
                   refreshWebView(addParameter.repositoryPath);
                 })
                 .catch((error) => {
