@@ -1,6 +1,10 @@
 import * as vscode from "vscode";
 
-import { CacheManager, RepositoryManager, RepositoryDetails } from "../manager/exports";
+import {
+  CacheManager,
+  RepositoryManager,
+  RepositoryDetails,
+} from "../manager/exports";
 import { GitNotesStatusBar } from "../ui/status";
 import { GitNotesSettings } from "../settings";
 import { LoggerService } from "../log/service";
@@ -116,6 +120,16 @@ export class GitNotesPanel {
             ? await vscode.env.openExternal(vscode.Uri.parse(url))
             : false;
           break;
+        case "commitAppend":
+          logger.debug(
+            `webview commitAppend: ${message.repositoryPath}, ${message.commitHash}`
+          );
+          await vscode.commands.executeCommand(
+            "extension.appendGitNotes",
+            message.repositoryPath,
+            message.commitHash
+          );
+          break;
         case "commitEdit":
           logger.debug(
             `webview commitEdit: ${message.repositoryPath}, ${message.commitHash}`
@@ -137,9 +151,7 @@ export class GitNotesPanel {
           );
           break;
         case "repoLoadMore":
-          await cache.load(
-            message.repositoryPath,
-          );
+          await cache.load(message.repositoryPath);
           break;
         case "repoClearCache":
           await vscode.commands.executeCommand(
@@ -320,6 +332,18 @@ export class GitNotesPanel {
             }', commitHash: '${commit.commitHash}' });
           });
         }
+        if (document.getElementById('append-${commit.commitHash}')) {
+          document.getElementById('append-${
+            commit.commitHash
+          }').addEventListener('click', () => {
+            vscode.postMessage({ command: 'commitAppend', commitHash: '${
+              commit.commitHash
+            }', repositoryPath: '${details.repositoryPath?.replace(
+              /\\/g,
+              "\\\\"
+            )}', refresh: true });
+          });
+        }
         if (document.getElementById('edit-${commit.commitHash}')) {
           document.getElementById('edit-${
             commit.commitHash
@@ -382,7 +406,7 @@ export class GitNotesPanel {
           <p><h4 style="color:${headingColor};background-color:${headingBgColor};">Notes Found: ${
             details.commitDetails.length
           }</h4></p>
-          <p><button id="repoOpen" >Open Repo</button>
+          <p><button id="repoOpen">Open Repo</button>
           <button id="repoAdd">Add Note</button>
           <button id="repoPrune">Prune Notes</button>
           <button id="repoPush">Push Notes</button>
@@ -405,6 +429,9 @@ export class GitNotesPanel {
               commit.noteHash
             }</p>
           <p><button id="open-${commit.commitHash}">Open Commit</button>
+          <button id="append-${commit.commitHash}" style="display: ${
+              commit.note ? "inline-block" : "none"
+            }">Append</button>
           <button id="edit-${commit.commitHash}" style="display: ${
               commit.note ? "inline-block" : "none"
             }">Edit</button>
