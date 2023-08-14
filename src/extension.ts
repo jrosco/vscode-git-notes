@@ -109,31 +109,25 @@ export function activate(context: vscode.ExtensionContext) {
     async (cmdRepositoryPath?, cmdClearRepoCache?: boolean) => {
       logger.info("extension.checkGitNotes command called");
       const activeEditor = vscode.window.activeTextEditor;
-      git.repositoryPath = cmdRepositoryPath
+      const repositoryPath = cmdRepositoryPath
         ? cmdRepositoryPath
         : cache.getGitRepositoryPath(activeEditor?.document.uri);
-      if (git.repositoryPath !== undefined) {
-        cmdClearRepoCache
-          ? await cache.clearRepositoryDetails(undefined, git.repositoryPath)
-          : false;
+      if (repositoryPath !== undefined) {
         await cache
-          .load(git.repositoryPath)
-          .then(() => {})
-          .catch((error) => {
-            logger.error(error);
-          });
-      } else if (activeEditor) {
-        const repositoryPath = cache.getGitRepositoryPath(
-          activeEditor.document.uri
-        );
-        cmdClearRepoCache
-          ? await cache.clearRepositoryDetails(activeEditor.document.uri)
-          : false;
-        await cache
-          .load(repositoryPath)
-          .then(() => {})
-          .catch((error) => {
-            logger.error(error);
+          .clearRepositoryDetails(undefined, repositoryPath)
+          .then(async () => {
+            await cache
+              .load(repositoryPath)
+              .then(() => {})
+              .catch((error) => {
+                logger.error(error);
+              });
+          })
+          .finally(() => {
+            statusBar.notesCount =
+              cache.getExistingRepositoryDetails(repositoryPath)?.length || 0;
+            statusBar.update();
+            refreshWebView(repositoryPath);
           });
       }
     }
