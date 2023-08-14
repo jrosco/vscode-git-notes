@@ -197,7 +197,9 @@ export class GitNotesPanel {
 
   public postMessage(message: any) {
     if (this._panel) {
-      console.debug("postMessage: ", message.command, message.repositoryPath);
+      this.logger.debug(
+        `postMessage: ${message.command} ${message.repositoryPath}`
+      );
       this._panel.webview.postMessage({ message });
     } else {
       return;
