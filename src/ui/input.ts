@@ -30,7 +30,7 @@ export class NotesInput {
     this.confirmation = confirmation;
   }
 
-  public async showInputBox() {
+  public async showInputBox(): Promise<string | boolean>{
     const inputPrompt = this.prompt;
     const inputPlaceHolder = this.placeHolder;
     const inputConfirmation = this.confirmation;
@@ -80,7 +80,8 @@ export class NotesInput {
         { modal: false },
         messageItem[0],
         messageItem[1],
-        messageItem[2]
+        messageItem[2],
+        messageItem[3]
       );
       if (confirm === messageItem[0]) {
         return messageItem[0];
@@ -88,6 +89,8 @@ export class NotesInput {
         return messageItem[1];
       } else if (confirm === messageItem[2]) {
         return messageItem[2];
+       } else if (confirm === messageItem[3]) {
+        return messageItem[3];
       } else {
         return undefined;
       }
