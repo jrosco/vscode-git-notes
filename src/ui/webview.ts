@@ -170,7 +170,6 @@ export class GitNotesPanel {
           console.warn("Unknown command:", message.command);
           break;
       }
-      // Update the content of the webview panel, if `message.repositoryPath` is set
       if (
         GitNotesPanel.currentPanel &&
         (message.refresh || message.command === "refresh")
@@ -181,13 +180,6 @@ export class GitNotesPanel {
       }
     });
 
-    // let webViewTab = vscode.window.onDidChangeActiveTextEditor((editor) => {
-    //   // Check if the WebView panel is not active and close / dispose of panel
-    //   if (editor?.document !== undefined) {
-    //     GitNotesPanel.currentPanel?._panel.dispose();
-    //     webViewTab.dispose();
-    //   }
-    // });
     GitNotesPanel.currentPanel = new GitNotesPanel(
       panel,
       document,
