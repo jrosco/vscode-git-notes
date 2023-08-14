@@ -532,6 +532,10 @@ export class GitCommands {
     }
   }
 
+  /**
+  * This function is deprecated. Use FetchNotes() instead.
+  * @deprecated Since version 0.2.2. Will be removed in version 1.0.0.
+  */
   public async fetchGitNotes(fileUri?: vscode.Uri, repositoryPath?: string, force?: boolean): Promise<void> {
     this.logger.deprecated(`fetchGitNotes(${fileUri}, ${repositoryPath})`);
     repositoryPath = this.manager.getGitRepositoryPath(fileUri, repositoryPath);
@@ -578,6 +582,10 @@ export class GitCommands {
     }
   }
 
+  /**
+  * This function is deprecated. Use PushNotes() instead.
+  * @deprecated Since version 0.2.2. Will be removed in version 1.0.0.
+  */
   public async pushGitNotes(fileUri?: vscode.Uri, repositoryPath?: string, force?: boolean): Promise<void> {
     this.logger.deprecated(`pushGitNotes(${fileUri}, ${repositoryPath})`);
     repositoryPath = this.manager.getGitRepositoryPath(fileUri, repositoryPath);

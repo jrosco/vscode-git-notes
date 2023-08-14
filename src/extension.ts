@@ -8,6 +8,10 @@ import {
   AppendNoteParameters,
   EditNote,
   EditNoteParameters,
+  FetchNotes,
+  FetchNotesParameters,
+  PushNotes,
+  PushNotesParameters,
   GitUtils,
   RemoveNote,
   RemoveNoteParameters,
@@ -26,6 +30,8 @@ const add = new AddNote();
 const edit = new EditNote();
 const remove = new RemoveNote();
 const append = new AppendNote();
+const fetch = new FetchNotes();
+const push = new PushNotes();
 const gitUtils = new GitUtils();
 const cache = CacheManager.getInstance();
 const notes = new GitCommands();
@@ -139,13 +145,17 @@ export function activate(context: vscode.ExtensionContext) {
     async (cmdRepositoryPath?) => {
       logger.info("extension.fetchGitNotes command called");
       const activeEditor = vscode.window.activeTextEditor;
-      notes.repositoryPath = cmdRepositoryPath
+      const repositoryPath = cmdRepositoryPath
         ? cmdRepositoryPath
-        : notes.repositoryPath;
-      if (notes.repositoryPath !== undefined) {
-        await notes.fetchGitNotes(undefined, notes.repositoryPath);
-      } else if (activeEditor) {
-        await notes.fetchGitNotes(activeEditor.document.uri);
+        : git.repositoryPath;
+      const fetchParameter: FetchNotesParameters = {
+        repositoryPath: repositoryPath
+          ? repositoryPath
+          : activeEditor?.document.uri,
+        force: false,
+      };
+      if (fetchParameter.repositoryPath !== undefined) {
+        await fetch.command(fetchParameter);
       }
     }
   );
@@ -156,13 +166,17 @@ export function activate(context: vscode.ExtensionContext) {
     async (cmdRepositoryPath?) => {
       logger.info("extension.pushGitNotes command called");
       const activeEditor = vscode.window.activeTextEditor;
-      notes.repositoryPath = cmdRepositoryPath
+      const repositoryPath = cmdRepositoryPath
         ? cmdRepositoryPath
-        : notes.repositoryPath;
-      if (notes.repositoryPath !== undefined) {
-        await notes.pushGitNotes(undefined, notes.repositoryPath);
-      } else if (activeEditor) {
-        await notes.pushGitNotes(activeEditor.document.uri);
+        : git.repositoryPath;
+      const pushParameter: PushNotesParameters = {
+        repositoryPath: repositoryPath
+          ? repositoryPath
+          : activeEditor?.document.uri,
+        force: false,
+      };
+      if (pushParameter.repositoryPath !== undefined) {
+        await push.command(pushParameter);
       }
     }
   );
