@@ -345,8 +345,6 @@ export function activate(context: vscode.ExtensionContext) {
         };
         if (removeParameter.commitHash !== undefined) {
           let confirm = undefined;
-          statusBar.message = "Removing ...";
-          statusBar.update();
           const title = "Confirm Note Removal";
           const messageItem: vscode.MessageItem[] = [
             { title: title },
@@ -361,17 +359,21 @@ export function activate(context: vscode.ExtensionContext) {
             );
           }
           if (confirm?.title === title || !settings.confirmRemovalCommands) {
-            await remove.command(removeParameter).then(() => {
-              statusBar.showInformationMessage(
-                `Git Notes: Removed note for commit ${commitHash} \nPath: ${repositoryPath}`
-              );
-              statusBar.notesCount =
-                cache.getExistingRepositoryDetails(
-                  removeParameter.repositoryPath
-                )?.length || 0;
-              statusBar.update();
-              refreshWebView(removeParameter.repositoryPath);
-            });
+            await remove
+              .command(removeParameter)
+              .then(() => {
+                statusBar.showInformationMessage(
+                  `Git Notes: Removed note for commit ${commitHash} \nPath: ${repositoryPath}`
+                );
+              })
+              .finally(() => {
+                statusBar.notesCount =
+                  cache.getExistingRepositoryDetails(
+                    removeParameter.repositoryPath
+                  )?.length || 0;
+                statusBar.update();
+                refreshWebView(removeParameter.repositoryPath);
+              });
           }
         }
       }
@@ -397,8 +399,6 @@ export function activate(context: vscode.ExtensionContext) {
       };
       if (removeParameter.repositoryPath) {
         let confirm = undefined;
-        statusBar.message = "Pruning ...";
-        statusBar.update();
         const title = "Confirm Prune";
         if (settings.confirmPruneCommands) {
           const messageItem: vscode.MessageItem[] = [
@@ -414,6 +414,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
         if (confirm?.title === title || !settings.confirmPushAndFetchCommands) {
           await remove.command(removeParameter).then(() => {
+          }).finally(() => {
             statusBar.showInformationMessage(`Git Notes: Pruned notes`);
             statusBar.notesCount =
               cache.getExistingRepositoryDetails(removeParameter.repositoryPath)
