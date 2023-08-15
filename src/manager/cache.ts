@@ -24,7 +24,6 @@ export class CacheManager extends RepositoryManager {
   // load the repository details from the repositoryPath when extension is activated
   public async load(
     repositoryPath: string,
-    showMax?: number
   ): Promise<RepositoryDetails[]> {
     this.logger.debug(`load(${repositoryPath})`);
     this.statusBar.reset();
@@ -32,7 +31,7 @@ export class CacheManager extends RepositoryManager {
     const commitDetailsInterface: CommitDetails[] = [];
     const existing = this.getExistingRepositoryDetails(repositoryPath);
     let counter = 0;
-    let max = showMax || 0;
+    let max = this.settings.gitNotesLoadLimit || 0;
 
     if (existing === undefined) {
       this.logger.debug(`no details found for ${repositoryPath} ... loading`);

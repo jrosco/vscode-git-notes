@@ -18,7 +18,6 @@ import {
 } from "./git/exports";
 import { CacheManager } from "./manager/exports";
 import { EditWindow } from "./ui/edit";
-import { GitCommands } from "./git/cmd";
 import { GitNotesPanel } from "./ui/webview";
 import { GitNotesSettings } from "./settings";
 import { GitNotesStatusBar } from "./ui/status";
@@ -34,7 +33,6 @@ const fetch = new FetchNotes();
 const push = new PushNotes();
 const gitUtils = new GitUtils();
 const cache = CacheManager.getInstance();
-const notes = new GitCommands();
 const input = NotesInput.getInstance();
 const settings = new GitNotesSettings();
 const logger = LoggerService.getInstance(settings.logLevel);
@@ -103,10 +101,35 @@ export function activate(context: vscode.ExtensionContext) {
     }
   });
 
+  // Register the command handler for the status bar item onclick event
+  let runWebviewDisposable = vscode.commands.registerCommand(
+    "extension.runWebview",
+    async () => {
+      logger.info("extension.runWebview command called");
+      const activeEditor = vscode.window.activeTextEditor;
+      if (activeEditor !== undefined) {
+        const repositoryPath = cache.getGitRepositoryPath(
+          activeEditor.document.uri
+        );
+        await cache
+          .load(repositoryPath)
+          .then((repositoryDetails) => {
+            GitNotesPanel.createOrShow(
+              activeEditor.document.uri,
+              repositoryDetails
+            );
+          })
+          .catch((error) => {
+            logger.error(error);
+          });
+      }
+    }
+  );
+
   // Register the command for manual Git notes check. Can take optional parameter `cmdRepositoryPath`
   let gitCheckNotesDisposable = vscode.commands.registerCommand(
     "extension.checkGitNotes",
-    async (cmdRepositoryPath?, cmdClearRepoCache?: boolean) => {
+    async (cmdRepositoryPath?) => {
       logger.info("extension.checkGitNotes command called");
       const activeEditor = vscode.window.activeTextEditor;
       const repositoryPath = cmdRepositoryPath
@@ -282,31 +305,6 @@ export function activate(context: vscode.ExtensionContext) {
               refreshWebView(pushParameter.repositoryPath);
             });
         }
-      }
-    }
-  );
-
-  // Register the command handler for the status bar item onclick event
-  let runWebviewDisposable = vscode.commands.registerCommand(
-    "extension.runWebview",
-    async () => {
-      logger.info("extension.runWebview command called");
-      const activeEditor = vscode.window.activeTextEditor;
-      if (activeEditor !== undefined) {
-        git.repositoryPath = cache.getGitRepositoryPath(
-          activeEditor.document.uri
-        );
-        await cache
-          .load(git.repositoryPath, settings.gitNotesLoadLimit)
-          .then((repositoryDetails) => {
-            GitNotesPanel.createOrShow(
-              activeEditor.document.uri,
-              repositoryDetails
-            );
-          })
-          .catch((error) => {
-            logger.error(error);
-          });
       }
     }
   );
@@ -504,13 +502,16 @@ export function activate(context: vscode.ExtensionContext) {
               force: force ? force : false,
             };
             addParameter.message !== ""
-              ? await add.command(addParameter).then(() => {
-                  statusBar.showInformationMessage(
-                    `Git Notes: Added note for commit ${commitHash} \nPath: ${activeFileRepoPath}`
-                  );
-                }).finally(() => {
-                  refreshWebView(addParameter.repositoryPath);
-                })
+              ? await add
+                  .command(addParameter)
+                  .then(() => {
+                    statusBar.showInformationMessage(
+                      `Git Notes: Added note for commit ${commitHash} \nPath: ${activeFileRepoPath}`
+                    );
+                  })
+                  .finally(() => {
+                    refreshWebView(addParameter.repositoryPath);
+                  })
               : false;
           });
         }
@@ -618,6 +619,7 @@ export function activate(context: vscode.ExtensionContext) {
         if (!commitHash) {
           return;
         }
+        commitHash = commitHash.replace(/\s/g, "");
         const editWindow = new EditWindow(commitHash);
         await editWindow.showEditWindow().then(async (message) => {
           const appendParameter: AppendNoteParameters = {
@@ -625,26 +627,28 @@ export function activate(context: vscode.ExtensionContext) {
             commitHash: commitHash,
             message: message,
           };
-          await append
-            .command(appendParameter)
-            .then(() => {
-              statusBar.showInformationMessage(
-                `Git Notes: Appended note for commit ${commitHash} \nPath: ${activeFileRepoPath}`
-              );
-            })
-            .catch((error) => {
-              statusBar.showErrorMessage(
-                `Git Notes: An error occurred while appending Git note: ${error}`
-              );
-            })
-            .finally(() => {
-              statusBar.notesCount =
-                cache.getExistingRepositoryDetails(
-                  appendParameter.repositoryPath
-                )?.length || 0;
-              statusBar.update();
-              refreshWebView(appendParameter.repositoryPath);
-            });
+          appendParameter.message !== ""
+            ? await append
+                .command(appendParameter)
+                .then(() => {
+                  statusBar.showInformationMessage(
+                    `Git Notes: Appended note for commit ${commitHash} \nPath: ${activeFileRepoPath}`
+                  );
+                })
+                .catch((error) => {
+                  statusBar.showErrorMessage(
+                    `Git Notes: An error occurred while appending Git note: ${error}`
+                  );
+                })
+                .finally(() => {
+                  statusBar.notesCount =
+                    cache.getExistingRepositoryDetails(
+                      appendParameter.repositoryPath
+                    )?.length || 0;
+                  statusBar.update();
+                  refreshWebView(appendParameter.repositoryPath);
+                })
+            : false;
         });
       }
     }

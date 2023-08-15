@@ -1,18 +1,21 @@
 import * as vscode from "vscode";
 
-import { RepositoryManager, RepositoryDetails } from "../interface";
+import {
+  CacheManager,
+  RepositoryManager,
+  RepositoryDetails,
+} from "../manager/exports";
 import { GitNotesStatusBar } from "../ui/status";
 import { GitNotesSettings } from "../settings";
-import { LoggerService, LogLevel } from "../log/service";
-import { GitCommands } from "../git/cmd";
-import { GitUtils } from "../git/utils";
+import { LoggerService } from "../log/service";
+import { GitUtils } from "../git/exports";
 export class GitNotesPanel {
   public static currentPanel: GitNotesPanel | undefined;
   private static readonly viewType = "gitNotesPanel";
 
   private statusBar: GitNotesStatusBar;
 
-  private manager: RepositoryManager;
+  private cache: CacheManager;
   private repositoryPath: string | undefined;
 
   private readonly _panel: vscode.WebviewPanel;
@@ -30,12 +33,12 @@ export class GitNotesPanel {
     this._document = document;
     this.settings = new GitNotesSettings();
     this.logger = LoggerService.getInstance(this.settings.logLevel);
-    this.manager = RepositoryManager.getInstance();
+    this.cache = CacheManager.getInstance();
     this.statusBar = GitNotesStatusBar.getInstance();
-    repositoryDetails = this.manager.getRepositoryDetailsInterface();
+    repositoryDetails = this.cache.getRepositoryDetailsInterface();
 
     // Set up the webview panel
-    this.repositoryPath = this.manager.getGitRepositoryPath(document);
+    this.repositoryPath = this.cache.getGitRepositoryPath(document);
     this._panel.webview.html = this._getWebviewContent(
       this.repositoryPath,
       repositoryDetails
@@ -69,7 +72,7 @@ export class GitNotesPanel {
 
     // Handle messages from the Webview
     panel.webview.onDidReceiveMessage(async (message) => {
-      const cmd = new GitCommands();
+      const cache = CacheManager.getInstance();
       const settings = new GitNotesSettings();
       const logger = LoggerService.getInstance(settings.logLevel);
       logger.debug(
@@ -84,9 +87,9 @@ export class GitNotesPanel {
           break;
         case "repoAdd":
           await vscode.commands.executeCommand(
-            "extension.addOrEditGitNote",
-            undefined,
-            message.repositoryPath
+            "extension.addGitNotes",
+            message.repositoryPath,
+            undefined
           );
           break;
         case "repoPrune":
@@ -117,14 +120,24 @@ export class GitNotesPanel {
             ? await vscode.env.openExternal(vscode.Uri.parse(url))
             : false;
           break;
-        case "commitEdit":
+        case "commitAppend":
           logger.debug(
-            `webview commitEdit: ${message.commitHash}, ${message.repositoryPath}`
+            `webview commitAppend: ${message.repositoryPath}, ${message.commitHash}`
           );
           await vscode.commands.executeCommand(
-            "extension.addOrEditGitNote",
-            message.commitHash,
-            message.repositoryPath
+            "extension.appendGitNotes",
+            message.repositoryPath,
+            message.commitHash
+          );
+          break;
+        case "commitEdit":
+          logger.debug(
+            `webview commitEdit: ${message.repositoryPath}, ${message.commitHash}`
+          );
+          await vscode.commands.executeCommand(
+            "extension.editGitNotes",
+            message.repositoryPath,
+            message.commitHash
           );
           break;
         case "commitRemove":
@@ -138,24 +151,25 @@ export class GitNotesPanel {
           );
           break;
         case "repoLoadMore":
-          await cmd.loader(message.repositoryPath, settings.gitNotesLoadLimit);
+          await cache.load(message.repositoryPath);
           break;
         case "repoClearCache":
           await vscode.commands.executeCommand(
             "extension.checkGitNotes",
-            message.repositoryPath,
-            true
+            message.repositoryPath
           );
           break;
         case "commitLoad":
-          await cmd.loadNoteDetails(message.repositoryPath, message.commitHash);
+          await cache.loadNoteDetails(
+            message.repositoryPath,
+            message.commitHash
+          );
         case "refresh":
           break;
         default:
           console.warn("Unknown command:", message.command);
           break;
       }
-      // Update the content of the webview panel, if `message.repositoryPath` is set
       if (
         GitNotesPanel.currentPanel &&
         (message.refresh || message.command === "refresh")
@@ -166,13 +180,6 @@ export class GitNotesPanel {
       }
     });
 
-    // let webViewTab = vscode.window.onDidChangeActiveTextEditor((editor) => {
-    //   // Check if the WebView panel is not active and close / dispose of panel
-    //   if (editor?.document !== undefined) {
-    //     GitNotesPanel.currentPanel?._panel.dispose();
-    //     webViewTab.dispose();
-    //   }
-    // });
     GitNotesPanel.currentPanel = new GitNotesPanel(
       panel,
       document,
@@ -182,7 +189,9 @@ export class GitNotesPanel {
 
   public postMessage(message: any) {
     if (this._panel) {
-      console.debug("postMessage: ", message.command, message.repositoryPath);
+      this.logger.debug(
+        `postMessage: ${message.command} ${message.repositoryPath}`
+      );
       this._panel.webview.postMessage({ message });
     } else {
       return;
@@ -191,7 +200,7 @@ export class GitNotesPanel {
 
   public refreshWebViewContent(repositoryPath: string) {
     // Your logic to update the WebView content here
-    const repositoryDetails = this.manager.getRepositoryDetailsInterface();
+    const repositoryDetails = this.cache.getRepositoryDetailsInterface();
     this.logger.debug(
       `refreshWebViewContent(${repositoryPath}, ${repositoryDetails})`
     );
@@ -207,9 +216,7 @@ export class GitNotesPanel {
 
   public dispose() {
     GitNotesPanel.currentPanel = undefined;
-
     this._panel.dispose();
-
     while (this._disposables.length) {
       const disposable = this._disposables.pop();
       if (disposable) {
@@ -319,6 +326,18 @@ export class GitNotesPanel {
             }', commitHash: '${commit.commitHash}' });
           });
         }
+        if (document.getElementById('append-${commit.commitHash}')) {
+          document.getElementById('append-${
+            commit.commitHash
+          }').addEventListener('click', () => {
+            vscode.postMessage({ command: 'commitAppend', commitHash: '${
+              commit.commitHash
+            }', repositoryPath: '${details.repositoryPath?.replace(
+              /\\/g,
+              "\\\\"
+            )}', refresh: true });
+          });
+        }
         if (document.getElementById('edit-${commit.commitHash}')) {
           document.getElementById('edit-${
             commit.commitHash
@@ -381,7 +400,7 @@ export class GitNotesPanel {
           <p><h4 style="color:${headingColor};background-color:${headingBgColor};">Notes Found: ${
             details.commitDetails.length
           }</h4></p>
-          <p><button id="repoOpen" >Open Repo</button>
+          <p><button id="repoOpen">Open Repo</button>
           <button id="repoAdd">Add Note</button>
           <button id="repoPrune">Prune Notes</button>
           <button id="repoPush">Push Notes</button>
@@ -389,7 +408,7 @@ export class GitNotesPanel {
           <button id="repoLoadMore">Load More (${
             this.settings.gitNotesLoadLimit
           })</button>
-          <button id="repoClearCache">Clear Cache</button></p>
+          <button id="repoClearCache">Refresh</button></p>
         </header>
         </div>
         ${details.commitDetails
@@ -404,6 +423,9 @@ export class GitNotesPanel {
               commit.noteHash
             }</p>
           <p><button id="open-${commit.commitHash}">Open Commit</button>
+          <button id="append-${commit.commitHash}" style="display: ${
+              commit.note ? "inline-block" : "none"
+            }">Append</button>
           <button id="edit-${commit.commitHash}" style="display: ${
               commit.note ? "inline-block" : "none"
             }">Edit</button>

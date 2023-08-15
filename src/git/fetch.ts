@@ -21,19 +21,18 @@ export class FetchNotes extends GitCommandsInstance {
       : ["origin", refspec];
     await this.git
       .fetch(cmdList)
-      .then( async() => {
+      .then(async () => {
         await this.cache.clearRepositoryDetails(
           undefined,
           parameter.repositoryPath
-        ).then(async () => {
-          await this.cache.load(
-            parameter.repositoryPath
-          );
-        });
-    })
-    .catch((error) => {
-      this.logger.error(`command error fetching notes: ${error}`);
-      throw new Error(`Fetch ${error}`);
-    });
+        );
+      })
+      .catch((error) => {
+        this.logger.error(`command error fetching notes: ${error}`);
+        throw new Error(`Fetch ${error}`);
+      })
+      .finally(async () => {
+        await this.cache.load(parameter.repositoryPath);
+      });
   }
 }

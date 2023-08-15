@@ -18,6 +18,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 - [#48](https://github.com/jrosco/vscode-git-notes/pull/48) [#49](https://github.com/jrosco/vscode-git-notes/pull/49) ♻️ Updated Git notes `add` and `edit` commands, moved remove and prune commands
 - [#53](https://github.com/jrosco/vscode-git-notes/pull/53) ♻️ Update `push` and `fetch` to use new `Git` command classes
 - [#54](https://github.com/jrosco/vscode-git-notes/pull/54) 🍺 Update status bar windows new git command classes
+- [#55](https://github.com/jrosco/vscode-git-notes/pull/55) ♻️ Updated webview to work with new `git` and `manager` classes
 
 ### Fixed
 
