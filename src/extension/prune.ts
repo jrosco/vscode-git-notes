@@ -47,9 +47,12 @@ export class DisposablePrune extends DisposableInstance {
             await this.remove
               .command(removeParameter)
               .then(() => {})
+              .catch((error) => {
+                this.statusBar.showErrorMessage(error.message);
+              })
               .finally(() => {
                 this.statusBar.showInformationMessage(
-                  `Git Notes: Pruned notes`
+                  `Pruned notes`
                 );
                 this.statusBar.notesCount =
                   this.cache.getExistingRepositoryDetails(

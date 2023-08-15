@@ -61,7 +61,7 @@ export class DisposableRemove extends DisposableInstance {
                 .command(removeParameter)
                 .then(() => {
                   this.statusBar.showInformationMessage(
-                    `Git Notes: Removed note for commit ${commitHash} \nPath: ${repositoryPath}`
+                    `Removed note for commit ${commitHash} \nPath: ${repositoryPath}`
                   );
                 })
                 .finally(() => {

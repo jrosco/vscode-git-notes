@@ -92,7 +92,7 @@ export class DisposableAdd extends DisposableInstance {
                     .command(addParameter)
                     .then(() => {
                       this.statusBar.showInformationMessage(
-                        `Git Notes: Added note for commit ${commitHash} \nPath: ${repositoryPath}`
+                        `Added note for commit ${commitHash} \nPath: ${repositoryPath}`
                       );
                     })
                     .finally(() => {

@@ -64,12 +64,12 @@ export class DisposableEdit extends DisposableInstance {
                   .command(editParameter)
                   .then(() => {
                     this.statusBar.showInformationMessage(
-                      `Git Notes: Edited note for commit ${commitHash} \nPath: ${repositoryPath}`
+                      `Edited note for commit ${commitHash} \nPath: ${repositoryPath}`
                     );
                   })
                   .catch((error) => {
                     this.statusBar.showErrorMessage(
-                      `Git Notes: An error occurred while editing Git note: ${error}`
+                      `An error occurred while editing Git note: ${error}`
                     );
                   })
                   .finally(() => {

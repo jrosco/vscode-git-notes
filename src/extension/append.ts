@@ -52,12 +52,12 @@ export class DisposableAppend extends DisposableInstance {
                   .command(appendParameter)
                   .then(() => {
                     this.statusBar.showInformationMessage(
-                      `Git Notes: Appended note for commit ${commitHash} \nPath: ${repositoryPath}`
+                      `Appended note for commit ${commitHash} \nPath: ${repositoryPath}`
                     );
                   })
                   .catch((error) => {
                     this.statusBar.showErrorMessage(
-                      `Git Notes: An error occurred while appending Git note: ${error}`
+                      `An error occurred while appending Git note: ${error}`
                     );
                   })
                   .finally(() => {

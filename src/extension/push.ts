@@ -53,9 +53,10 @@ export class DisposablePush extends DisposableInstance {
             await this.push
               .command(pushParameter)
               .then(() => {
-                this.statusBar.showInformationMessage("Git Notes: Pushed");
+                this.statusBar.showInformationMessage("Pushed");
               })
-              .catch(async () => {
+              .catch(async (error) => {
+                this.statusBar.showErrorMessage(error.message);
                 const messageItem: vscode.MessageItem[] = [
                   { title: "Fetch notes" },
                   { title: "Force push" },

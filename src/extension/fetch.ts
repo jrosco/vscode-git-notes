@@ -51,9 +51,10 @@ export class DisposableFetch extends DisposableInstance {
             await this.fetch
               .command(fetchParameter)
               .then(() => {
-                this.statusBar.showInformationMessage("Git Notes: Fetched");
+                this.statusBar.showInformationMessage("Fetched");
               })
-              .catch(async () => {
+              .catch(async (error) => {
+                this.statusBar.showErrorMessage(error.message);
                 const messageItem: vscode.MessageItem[] = [
                   { title: "Push notes" },
                   { title: "Force fetch" },
