@@ -18,7 +18,7 @@ export class DisposableRemove extends DisposableInstance {
         const repositoryPath = cmdRepositoryPath
           ? cmdRepositoryPath
           : this.cache.getGitRepositoryPath(activeEditor?.document.uri);
-        if (activeEditor !== undefined || repositoryPath !== undefined) {
+        if (repositoryPath !== undefined) {
           cmdCommitHash
             ? undefined
             : this.input.setup(

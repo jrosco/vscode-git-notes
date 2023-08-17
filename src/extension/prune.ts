@@ -25,7 +25,7 @@ export class DisposablePrune extends DisposableInstance {
           commitHash: "",
           prune: true,
         };
-        if (removeParameter.repositoryPath) {
+        if (removeParameter.repositoryPath !== undefined) {
           let confirm = undefined;
           const title = "Confirm Prune";
           if (this.settings.confirmPruneCommands) {

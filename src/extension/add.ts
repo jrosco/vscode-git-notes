@@ -53,7 +53,7 @@ export class DisposableAdd extends DisposableInstance {
               { title: "Cancel" },
             ];
             const selected = await this.input.showInputWindowMessage(
-              "Git Note Already Exists",
+              `Git Note already exist for ${commitHash}`,
               messageItem,
               true,
               false

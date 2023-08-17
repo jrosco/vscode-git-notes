@@ -42,12 +42,14 @@ export function activate(context: vscode.ExtensionContext) {
       if (document.uri.scheme === "file") {
         git.repositoryPath = cache.getGitRepositoryPath(document.uri);
         if (settings.autoCheck) {
-          await cache
-            .load(git.repositoryPath)
-            .then(() => {})
-            .catch((error) => {
-              logger.error(error);
-            });
+          git.repositoryPath
+            ? await cache
+                .load(git.repositoryPath)
+                .then(() => {})
+                .catch((error) => {
+                  logger.error(error);
+                })
+            : logger.info("No Git repository found.");
         }
       }
     }
@@ -63,12 +65,14 @@ export function activate(context: vscode.ExtensionContext) {
           !document.uri.path.endsWith(tempFileSuffixPath)
         ) {
           git.repositoryPath = cache.getGitRepositoryPath(document.uri);
-          await cache
-            .load(git.repositoryPath)
-            .then(() => {})
-            .catch((error) => {
-              logger.error(error);
-            });
+          git.repositoryPath
+            ? await cache
+                .load(git.repositoryPath)
+                .then(() => {})
+                .catch((error) => {
+                  logger.error(error);
+                })
+            : logger.info("No Git repository found.");
         }
       }
     }
@@ -83,19 +87,21 @@ export function activate(context: vscode.ExtensionContext) {
         !editor.document.uri.path.endsWith(tempFileSuffixPath)
       ) {
         git.repositoryPath = cache.getGitRepositoryPath(editor.document.uri);
-        await cache
+        git.repositoryPath
+        ? await cache
           .load(git.repositoryPath)
           .then(() => {})
           .catch((error) => {
             logger.error(error);
-          });
+          })
+        : logger.info("No Git repository found.");
       }
     }
   });
 
-  // This section of code retrieves a disposable object and ensures that it's 
+  // This section of code retrieves a disposable object and ensures that it's
   // properly managed by VSCode's subscription system. Disposing of resources
-  // when they are no longer needed helps prevent memory leaks and ensures a 
+  // when they are no longer needed helps prevent memory leaks and ensures a
   // clean extension shutdown.
   const runWebviewDisposable = disposableWebView.disposable();
   runWebviewDisposable.then((disposable) => {

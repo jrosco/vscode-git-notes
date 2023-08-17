@@ -14,19 +14,21 @@ export class DisposableWebView extends DisposableInstance {
         const activeEditor = vscode.window.activeTextEditor;
         if (activeEditor !== undefined) {
           const repositoryPath = this.cache.getGitRepositoryPath(
-            activeEditor.document.uri
+            activeEditor?.document.uri
           );
-          await this.cache
-            .load(repositoryPath)
-            .then((repositoryDetails) => {
-              this.gitNotesPanel.createOrShow(
-                activeEditor.document.uri,
-                repositoryDetails
-              );
-            })
-            .catch((error) => {
-              this.logger.error(error);
-            });
+          repositoryPath
+            ? await this.cache
+                .load(repositoryPath)
+                .then((repositoryDetails) => {
+                  this.gitNotesPanel.createOrShow(
+                    activeEditor.document.uri,
+                    repositoryDetails
+                  );
+                })
+                .catch((error) => {
+                  this.logger.error(error);
+                })
+            : this.logger.error("No repository found");
         }
       }
     );
