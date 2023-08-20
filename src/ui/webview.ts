@@ -1,10 +1,6 @@
 import * as vscode from "vscode";
 
-import {
-  CacheManager,
-  RepositoryManager,
-  RepositoryDetails,
-} from "../manager/exports";
+import { CacheManager, RepositoryDetails } from "../manager/exports";
 import { GitNotesStatusBar } from "../ui/status";
 import { GitNotesSettings } from "../settings";
 import { LoggerService } from "../log/service";

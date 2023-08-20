@@ -91,11 +91,11 @@ export class GitNotesStatusBar {
 
   public showInformationMessage(message: string) {
     if (this.settings.enableNotifications) {
-      vscode.window.showInformationMessage(message);
+      vscode.window.showInformationMessage(`Git Notes: ${message}`);
     }
   }
 
   public showErrorMessage(message: string) {
-    vscode.window.showErrorMessage(message);
+    vscode.window.showErrorMessage(`Git Notes: ${message}`);
   }
 }
